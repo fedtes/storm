@@ -19,6 +19,7 @@ namespace Storm.Schema
             this.ticks = ticks;
         }
 
+        /*
         public SchemaEditor Add(String identifier, String sourceTable)
         {
             if (!schemaInstance.ContainsKey(identifier))
@@ -31,6 +32,7 @@ namespace Storm.Schema
 
             return this;
         }
+        */
 
         public SchemaEditor Add<TModel>(String identifier, String sourceTable)
         {

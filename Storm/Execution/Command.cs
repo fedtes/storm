@@ -2,72 +2,109 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using SqlKata;
 
 namespace Storm.Execution
 {
     public class Command
     {
+        protected Query CommandQuery;
         protected String from;
         protected SchemaNavigator navigator;
-        protected CommandTree tree;
-    }
+        protected TableTree fromTree;
+        protected Dictionary<string, TableTree> nodes;
 
-    public class CommandNode
-    {
-        public String FullPath;
-        public SchemaEdge fromParent;
-        public SchemaNode node;
-        public String Alias;
-        public List<CommandNode> children;
-    }
-
-    public class CommandTree
-    {
-        public CommandNode root;
-        public Dictionary<string, CommandNode> nodes;
-    }
-
-
-    public class GetCommand : Command
-    {
-
-        public GetCommand()
+        protected virtual Query ParseSQL()
         {
-            tree = new CommandTree()
+            Query parseTree(TableTree parentTree, TableTree subTree, Query query)
             {
-                root = new CommandNode()
+                if (subTree.Edge.OnExpression is null)
                 {
-                    Alias = "A0",
-                    FullPath = from,
-                    fromParent = null,
-                    node = navigator.GetEntity(from),
-                    children = new List<CommandNode>()
+                    String sourceCol = resolveSourceColumnName(subTree);
+                    String targetCol = resolveTargetColumnName(subTree);
+                    query.LeftJoin($"{subTree.Entity.DBName} as {subTree.Alias}", $"{parentTree.Alias}.{sourceCol}", $"{subTree.Alias}.{targetCol}");
                 }
-            };
-            tree.nodes = new Dictionary<string, CommandNode>() { { tree.root.FullPath, tree.root } };
+                else
+                {
+
+                }
+                return subTree.children.Aggregate(query, (q, n) => parseTree(subTree, n, q));
+            }
+
+            var _q = new Query($"{fromTree.Entity.DBName} as {fromTree.Alias}");
+            _q = fromTree.children.Aggregate(_q, (q, n) => parseTree(fromTree, n, q));
+            return _q;
         }
 
-        private object Add(CommandNode node, string prev, string current, IEnumerable<string> head, IEnumerable<string> tail)
+        protected TableTree Resolve(TableTree subTree, int idx, IEnumerable<string> path)
         {
-            var e = navigator.GetEdge($"{prev}.{current}");
-            node.children.Add(new CommandNode
+            var head = path.Take(idx);
+            var current = path.ElementAt(idx);
+            var tail = path.Skip(idx);
+            var partialPath = String.Join(".", head.Concat(new string[] { current }));
+
+            if (!nodes.ContainsKey(partialPath))
             {
-                Alias = $"A{tree.nodes.Count}",
-                children = new List<CommandNode>(),
-                fromParent = e,
-                node = navigator.GetEntity(e.TargetID)
-            });
+                var _edge = navigator.GetEdge($"{subTree.Entity.ID}.{current}");
+                var node = new TableTree()
+                {
+                    Alias = $"A{nodes.Count}",
+                    children = new List<TableTree>(),
+                    Edge = _edge,
+                    Entity = navigator.GetEntity(_edge.TargetID)
+                };
+                nodes.Add(partialPath, node);
+                subTree.children.Add(node);
+            }
+
+            if (tail.Count() == 0)
+                return nodes[partialPath];
+            else
+                return Resolve(nodes[partialPath], idx + 1, path);
         }
 
-        public GetCommand With(String requestPath)
+        private string resolveTargetColumnName(TableTree subTree)
         {
-            var path = requestPath.Split('.');
-            path = path[0] == from ? path : (new string[] { from }).Concat(path).ToArray();
-            Add(tree.root, path[0], path[1], path.Skip(2));
+            string targetCol = string.Empty;
+            var target = navigator.GetEntity(subTree.Edge.TargetID);
+            if (target.entityFields != null && target.entityFields.Any())
+            {
+                var field = target
+                    .entityFields
+                    .FirstOrDefault(ef => ef.CodeName == subTree.Edge.On.Item2);
+                if (field != null)
+                    targetCol = field.DBName;
+                else
+                    throw new ArgumentException($"Error on parsing join condition for table {subTree.Entity.DBName}: no field found on entity {subTree.Edge.TargetID} with name {subTree.Edge.On.Item2}.");
+            }
+            else
+            {
+                targetCol = subTree.Edge.On.Item2;
+            }
 
-            return this;
+            return targetCol;
         }
 
+        private string resolveSourceColumnName(TableTree subTree)
+        {
+            string sourceCol = string.Empty;
+            var source = navigator.GetEntity(subTree.Edge.SourceID);
+            if (source.entityFields != null && source.entityFields.Any())
+            {
+                var field = source
+                    .entityFields
+                    .FirstOrDefault(ef => ef.CodeName == subTree.Edge.On.Item1);
+                if (field != null)
+                    sourceCol = field.DBName;
+                else
+                    throw new ArgumentException($"Error on parsing join condition for table {subTree.Entity.DBName}: no field found on entity {subTree.Edge.SourceID} with name {subTree.Edge.On.Item1}.");
+            }
+            else
+            {
+                sourceCol = subTree.Edge.On.Item1;
+            }
+
+            return sourceCol;
+        }
     }
 }
