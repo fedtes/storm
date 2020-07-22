@@ -45,7 +45,7 @@ namespace Storm.Schema
         public string SourceID { get; internal set; }
         public string TargetID { get; internal set; }
         public Tuple<string,string> On { get; internal set; }
-        public FilterExpression OnExpression { get; internal set; }
+        public Filter OnExpression { get; internal set; }
 
         internal override SchemaItem Clone()
         {

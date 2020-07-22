@@ -1,4 +1,5 @@
 ﻿using SqlKata;
+using Storm.Filters;
 using Storm.Schema;
 using System;
 using System.Collections.Generic;
@@ -33,16 +34,22 @@ namespace Storm.Execution
             return this;
         }
 
-        protected override Query ParseSQL()
+        public GetCommand Where(Func<Expression, Filter> where)
         {
-            var q = base.ParseSQL();
-            string parseFields(IEnumerable<EntityField> entityFields)
-            {
-                return entityFields
-                    .Select(f => $"{f.DBName} as {f.CodeName}")
-                    .Aggregate("{", (acc, f) => $"{acc}{f}, ", (acc) => acc.TrimEnd(',') + "}");
-            }
-            return q.Select(requests.Select(r => $"{r.Alias}.{parseFields(r.Entity.entityFields)}").ToArray());
+            this.where = where(new Expression());
+            return this;
         }
+
+        //protected override Query ParseSQL()
+        //{
+        //    var q = base.ParseSQL();
+        //    string parseFields(IEnumerable<EntityField> entityFields)
+        //    {
+        //        return entityFields
+        //            .Select(f => $"{f.DBName} as {f.CodeName}")
+        //            .Aggregate("{", (acc, f) => $"{acc}{f}, ", (acc) => acc.TrimEnd(',') + "}");
+        //    }
+        //    return q.Select(requests.Select(r => $"{r.Alias}.{parseFields(r.Entity.entityFields)}").ToArray());
+        //}
     }
 }

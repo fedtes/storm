@@ -106,7 +106,7 @@ namespace Storm.Schema
             return this;
         }
 
-        public SchemaEditor Connect(String identifier, String sourceIdentifier, String targetIdentifier, Func<Expression, Expression, FilterExpression> joinExpression)
+        public SchemaEditor Connect(String identifier, String sourceIdentifier, String targetIdentifier, Func<Expression, Expression, Filter> joinExpression)
         {
             var x = new SchemaEdge
             {

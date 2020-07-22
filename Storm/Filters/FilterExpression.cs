@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Storm.Filters
 {
-    public abstract class FilterExpression
+    public abstract class Filter
     {
-        public static FilterExpression operator *(FilterExpression left, FilterExpression right)
+        public static Filter operator *(Filter left, Filter right)
         {
             switch (left)
             {
@@ -29,9 +29,9 @@ namespace Storm.Filters
                         case AndFilter andRight:
                             return new AndFilter() { filters = (new[] { orLeft }).Concat(andRight.filters) };
                         case OrFilter orRight:
-                            return new AndFilter() { filters = (new[] { orLeft }).Cast<FilterExpression>().Concat(new[] { orRight }) };
+                            return new AndFilter() { filters = (new[] { orLeft }).Cast<Filter>().Concat(new[] { orRight }) };
                         case MonoFilter monoRight:
-                            return new AndFilter() { filters = (new[] { orLeft }).Cast<FilterExpression>().Concat(new[] { monoRight }) };
+                            return new AndFilter() { filters = (new[] { orLeft }).Cast<Filter>().Concat(new[] { monoRight }) };
                         default:
                             throw new Exception("Unupported Filter type");
                     }
@@ -41,9 +41,9 @@ namespace Storm.Filters
                         case AndFilter andRight:
                             return new AndFilter() { filters = (new[] { monoLeft }).Concat(andRight.filters) };
                         case OrFilter orRight:
-                            return new AndFilter() { filters = (new[] { monoLeft }).Cast<FilterExpression>().Concat(new[] { orRight }) };
+                            return new AndFilter() { filters = (new[] { monoLeft }).Cast<Filter>().Concat(new[] { orRight }) };
                         case MonoFilter monoRight:
-                            return new AndFilter() { filters = (new[] { monoLeft }).Cast<FilterExpression>().Concat(new[] { monoRight }) };
+                            return new AndFilter() { filters = (new[] { monoLeft }).Cast<Filter>().Concat(new[] { monoRight }) };
                         default:
                             throw new Exception("Unupported Filter type");
                     }
@@ -52,7 +52,7 @@ namespace Storm.Filters
             }
         }
 
-        public static FilterExpression operator +(FilterExpression left, FilterExpression right)
+        public static Filter operator +(Filter left, Filter right)
         {
             switch (left)
             {
@@ -60,11 +60,11 @@ namespace Storm.Filters
                     switch (right)
                     {
                         case AndFilter andRight:
-                            return new OrFilter() { filters = (new[] { andLeft }).Cast<FilterExpression>().Concat(new[] { andRight }) };
+                            return new OrFilter() { filters = (new[] { andLeft }).Cast<Filter>().Concat(new[] { andRight }) };
                         case OrFilter orRight:
-                            return new OrFilter() { filters = (new[] { andLeft }).Cast<FilterExpression>().Concat(orRight.filters) };
+                            return new OrFilter() { filters = (new[] { andLeft }).Cast<Filter>().Concat(orRight.filters) };
                         case MonoFilter monoRight:
-                            return new OrFilter() { filters = (new[] { andLeft }).Cast<FilterExpression>().Concat(new[] { monoRight }) };
+                            return new OrFilter() { filters = (new[] { andLeft }).Cast<Filter>().Concat(new[] { monoRight }) };
                         default:
                             throw new Exception("Unupported Filter type");
                     }
@@ -84,11 +84,11 @@ namespace Storm.Filters
                     switch (right)
                     {
                         case AndFilter andRight:
-                            return new OrFilter() { filters = (new[] { monoLeft }).Cast<FilterExpression>().Concat(new[] { andRight }) };
+                            return new OrFilter() { filters = (new[] { monoLeft }).Cast<Filter>().Concat(new[] { andRight }) };
                         case OrFilter orRight:
                             return new OrFilter() { filters = (new[] { monoLeft }).Concat(orRight.filters) };
                         case MonoFilter monoRight:
-                            return new OrFilter() { filters = (new[] { monoLeft }).Cast<FilterExpression>().Concat(new[] { monoRight }) };
+                            return new OrFilter() { filters = (new[] { monoLeft }).Cast<Filter>().Concat(new[] { monoRight }) };
                         default:
                             throw new Exception("Unupported Filter type");
                     }
@@ -98,28 +98,107 @@ namespace Storm.Filters
         }
     }
 
-    public abstract class MultiFilter : FilterExpression
+    public abstract class MultiFilter : Filter
     {
-        internal IEnumerable<FilterExpression> filters;
+        internal IEnumerable<Filter> filters;
     }
 
-    public class AndFilter : MultiFilter
+    public class MonoFilter : Filter
     {
-        
+        public ReferenceFilterValue Left;
+        public FilterValue Right;
+    }
+    public abstract class FilterValue
+    {
+
     }
 
-    public class OrFilter : MultiFilter
+    public class ReferenceFilterValue : FilterValue
     {
+        internal string _path;
 
+        public String Path => _path;
+
+        public ReferenceFilterValue(string path)
+        {
+            _path = path;
+        }
     }
 
-    public class MonoFilter : FilterExpression
+    public class DataFilterValue : FilterValue
     {
+        internal object value;
 
+        public DataFilterValue(object value)
+        {
+            this.value = value;
+        }
     }
 
     public class Expression
     {
+        public FluentOperationSelectorSyntax this[string path] => continueSintax(path);
 
+        private FluentOperationSelectorSyntax continueSintax(string path)
+        {
+            return new FluentOperationSelectorSyntax(path);
+        }
+
+        public class FluentOperationSelectorSyntax
+        {
+            private readonly string _path;
+
+            internal FluentOperationSelectorSyntax(string path)
+            {
+                _path = path;
+            }
+
+            public FluentValueSelecetorSintax EqualTo => new FluentValueSelecetorSintax(new EqualToFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public FluentValueSelecetorSintax NotEqualTo => new FluentValueSelecetorSintax(new NotEqualToFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public FluentValueSelecetorSintax GreaterTo => new FluentValueSelecetorSintax(new GreaterToFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public FluentValueSelecetorSintax GreaterOrEqualTo => new FluentValueSelecetorSintax(new GreaterOrEqualToFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public FluentValueSelecetorSintax LessTo => new FluentValueSelecetorSintax(new LessToFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public FluentValueSelecetorSintax LessOrEqualTo => new FluentValueSelecetorSintax(new LessOrEqualToFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public FluentValueSelecetorSintax Like => new FluentValueSelecetorSintax(new LikeFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public FluentValueSelecetorSintax NotLike => new FluentValueSelecetorSintax(new NotLikeFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public FluentValueSelecetorSintax In => new FluentValueSelecetorSintax(new InFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public FluentValueSelecetorSintax NotIn => new FluentValueSelecetorSintax(new NotInFilter() { Right = new ReferenceFilterValue(_path) });
+
+            public Filter IsNull => new IsNullFilter() { Right = new ReferenceFilterValue(_path) }; 
+            
+            public Filter IsNotNull => new IsNotNullFilter() { Right = new ReferenceFilterValue(_path) };
+
+        }
+
+        public class FluentValueSelecetorSintax
+        {
+            private readonly Filter _filter;
+
+            internal FluentValueSelecetorSintax(Filter filter)
+            {
+                _filter = filter;
+            }
+
+            public Filter Ref(string path)
+            {
+                ((MonoFilter)_filter).Right = new ReferenceFilterValue(path);
+                return _filter;
+            }
+
+            public Filter Val(object value)
+            {
+                ((MonoFilter)_filter).Right = new DataFilterValue(value);
+                return _filter;
+            }
+        }
     }
 }
