@@ -54,6 +54,7 @@ namespace Storm.Schema
             {
                 var b = builder(new EntityBuilder());
                 var e = b.GetEntity();
+                ((SchemaNode)e).DBName = sourceTable;
                 e.ID = identifier;
                 schemaInstance.Add(identifier, e);
             }
@@ -167,12 +168,14 @@ namespace Storm.Schema
             var ps = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
             ps.Select(p => new { p.Name, p.PropertyType, attr = getAttributes(p) })
+                .Where(p => p.PropertyType.IsValueType || p.PropertyType == typeof(string))
                 .ToList()
                 .ForEach(mapToField);
 
             var fs = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
 
             fs.Select(p => new { p.Name, p.FieldType, attr = getAttributes(p) })
+                .Where(p => p.FieldType.IsValueType || p.FieldType == typeof(string))
                 .ToList()
                 .ForEach(mapToField);
 

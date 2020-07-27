@@ -110,6 +110,7 @@ namespace Storm.Schema
         public Schema()
         {
             _schemas = new Dictionary<long, SchemaInstance>();
+            _schemas.Add(_current, new SchemaInstance());
         }
 
         public SchemaNavigator GetNavigator()

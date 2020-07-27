@@ -11,8 +11,10 @@ namespace Storm.Execution
     public class GetCommand : Command
     {
         protected List<TableTree> requests;
-        public GetCommand()
+        public GetCommand(SchemaNavigator navigator, String from)
         {
+            this.navigator = navigator;
+            this.from = from;
             this.fromTree = new TableTree()
             {
                 Alias = "A0",
@@ -40,16 +42,14 @@ namespace Storm.Execution
             return this;
         }
 
-        //protected override Query ParseSQL()
-        //{
-        //    var q = base.ParseSQL();
-        //    string parseFields(IEnumerable<EntityField> entityFields)
-        //    {
-        //        return entityFields
-        //            .Select(f => $"{f.DBName} as {f.CodeName}")
-        //            .Aggregate("{", (acc, f) => $"{acc}{f}, ", (acc) => acc.TrimEnd(',') + "}");
-        //    }
-        //    return q.Select(requests.Select(r => $"{r.Alias}.{parseFields(r.Entity.entityFields)}").ToArray());
-        //}
+        protected override void InternalParseSQL()
+        {
+            var selectStatement = requests
+                .SelectMany(r => r.Entity.entityFields.Select(ef => (r.Alias, ef)))
+                .Select(x => $"{x.ef.DBName} AS {x.Alias}${x.ef.CodeName}")
+                .ToArray();
+
+            parser.ctx.query.Select(selectStatement);
+        }
     }
 }

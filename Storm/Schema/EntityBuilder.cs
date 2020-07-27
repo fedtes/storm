@@ -6,8 +6,7 @@ namespace Storm.Schema
 {
     public class EntityBuilder
     {
-        public String Table;
-        public List<EntityField> efs = new List<EntityField>();
+        private List<EntityField> efs = new List<EntityField>();
 
         public EntityBuilder Add(FieldConfig field)
         {
@@ -30,7 +29,6 @@ namespace Storm.Schema
         {
             return new SchemaNode
             {
-                DBName = this.Table,
                 entityFields = efs
             };
         }

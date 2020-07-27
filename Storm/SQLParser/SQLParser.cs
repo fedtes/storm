@@ -19,7 +19,16 @@ namespace Storm.SQLParser
 
     class SQLParser
     {
-        private ParseContext ctx;
+        internal ParseContext ctx;
+
+        public SQLParser(Command command, SchemaNavigator navigator)
+        {
+            ctx = new ParseContext()
+            {
+                navigator = navigator,
+                command = command
+            };
+        }
 
         public void BuildFrom(TableTree fromTree)
         {
@@ -30,16 +39,18 @@ namespace Storm.SQLParser
 
         internal void BuildWhere(TableTree fromTree, Filter where)
         {
-            
+            ctx.query = ParseFilter(where, ctx.query);
         }
 
         private Query ParseFilter(Filter filter, Query query)
         {
             switch (filter)
             {
-                case AndFilter andFilter:
+                case AndFilter f:
+                    query.Where(q => ParseFilter(f, q));
                     break;
-                case OrFilter andFilter:
+                case OrFilter f:
+                    query.OrWhere(q => ParseFilter(f, q));
                     break;
                 case EqualToFilter f:
                     {

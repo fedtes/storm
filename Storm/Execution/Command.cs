@@ -6,21 +6,25 @@ using Storm.Filters;
 
 namespace Storm.Execution
 {
-    public class Command
+    public abstract class Command
     {
         internal String from;
-        internal SchemaNavigator navigator;
         internal TableTree fromTree;
-        internal Dictionary<string, TableTree> nodes;
         internal Filter where;
-        private SQLParser.SQLParser parser = new SQLParser.SQLParser();
+        internal SchemaNavigator navigator;
+        internal Dictionary<string, TableTree> nodes;
+        internal SQLParser.SQLParser parser;
 
 
-        protected virtual void ParseSQL()
+        protected void ParseSQL()
         {
+            parser = new SQLParser.SQLParser(this, navigator);
             parser.BuildFrom(fromTree);
             parser.BuildWhere(fromTree, where);
+            InternalParseSQL();
         }
+
+        protected abstract void InternalParseSQL();
 
         protected TableTree Resolve(TableTree subTree, int idx, IEnumerable<string> path)
         {

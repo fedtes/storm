@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -169,9 +170,9 @@ namespace Storm.Filters
 
             public FluentValueSelecetorSintax NotLike => new FluentValueSelecetorSintax(new NotLikeFilter() { Right = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax In => new FluentValueSelecetorSintax(new InFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentIEnumerableValueSelectorSintax In => new FluentIEnumerableValueSelectorSintax(new InFilter() { Right = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax NotIn => new FluentValueSelecetorSintax(new NotInFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentIEnumerableValueSelectorSintax NotIn => new FluentIEnumerableValueSelectorSintax(new NotInFilter() { Right = new ReferenceFilterValue(_path) });
 
             public Filter IsNull => new IsNullFilter() { Right = new ReferenceFilterValue(_path) }; 
             
@@ -199,6 +200,22 @@ namespace Storm.Filters
                 ((MonoFilter)_filter).Right = new DataFilterValue(value);
                 return _filter;
             }
+        }
+
+        public class FluentIEnumerableValueSelectorSintax
+        {
+            private readonly Filter _filter;
+            internal FluentIEnumerableValueSelectorSintax(Filter filter)
+            {
+                _filter = filter;
+            }
+
+            public Filter Val(IEnumerable value)
+            {
+                ((MonoFilter)_filter).Right = new DataFilterValue(value);
+                return _filter;
+            }
+
         }
     }
 }
