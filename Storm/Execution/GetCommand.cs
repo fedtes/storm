@@ -10,7 +10,7 @@ namespace Storm.Execution
 {
     public class GetCommand : Command
     {
-        protected List<TableTree> requests;
+        protected List<TableTree> requests = new List<TableTree>();
         public GetCommand(SchemaNavigator navigator, String from)
         {
             this.navigator = navigator;

@@ -30,7 +30,7 @@ namespace Storm.Execution
         {
             var head = path.Take(idx);
             var current = path.ElementAt(idx);
-            var tail = path.Skip(idx);
+            var tail = path.Skip(idx + 1);
             var partialPath = String.Join(".", head.Concat(new string[] { current }));
 
             if (!nodes.ContainsKey(partialPath))

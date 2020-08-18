@@ -80,11 +80,8 @@ namespace Storm.Schema
 
         public SchemaEditor Connect(String identifier, String sourceIdentifier, String targetIdentifier, String sourceField, String targetField)
         {
-            if (schemaInstance.ContainsKey(identifier))
-            {
-                throw new ArgumentException($"Entity Connection with identifier {identifier} already exists.");
-            }
-            else if (!schemaInstance.ContainsKey(sourceIdentifier))
+            
+            if (!schemaInstance.ContainsKey(sourceIdentifier))
             {
                 throw new ArgumentException($"Entity with identifier {identifier} not exists.");
             }
@@ -101,7 +98,7 @@ namespace Storm.Schema
                     SourceID = sourceIdentifier,
                     TargetID = targetIdentifier
                 };
-                schemaInstance.Add(identifier, x);
+                schemaInstance.Add(x.ID, x);
             }
 
             return this;
@@ -116,7 +113,7 @@ namespace Storm.Schema
                 SourceID = sourceIdentifier,
                 TargetID = targetIdentifier
             };
-            schemaInstance.Add(identifier, x);
+            schemaInstance.Add(x.ID, x);
             return this;
         }
 
@@ -182,47 +179,64 @@ namespace Storm.Schema
             return schemaNode;
         }
 
-        static private Dictionary<Type, DbType> typeMap = new Dictionary<Type, DbType>();
+        static private Dictionary<Type, DbType> _typeMap;
+        static private Object monitor = new object();
+
+        static private Dictionary<Type, DbType> typeMap 
+        {
+            get 
+            {
+                if (_typeMap == null)
+                {
+                    lock (monitor)
+                    {
+                        if (_typeMap == null)
+                        {
+                            _typeMap = new Dictionary<Type, DbType>();
+                            _typeMap[typeof(byte)] = DbType.Byte;
+                            _typeMap[typeof(sbyte)] = DbType.SByte;
+                            _typeMap[typeof(short)] = DbType.Int16;
+                            _typeMap[typeof(ushort)] = DbType.UInt16;
+                            _typeMap[typeof(int)] = DbType.Int32;
+                            _typeMap[typeof(uint)] = DbType.UInt32;
+                            _typeMap[typeof(long)] = DbType.Int64;
+                            _typeMap[typeof(ulong)] = DbType.UInt64;
+                            _typeMap[typeof(float)] = DbType.Single;
+                            _typeMap[typeof(double)] = DbType.Double;
+                            _typeMap[typeof(decimal)] = DbType.Decimal;
+                            _typeMap[typeof(bool)] = DbType.Boolean;
+                            _typeMap[typeof(string)] = DbType.String;
+                            _typeMap[typeof(char)] = DbType.StringFixedLength;
+                            _typeMap[typeof(Guid)] = DbType.Guid;
+                            _typeMap[typeof(DateTime)] = DbType.DateTime;
+                            _typeMap[typeof(DateTimeOffset)] = DbType.DateTimeOffset;
+                            _typeMap[typeof(byte[])] = DbType.Binary;
+                            _typeMap[typeof(byte?)] = DbType.Byte;
+                            _typeMap[typeof(sbyte?)] = DbType.SByte;
+                            _typeMap[typeof(short?)] = DbType.Int16;
+                            _typeMap[typeof(ushort?)] = DbType.UInt16;
+                            _typeMap[typeof(int?)] = DbType.Int32;
+                            _typeMap[typeof(uint?)] = DbType.UInt32;
+                            _typeMap[typeof(long?)] = DbType.Int64;
+                            _typeMap[typeof(ulong?)] = DbType.UInt64;
+                            _typeMap[typeof(float?)] = DbType.Single;
+                            _typeMap[typeof(double?)] = DbType.Double;
+                            _typeMap[typeof(decimal?)] = DbType.Decimal;
+                            _typeMap[typeof(bool?)] = DbType.Boolean;
+                            _typeMap[typeof(char?)] = DbType.StringFixedLength;
+                            _typeMap[typeof(Guid?)] = DbType.Guid;
+                            _typeMap[typeof(DateTime?)] = DbType.DateTime;
+                            _typeMap[typeof(DateTimeOffset?)] = DbType.DateTimeOffset;
+                        }
+                    }
+                }
+                return _typeMap;
+            }
+        }
+
         
         private DbType standardTypeMap(Type propertyType)
         {
-            if (!typeMap.Any())
-            {
-                typeMap[typeof(byte)] = DbType.Byte;
-                typeMap[typeof(sbyte)] = DbType.SByte;
-                typeMap[typeof(short)] = DbType.Int16;
-                typeMap[typeof(ushort)] = DbType.UInt16;
-                typeMap[typeof(int)] = DbType.Int32;
-                typeMap[typeof(uint)] = DbType.UInt32;
-                typeMap[typeof(long)] = DbType.Int64;
-                typeMap[typeof(ulong)] = DbType.UInt64;
-                typeMap[typeof(float)] = DbType.Single;
-                typeMap[typeof(double)] = DbType.Double;
-                typeMap[typeof(decimal)] = DbType.Decimal;
-                typeMap[typeof(bool)] = DbType.Boolean;
-                typeMap[typeof(string)] = DbType.String;
-                typeMap[typeof(char)] = DbType.StringFixedLength;
-                typeMap[typeof(Guid)] = DbType.Guid;
-                typeMap[typeof(DateTime)] = DbType.DateTime;
-                typeMap[typeof(DateTimeOffset)] = DbType.DateTimeOffset;
-                typeMap[typeof(byte[])] = DbType.Binary;
-                typeMap[typeof(byte?)] = DbType.Byte;
-                typeMap[typeof(sbyte?)] = DbType.SByte;
-                typeMap[typeof(short?)] = DbType.Int16;
-                typeMap[typeof(ushort?)] = DbType.UInt16;
-                typeMap[typeof(int?)] = DbType.Int32;
-                typeMap[typeof(uint?)] = DbType.UInt32;
-                typeMap[typeof(long?)] = DbType.Int64;
-                typeMap[typeof(ulong?)] = DbType.UInt64;
-                typeMap[typeof(float?)] = DbType.Single;
-                typeMap[typeof(double?)] = DbType.Double;
-                typeMap[typeof(decimal?)] = DbType.Decimal;
-                typeMap[typeof(bool?)] = DbType.Boolean;
-                typeMap[typeof(char?)] = DbType.StringFixedLength;
-                typeMap[typeof(Guid?)] = DbType.Guid;
-                typeMap[typeof(DateTime?)] = DbType.DateTime;
-                typeMap[typeof(DateTimeOffset?)] = DbType.DateTimeOffset;
-            }
             return typeMap[propertyType];
         }
     }

@@ -9,7 +9,7 @@ namespace Storm.Test
     public class SchemaTest
     {
 
-        public EntityBuilder AppointmentCustomFields(EntityBuilder e)
+        public static EntityBuilder AppointmentCustomFields(EntityBuilder e)
         {
             return e.Add(new FieldConfig() { CodeName = "ID", CodeType = typeof(String), DBName = "AppointmentID", DBType = DbType.Int32 })
                 .Add(new FieldConfig() { CodeName = "CF1", CodeType = typeof(String), DBName = "CF1_COL", DBType = DbType.String })
