@@ -154,29 +154,29 @@ namespace Storm.Filters
                 _path = path;
             }
 
-            public FluentValueSelecetorSintax EqualTo => new FluentValueSelecetorSintax(new EqualToFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentValueSelecetorSintax EqualTo => new FluentValueSelecetorSintax(new EqualToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax NotEqualTo => new FluentValueSelecetorSintax(new NotEqualToFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentValueSelecetorSintax NotEqualTo => new FluentValueSelecetorSintax(new NotEqualToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax GreaterTo => new FluentValueSelecetorSintax(new GreaterToFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentValueSelecetorSintax GreaterTo => new FluentValueSelecetorSintax(new GreaterToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax GreaterOrEqualTo => new FluentValueSelecetorSintax(new GreaterOrEqualToFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentValueSelecetorSintax GreaterOrEqualTo => new FluentValueSelecetorSintax(new GreaterOrEqualToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax LessTo => new FluentValueSelecetorSintax(new LessToFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentValueSelecetorSintax LessTo => new FluentValueSelecetorSintax(new LessToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax LessOrEqualTo => new FluentValueSelecetorSintax(new LessOrEqualToFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentValueSelecetorSintax LessOrEqualTo => new FluentValueSelecetorSintax(new LessOrEqualToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax Like => new FluentValueSelecetorSintax(new LikeFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentValueSelecetorSintax Like => new FluentValueSelecetorSintax(new LikeFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax NotLike => new FluentValueSelecetorSintax(new NotLikeFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentValueSelecetorSintax NotLike => new FluentValueSelecetorSintax(new NotLikeFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentIEnumerableValueSelectorSintax In => new FluentIEnumerableValueSelectorSintax(new InFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentIEnumerableValueSelectorSintax In => new FluentIEnumerableValueSelectorSintax(new InFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentIEnumerableValueSelectorSintax NotIn => new FluentIEnumerableValueSelectorSintax(new NotInFilter() { Right = new ReferenceFilterValue(_path) });
+            public FluentIEnumerableValueSelectorSintax NotIn => new FluentIEnumerableValueSelectorSintax(new NotInFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public Filter IsNull => new IsNullFilter() { Right = new ReferenceFilterValue(_path) }; 
+            public Filter IsNull => new IsNullFilter() { Left = new ReferenceFilterValue(_path) }; 
             
-            public Filter IsNotNull => new IsNotNullFilter() { Right = new ReferenceFilterValue(_path) };
+            public Filter IsNotNull => new IsNotNullFilter() { Left = new ReferenceFilterValue(_path) };
 
         }
 
