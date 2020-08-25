@@ -1,4 +1,6 @@
-﻿using Storm.Execution;
+﻿using SqlKata;
+using SqlKata.Compilers;
+using Storm.Execution;
 using Storm.Filters;
 using System;
 using System.Collections.Generic;
@@ -10,6 +12,16 @@ namespace Storm.Test
 {
     public class CommandTest
     {
+        private string Checksum(string s)
+        {
+            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+            {
+                return BitConverter
+                    .ToString(md5.ComputeHash(Encoding.UTF8.GetBytes(s)))
+                    .Replace("-", String.Empty);
+            }
+        }
+
         [Fact]
         public void CreateGetCommand()
         {
@@ -18,25 +30,41 @@ namespace Storm.Test
             GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
             cmd.With("Contact").With("AssignedUser");
 
-            Assert.Equal("Appointment", cmd.fromTree.Entity.ID);
-            Assert.Equal(2, cmd.fromTree.children.Count);
-            Assert.Equal("Contact", cmd.fromTree.children[0].Entity.ID);
-            Assert.Equal("User", cmd.fromTree.children[1].Entity.ID);
+            Assert.Equal("Appointment", cmd.from.root.Entity.ID);
+            Assert.Equal(2, cmd.from.root.children.Count);
+            Assert.Equal("Contact", cmd.from.root.children[0].Entity.ID);
+            Assert.Equal("User", cmd.from.root.children[1].Entity.ID);
         }
 
         [Fact]
-        public void CreateGetCommandTLMoreDepth()
+        public void CreateGetCommandWith_Depth_3()
         {
             Storm s = StormDefine();
 
             GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
             cmd.With("Contact").With("AssignedUser").With("Contact.OwnerUser");
 
-            Assert.Equal("Appointment", cmd.fromTree.Entity.ID);
-            Assert.Equal(2, cmd.fromTree.children.Count);
-            Assert.Single(cmd.fromTree.children.First().children);
-            Assert.Equal("Appointment.Contact.OwnerUser", cmd.fromTree.children.First().children.First().FullPath);
+            Assert.Equal("Appointment", cmd.from.root.Entity.ID);
+            Assert.Equal(2, cmd.from.root.children.Count);
+            Assert.Single(cmd.from.root.children.First().children);
+            Assert.Equal("Appointment.Contact.OwnerUser", cmd.from.root.children.First().children.First().FullPath);
 
+        }
+
+        [Fact]
+        public void Parse_GetCommandWith_Depth_3()
+        {
+            Storm s = StormDefine();
+
+            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            cmd.With("Contact").With("AssignedUser").With("Contact.OwnerUser");
+            cmd.ParseSQL();
+
+            var compiler = new SqlServerCompiler();
+            SqlResult result = compiler.Compile(cmd.parser.ctx.query);
+            string sql = result.Sql;
+            // Previusly Calculated check sum integrity
+            Assert.Equal("0B13F4B63EE5535DD7E2E3AC63EDB7FF", Checksum(sql));
         }
 
         [Fact]
@@ -49,7 +77,7 @@ namespace Storm.Test
                 .With("AssignedUser")
                 .Where(f => f["Contact.LastName"].EqualTo.Val("foo") * f["Contact.FirstName"].EqualTo.Val("boo"));
 
-            Assert.Equal("Appointment", cmd.fromTree.Entity.ID);
+            Assert.Equal("Appointment", cmd.from.root.Entity.ID);
             var _and =  Assert.IsType<AndFilter>(cmd.where);
             Assert.Equal(2, _and.filters.Count());
 

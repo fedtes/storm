@@ -8,51 +8,39 @@ namespace Storm.Execution
 {
     public abstract class Command
     {
-        internal String from;
-        internal TableTree fromTree;
+        internal String rootEntity;
+        internal FromTree from;
         internal Filter where;
         internal SchemaNavigator navigator;
-        internal Dictionary<string, TableTree> nodes;
         internal SQLParser.SQLParser parser;
 
+        internal Command(SchemaNavigator navigator, String from)
+        {
+            this.navigator = navigator;
+            this.rootEntity = from;
+            this.from = new FromTree()
+            {
+                navigator = navigator,
+                root = new FromNode()
+                {
+                    Alias = "A0",
+                    FullPath = from,
+                    Edge = null,
+                    Entity = navigator.GetEntity(from),
+                    children = new List<FromNode>()
+                }
+            };
+        }
 
-        protected void ParseSQL()
+        internal void ParseSQL()
         {
             parser = new SQLParser.SQLParser(this, navigator);
-            parser.BuildFrom(fromTree);
-            parser.BuildWhere(fromTree, where);
+            parser.BuildFrom(from.root);
+            parser.BuildWhere(from.root, where);
             InternalParseSQL();
         }
 
         protected abstract void InternalParseSQL();
 
-        protected TableTree Resolve(TableTree subTree, int idx, IEnumerable<string> path)
-        {
-            var head = path.Take(idx);
-            var current = path.ElementAt(idx);
-            var tail = path.Skip(idx + 1);
-            var partialPath = String.Join(".", head.Concat(new string[] { current }));
-
-            if (!nodes.ContainsKey(partialPath))
-            {
-                var _edge = navigator.GetEdge($"{subTree.Entity.ID}.{current}");
-                var node = new TableTree()
-                {
-                    Alias = $"A{nodes.Count}",
-                    children = new List<TableTree>(),
-                    Edge = _edge,
-                    Entity = navigator.GetEntity(_edge.TargetID)
-                };
-                nodes.Add(partialPath, node);
-                subTree.children.Add(node);
-            }
-
-            if (tail.Count() == 0)
-                return nodes[partialPath];
-            else
-                return Resolve(nodes[partialPath], idx + 1, path);
-        }
-
-        
     }
 }

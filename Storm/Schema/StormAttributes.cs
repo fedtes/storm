@@ -16,7 +16,7 @@ namespace Storm.Schema
     {
         public string name;
 
-        public StormColumnName(String name) => name = this.name;
+        public StormColumnName(String name) => this.name = name;
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
@@ -30,7 +30,7 @@ namespace Storm.Schema
     {
         public object value;
 
-        public StormDefaultIfNull(Object value) => value = this.value;
+        public StormDefaultIfNull(Object value) => this.value = value;
     }
 
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
@@ -41,8 +41,8 @@ namespace Storm.Schema
 
         public StormColumnType(DbType dBType, int size)
         {
-            dBType = this.dbType;
-            size = this.size;
+            this.dbType = dBType;
+            this.size = size;
         }
 
     }
@@ -52,7 +52,7 @@ namespace Storm.Schema
     {
         public ColumnAccess columnAccess;
 
-        public StormColumnAccess(ColumnAccess columnAccess) => columnAccess = this.columnAccess;
+        public StormColumnAccess(ColumnAccess columnAccess) => this.columnAccess = columnAccess;
     }
 
    

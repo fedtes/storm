@@ -10,28 +10,17 @@ namespace Storm.Execution
 {
     public class GetCommand : Command
     {
-        protected List<TableTree> requests = new List<TableTree>();
-        public GetCommand(SchemaNavigator navigator, String from)
+        protected List<FromNode> requests = new List<FromNode>();
+        public GetCommand(SchemaNavigator navigator, String from) : base(navigator, from)
         {
-            this.navigator = navigator;
-            this.from = from;
-            this.fromTree = new TableTree()
-            {
-                Alias = "A0",
-                FullPath = from,
-                Edge = null,
-                Entity = navigator.GetEntity(from),
-                children = new List<TableTree>()
-            };
-            this.nodes = new Dictionary<string, TableTree>() { { fromTree.FullPath, fromTree } };
-            requests.Add(fromTree);
+            requests.Add(base.from.root);
         }
 
         public GetCommand With(String requestPath)
         {
             var path = requestPath.Split('.');
-            path = path[0] == from ? path : (new string[] { from }).Concat(path).ToArray();
-            var x = Resolve(fromTree, 0, path);
+            path = path[0] == rootEntity ? path : (new string[] { rootEntity }).Concat(path).ToArray();
+            var x = base.from.Resolve(path);
             requests.Add(x);
             return this;
         }
@@ -46,7 +35,7 @@ namespace Storm.Execution
         {
             var selectStatement = requests
                 .SelectMany(r => r.Entity.entityFields.Select(ef => (r.Alias, ef)))
-                .Select(x => $"{x.ef.DBName} AS {x.Alias}${x.ef.CodeName}")
+                .Select(x => $"{x.Alias}.{x.ef.DBName} AS {x.Alias}${x.ef.CodeName}")
                 .ToArray();
 
             parser.ctx.query.Select(selectStatement);

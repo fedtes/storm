@@ -30,14 +30,14 @@ namespace Storm.SQLParser
             };
         }
 
-        public void BuildFrom(TableTree fromTree)
+        public void BuildFrom(FromNode fromTree)
         {
             var _q = new Query($"{fromTree.Entity.DBName} as {fromTree.Alias}");
             _q = fromTree.children.Aggregate(_q, (q, n) => ParseTableTree(fromTree, n, q));
             ctx.query = _q;
         }
 
-        internal void BuildWhere(TableTree fromTree, Filter where)
+        internal void BuildWhere(FromNode fromTree, Filter where)
         {
             ctx.query = ParseFilter(where, ctx.query);
         }
@@ -150,7 +150,7 @@ namespace Storm.SQLParser
 
         private string ParseReferenceStringLeft(MonoFilter f)
         {
-            var x = ctx.command.nodes[f.Left.Path];
+            var x = ctx.command.from.nodes[f.Left.Path];
             var name = f.Left.Path.Split('.').Last();
             var field = x.Entity.entityFields.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
             return $"{x.Alias}.{field.DBName}";
@@ -158,13 +158,13 @@ namespace Storm.SQLParser
 
         private string ParseReferenceStringRight(MonoFilter f)
         {
-            var x = ctx.command.nodes[((ReferenceFilterValue)f.Right).Path];
+            var x = ctx.command.from.nodes[((ReferenceFilterValue)f.Right).Path];
             var name = f.Left.Path.Split('.').Last();
             var field = x.Entity.entityFields.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
             return $"{x.Alias}.{field.DBName}";
         }
 
-        private Query ParseTableTree(TableTree parentTree, TableTree subTree, Query query)
+        private Query ParseTableTree(FromNode parentTree, FromNode subTree, Query query)
         {
             if (subTree.Edge.OnExpression is null)
             {
@@ -179,7 +179,7 @@ namespace Storm.SQLParser
             return subTree.children.Aggregate(query, (q, n) => ParseTableTree(subTree, n, q));
         }
 
-        private string resolveTargetColumnName(TableTree subTree)
+        private string resolveTargetColumnName(FromNode subTree)
         {
             string targetCol = string.Empty;
             var target = ctx.navigator.GetEntity(subTree.Edge.TargetID);
@@ -201,7 +201,7 @@ namespace Storm.SQLParser
             return targetCol;
         }
 
-        private string resolveSourceColumnName(TableTree subTree)
+        private string resolveSourceColumnName(FromNode subTree)
         {
             string sourceCol = string.Empty;
             var source = ctx.navigator.GetEntity(subTree.Edge.SourceID);
