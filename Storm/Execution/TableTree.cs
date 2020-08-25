@@ -23,9 +23,25 @@ namespace Storm.Execution
 
         internal Dictionary<string, FromNode> nodes;
 
+        internal IEnumerable<string> EnsurePath(String requestPath)
+        {
+            var path = requestPath.Split('.');
+            return EnsurePath(path);
+        }
+
+        internal IEnumerable<string> EnsurePath(string[] requestPath)
+        {
+            return requestPath[0] == root.Entity.ID ? requestPath : (new string[] { root.Entity.ID }).Concat(requestPath).ToArray();
+        }
+
+        internal FromNode Resolve(string path)
+        {
+            return Resolve(root, 0, EnsurePath(path));
+        }
+
         internal FromNode Resolve(IEnumerable<string> path)
         {
-            return Resolve(root, 0, path);
+            return Resolve(root, 0, EnsurePath(path.ToArray()));
         }
 
         internal FromNode Resolve(FromNode subTree, int idx, IEnumerable<string> path)

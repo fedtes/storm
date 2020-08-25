@@ -18,9 +18,7 @@ namespace Storm.Execution
 
         public GetCommand With(String requestPath)
         {
-            var path = requestPath.Split('.');
-            path = path[0] == rootEntity ? path : (new string[] { rootEntity }).Concat(path).ToArray();
-            var x = base.from.Resolve(path);
+            var x = base.from.Resolve(requestPath);
             requests.Add(x);
             return this;
         }

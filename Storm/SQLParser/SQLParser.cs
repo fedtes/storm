@@ -150,19 +150,25 @@ namespace Storm.SQLParser
 
         private string ParseReferenceStringLeft(MonoFilter f)
         {
-            var x = ctx.command.from.nodes[f.Left.Path];
-            var name = f.Left.Path.Split('.').Last();
-            var field = x.Entity.entityFields.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
-            return $"{x.Alias}.{field.DBName}";
+            ReferenceFilterValue rfv = (ReferenceFilterValue)f.Left;
+            return ParseReferenceFilterValue(rfv);
         }
-
         private string ParseReferenceStringRight(MonoFilter f)
         {
-            var x = ctx.command.from.nodes[((ReferenceFilterValue)f.Right).Path];
-            var name = f.Left.Path.Split('.').Last();
-            var field = x.Entity.entityFields.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
-            return $"{x.Alias}.{field.DBName}";
+            ReferenceFilterValue rfv = (ReferenceFilterValue)f.Right;
+            return ParseReferenceFilterValue(rfv);
         }
+
+        private string ParseReferenceFilterValue(ReferenceFilterValue rfv)
+        {
+            var ps = rfv.Path.Split('.');
+            var path = ps.Take(ps.Length - 1);
+            var name = ps.Last();
+            var fn = ctx.command.from.Resolve(path);
+            var field = fn.Entity.entityFields.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
+            return $"{fn.Alias}.{field.DBName}";
+        }
+
 
         private Query ParseTableTree(FromNode parentTree, FromNode subTree, Query query)
         {
