@@ -61,7 +61,7 @@ namespace Storm.Test
             cmd.ParseSQL();
 
             var compiler = new SqlServerCompiler();
-            SqlResult result = compiler.Compile(cmd.parser.ctx.query);
+            SqlResult result = compiler.Compile(cmd.query);
             string sql = result.Sql;
             // Previusly Calculated check sum integrity
             Assert.Equal("0B13F4B63EE5535DD7E2E3AC63EDB7FF", Checksum(sql));

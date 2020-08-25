@@ -8,35 +8,33 @@ using System.Text;
 
 namespace Storm.Execution
 {
-    public class GetCommand : Command
+    public class GetCommand : Command<GetCommand>
     {
         protected List<FromNode> requests = new List<FromNode>();
+
         public GetCommand(SchemaNavigator navigator, String from) : base(navigator, from)
         {
             requests.Add(base.from.root);
         }
 
-        public GetCommand With(String requestPath)
+        public override GetCommand With(string requestPath)
         {
-            var x = base.from.Resolve(requestPath);
+            var x = from.Resolve(requestPath);
             requests.Add(x);
             return this;
         }
 
-        public GetCommand Where(Func<Expression, Filter> where)
+        internal override void ParseSQL()
         {
-            this.where = where(new Expression());
-            return this;
-        }
-
-        protected override void InternalParseSQL()
-        {
+            base.ParseSQL();
             var selectStatement = requests
                 .SelectMany(r => r.Entity.entityFields.Select(ef => (r.Alias, ef)))
                 .Select(x => $"{x.Alias}.{x.ef.DBName} AS {x.Alias}${x.ef.CodeName}")
                 .ToArray();
 
-            parser.ctx.query.Select(selectStatement);
+            query.Select(selectStatement);
+
         }
+        
     }
 }

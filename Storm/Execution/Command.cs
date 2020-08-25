@@ -3,21 +3,32 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Storm.Filters;
+using SqlKata;
+using Storm.SQLParser;
 
 namespace Storm.Execution
 {
-    public abstract class Command
+    public abstract class BaseCommand
     {
         internal String rootEntity;
-        internal FromTree from;
-        internal Filter where;
         internal SchemaNavigator navigator;
-        internal SQLParser.SQLParser parser;
+        internal Query query;
 
-        internal Command(SchemaNavigator navigator, String from)
+        internal BaseCommand(SchemaNavigator navigator, String from)
         {
             this.navigator = navigator;
             this.rootEntity = from;
+            this.query = new Query($"{navigator.GetEntity(from).DBName} as A0");
+        }
+    }
+
+    public abstract class Command<C> : BaseCommand where C : BaseCommand
+    {    
+        internal Filter where;
+        internal FromTree from;
+        
+        internal Command(SchemaNavigator navigator, String from) : base(navigator, from)
+        {
             this.from = new FromTree()
             {
                 navigator = navigator,
@@ -32,15 +43,28 @@ namespace Storm.Execution
             };
         }
 
-        internal void ParseSQL()
+        internal virtual void ParseSQL()
         {
-            parser = new SQLParser.SQLParser(this, navigator);
-            parser.BuildFrom(from.root);
-            parser.BuildWhere(from.root, where);
-            InternalParseSQL();
+            SQLFromParser fromParser = new SQLFromParser(from, navigator, query);
+            query = fromParser.Parse();
+
+            SQLWhereParser whereParser = new SQLWhereParser(from, where, navigator, query);
+            query = whereParser.Parse();
         }
 
-        protected abstract void InternalParseSQL();
+        public virtual C With(String requestPath)
+        {
+            from.Resolve(requestPath);
+            return (C)(BaseCommand)this;
+        }
+
+        public virtual C Where(Func<Expression, Filter> where)
+        {
+            this.where = where(new Expression());
+            return (C)(BaseCommand)this;
+        }
+
+
 
     }
 }
