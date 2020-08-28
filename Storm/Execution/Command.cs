@@ -45,11 +45,11 @@ namespace Storm.Execution
 
         internal virtual void ParseSQL()
         {
-            SQLFromParser fromParser = new SQLFromParser(from, navigator, query);
-            query = fromParser.Parse();
-
             SQLWhereParser whereParser = new SQLWhereParser(from, where, navigator, query);
             query = whereParser.Parse();
+
+            SQLFromParser fromParser = new SQLFromParser(from, navigator, query);
+            query = fromParser.Parse();
         }
 
         public virtual C With(String requestPath)

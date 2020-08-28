@@ -90,6 +90,70 @@ namespace Storm.Test
             Assert.Equal("boo", ((DataFilterValue)_eq2.Right).value);
         }
 
+        [Fact]
+        public void Parse_GetCommandWithWhere()
+        {
+            Storm s = StormDefine();
+
+            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            cmd.With("Contact")
+                .With("AssignedUser")
+                .Where(f => f["Contact.LastName"].EqualTo.Val("foo") * f["Contact.FirstName"].EqualTo.Val("boo"));
+
+            cmd.ParseSQL();
+
+            var compiler = new SqlServerCompiler();
+            SqlResult result = compiler.Compile(cmd.query);
+            string sql = result.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("A024F3D087A2DD1487AFFA4D59BCA657", Checksum(sql));
+            Assert.Equal("foo", result.Bindings.First());
+            Assert.Equal("boo", result.Bindings.Last());
+        }
+
+
+        [Fact]
+        public void Parse_GetCommandWithWhereCol()
+        {
+            Storm s = StormDefine();
+
+            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            cmd.With("Contact")
+                .Where(f => f["Contact.LastName"].EqualTo.Ref("AssignedUser.LastName"));
+
+            cmd.ParseSQL();
+
+            var compiler = new SqlServerCompiler();
+            SqlResult result = compiler.Compile(cmd.query);
+            string sql = result.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("D9E6E2A3C2A1DE3AE862FB609B8819F8", Checksum(sql));
+        }
+
+
+        [Fact]
+        public void Parse_GetCommandWithWhere_ComplexFilter()
+        {
+            Storm s = StormDefine();
+
+            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            cmd.Where(f => {
+                    return f["Appointment.ID"].GreaterTo.Val(10) * (( f["Contact.LastName"].EqualTo.Ref("AssignedUser.LastName") * f["Contact.LastName"].IsNotNull ) + f["Contact.LastName"].IsNull);
+                });
+
+            cmd.ParseSQL();
+
+            var compiler = new SqlServerCompiler();
+            SqlResult result = compiler.Compile(cmd.query);
+            string sql = result.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("398E282B662A45718E2B023406B243BC", Checksum(sql));
+            Assert.Equal(10, result.Bindings.First());
+        }
+
         private static Storm StormDefine()
         {
             var s = new Storm();

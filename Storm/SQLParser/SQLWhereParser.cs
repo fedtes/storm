@@ -23,108 +23,190 @@ namespace Storm.SQLParser
 
         public override Query Parse()
         {
-            base.query = ParseFilter(where, base.query);
+            base.query = ParseFilter(where, base.query, Op.And);
             return query;
         }
 
-        private Query ParseFilter(Filter filter, Query query)
+        private enum Op
+        {
+            And = 0,
+            Or = 1
+        }
+
+        private Query ParseFilter(Filter filter, Query query, Op op)
         {
             switch (filter)
             {
                 case AndFilter f:
-                    query.Where(q => ParseFilter(f, q));
+                    if (op==Op.And)
+                        query.Where(q => f.filters.Aggregate(q, (a,x) => ParseFilter(x,a,Op.And)));
+                    else
+                        query.OrWhere(q => f.filters.Aggregate(q, (a, x) => ParseFilter(x, a, Op.And)));
                     break;
                 case OrFilter f:
-                    query.OrWhere(q => ParseFilter(f, q));
+                    if (op == Op.And)
+                        query.Where(q => f.filters.Aggregate(q, (a, x) => ParseFilter(x, a, Op.Or)));
+                    else
+                        query.OrWhere(q => f.filters.Aggregate(q, (a, x) => ParseFilter(x, a, Op.Or)));
                     break;
                 case EqualToFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.Where(ParseReferenceStringLeft(f), data.value);
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.Where(ParseReferenceStringLeft(f), data.value);
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), "=", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), "=", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                                query.OrWhere(ParseReferenceStringLeft(f), data.value);
+                            else
+                                query.OrWhereColumns(ParseReferenceStringLeft(f), "=", ParseReferenceStringRight(f));
                         break;
                     }
                 case NotEqualToFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.Where(ParseReferenceStringLeft(f), "<>", data.value);
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.Where(ParseReferenceStringLeft(f), "<>", data.value);
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), "<>", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), "<>", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                                query.OrWhere(ParseReferenceStringLeft(f), "<>", data.value);
+                            else
+                                query.OrWhereColumns(ParseReferenceStringLeft(f), "<>", ParseReferenceStringRight(f));
+
                         break;
                     }
                 case GreaterToFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.Where(ParseReferenceStringLeft(f), ">", data.value);
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.Where(ParseReferenceStringLeft(f), ">", data.value);
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), ">", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), ">", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                                query.OrWhere(ParseReferenceStringLeft(f), ">", data.value);
+                            else
+                                query.OrWhereColumns(ParseReferenceStringLeft(f), ">", ParseReferenceStringRight(f));
+
                         break;
                     }
                 case GreaterOrEqualToFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.Where(ParseReferenceStringLeft(f), ">=", data.value);
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.Where(ParseReferenceStringLeft(f), ">=", data.value);
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), ">=", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), ">=", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                                query.OrWhere(ParseReferenceStringLeft(f), ">=", data.value);
+                            else
+                                query.OrWhereColumns(ParseReferenceStringLeft(f), ">=", ParseReferenceStringRight(f));
+
                         break;
                     }
                 case LessToFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.Where(ParseReferenceStringLeft(f), "<", data.value);
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.Where(ParseReferenceStringLeft(f), "<", data.value);
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), "<", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), "<", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                            query.OrWhere(ParseReferenceStringLeft(f), "<", data.value);
+                            else
+                                query.OrWhereColumns(ParseReferenceStringLeft(f), "<", ParseReferenceStringRight(f));
+
                         break;
                     }
                 case LessOrEqualToFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.Where(ParseReferenceStringLeft(f), "<=", data.value);
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.Where(ParseReferenceStringLeft(f), "<=", data.value);
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), "<=", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), "<=", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                                query.OrWhere(ParseReferenceStringLeft(f), "<=", data.value);
+                            else
+                                query.OrWhereColumns(ParseReferenceStringLeft(f), "<=", ParseReferenceStringRight(f));
                         break;
                     }
                 case LikeFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.WhereLike(ParseReferenceStringLeft(f), data.value);
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.Where(ParseReferenceStringLeft(f), "like", data.value);
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), "like", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), "like", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                                query.OrWhere(ParseReferenceStringLeft(f), "like", data.value);
+                            else
+                                query.OrWhereColumns(ParseReferenceStringLeft(f), "like", ParseReferenceStringRight(f));
                         break;
                     }
                 case NotLikeFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.WhereNotLike(ParseReferenceStringLeft(f), data.value);
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.Where(ParseReferenceStringLeft(f), "not like", data.value);
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), "not like", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), "not like", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                                query.OrWhere(ParseReferenceStringLeft(f), "not like", data.value);
+                            else
+                                query.OrWhereColumns(ParseReferenceStringLeft(f), "not like", ParseReferenceStringRight(f));
                         break;
                     }
                 case InFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.WhereIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.WhereIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), "in", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), "in", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                                query.OrWhereIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                            else
+                                query.OrWhereColumns(ParseReferenceStringLeft(f), "in", ParseReferenceStringRight(f));
                         break;
                     }
                 case NotInFilter f:
                     {
-                        if (f.Right is DataFilterValue data)
-                            query.WhereNotIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                        if (op == Op.And)
+                            if (f.Right is DataFilterValue data)
+                                query.WhereNotIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                            else
+                                query.WhereColumns(ParseReferenceStringLeft(f), "not in", ParseReferenceStringRight(f));
                         else
-                            query.WhereColumns(ParseReferenceStringLeft(f), "not in", ParseReferenceStringRight(f));
+                            if (f.Right is DataFilterValue data)
+                            query.OrWhereNotIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                        else
+                            query.OrWhereColumns(ParseReferenceStringLeft(f), "not in", ParseReferenceStringRight(f));
                         break;
                     }
                 case IsNullFilter f:
                     {
-                        query.WhereNull(ParseReferenceStringLeft(f));
+                        if (op == Op.And)
+                            query.WhereNull(ParseReferenceStringLeft(f));
+                        else
+                            query.OrWhereNull(ParseReferenceStringLeft(f));
                         break;
                     }
                 case IsNotNullFilter f:
                     {
-                        query.WhereNotNull(ParseReferenceStringLeft(f));
+                        if (op== Op.And)
+                            query.WhereNotNull(ParseReferenceStringLeft(f));
+                        else
+                            query.OrWhereNotNull(ParseReferenceStringLeft(f));
                         break;
                     }
                 default:
