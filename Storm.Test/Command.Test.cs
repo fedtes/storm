@@ -154,6 +154,28 @@ namespace Storm.Test
             Assert.Equal(10, result.Bindings.First());
         }
 
+
+        [Fact]
+        public void Parse_SelectCommand()
+        {
+            Storm s = StormDefine();
+
+            SelectCommand cmd = new SelectCommand(s.schema.GetNavigator(), "Appointment");
+            cmd.Select("Appointment.{ID, Summary}")
+                .Select("Contact.*")
+                .Select("AssignedUser.ID");
+
+
+            cmd.ParseSQL();
+
+            var compiler = new SqlServerCompiler();
+            SqlResult result = compiler.Compile(cmd.query);
+            string sql = result.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("0436112BE4650A8FAD71A4CF432A8CA5", Checksum(sql));
+        }
+
         private static Storm StormDefine()
         {
             var s = new Storm();

@@ -17,7 +17,7 @@ namespace Storm.Execution
             public FromNode node;
         }
 
-        const String valudationPath = @"^([^ .{},[\]*]\.?)*([^* .[\]]+|\*)$";
+        const String valudationPath = @"^([^ .{},[\]*]\.?)*([^*.[\]]+|\*)$";
         protected List<SelectField> selectFields = new List<SelectField>();
 
         public SelectCommand(SchemaNavigator navigator, string from) : base(navigator, from) { }
@@ -34,8 +34,9 @@ namespace Storm.Execution
 
             if (tail.IndexOf("{") != -1 && tail.IndexOf("}") != -1) // residual{list, of, fields}
             {
-                var residual = tail.Substring(0, tail.IndexOf("{"));
-                var stringFields = tail.Substring(tail.IndexOf("{")).Substring(0, tail.IndexOf("}") - tail.IndexOf("{"));
+                var residual = tail.Substring(0, tail.IndexOf("{")).Trim('.');
+                var tail_1 = tail.Substring(tail.IndexOf("{") + 1);
+                var stringFields = tail_1.Substring(0, tail_1.IndexOf("}"));
                 var fields = stringFields.Split(',');
                 var path = (head + residual).Split('.').Select(s => s.Trim()).ToArray();
                 return fields.Select(f => f.Trim()).Select(f => (path, f));
@@ -43,7 +44,7 @@ namespace Storm.Execution
             else if (tail.IndexOf("{") == -1 && tail.IndexOf("}") == -1)
             {
                 var path = head.Split('.').Select(s => s.Trim()).ToArray();
-                var field = tail;
+                var field = tail.Trim('.');
                 return (new[] { field }).Select(f => f.Trim()).Select(f => (path, f));
             }
             else
@@ -60,18 +61,18 @@ namespace Storm.Execution
             {
                 var x = from.Resolve(item.Item1);
                 IEnumerable<SelectField> fields;
-                if (item.Item2 != "*") //wildcard = select all
+                if (item.Item2 != "*") 
                 {
                     fields = x.Entity.entityFields
                         .Where(ef => ef.CodeName == item.Item2)
                         .Select(ef => (ef.CodeName, ef.DBName))
-                        .Select(n => new SelectField() { fullPath = requestPath, codeName = n.CodeName, dbName = n.DBName, node = x });
+                        .Select(n => new SelectField() { fullPath = $"{x.FullPath}.{n.CodeName}", codeName = n.CodeName, dbName = n.DBName, node = x });
                 }
-                else
+                else //wildcard = select all
                 {
                     fields = x.Entity.entityFields
                         .Select(ef => (ef.CodeName, ef.DBName))
-                        .Select(n => new SelectField() { fullPath = requestPath, codeName = n.CodeName, dbName=n.DBName, node = x });
+                        .Select(n => new SelectField() { fullPath = $"{x.FullPath}.{n.CodeName}", codeName = n.CodeName, dbName=n.DBName, node = x });
                 }
                 selectFields.AddRange(fields);
             }
@@ -84,7 +85,7 @@ namespace Storm.Execution
 
             foreach (var field in selectFields)
             {
-                base.query.Select($"[{field.node.Alias}].[{field.dbName}] AS [{field.node.Alias}${field.codeName}]");
+                base.query.Select($"{field.node.Alias}.{field.dbName} AS {field.node.Alias}${field.codeName}");
             }
         }
     }
