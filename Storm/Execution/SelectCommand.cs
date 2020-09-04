@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -7,9 +8,9 @@ using Storm.Schema;
 
 namespace Storm.Execution
 {
-    class SelectCommand : Command<SelectCommand>
+    public class SelectCommand : Command<SelectCommand>
     {
-        internal class SelectField
+        public class SelectField
         {
             public String fullPath;
             public String codeName;
@@ -87,6 +88,11 @@ namespace Storm.Execution
             {
                 base.query.Select($"{field.node.Alias}.{field.dbName} AS {field.node.Alias}${field.codeName}");
             }
+        }
+
+        internal override object Read(IDataReader dataReader)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -8,20 +8,6 @@ using Storm.SQLParser;
 
 namespace Storm.Execution
 {
-    public abstract class BaseCommand
-    {
-        internal String rootEntity;
-        internal SchemaNavigator navigator;
-        internal Query query;
-
-        internal BaseCommand(SchemaNavigator navigator, String from)
-        {
-            this.navigator = navigator;
-            this.rootEntity = from;
-            this.query = new Query($"{navigator.GetEntity(from).DBName} as A0");
-        }
-    }
-
     public abstract class Command<C> : BaseCommand where C : BaseCommand
     {    
         internal Filter where;
@@ -43,7 +29,7 @@ namespace Storm.Execution
             };
         }
 
-        internal virtual void ParseSQL()
+        internal override void ParseSQL()
         {
             SQLWhereParser whereParser = new SQLWhereParser(from, where, navigator, query);
             query = whereParser.Parse();
