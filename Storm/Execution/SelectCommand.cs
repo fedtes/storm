@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Storm.Helpers;
 using Storm.Schema;
 
 namespace Storm.Execution
@@ -13,9 +14,10 @@ namespace Storm.Execution
         public class SelectField
         {
             public String fullPath;
-            public String codeName;
-            public String dbName;
+            public String CodeName { get => entityField.CodeName; }
+            public String DBName { get => entityField.DBName; }
             public FromNode node;
+            public EntityField entityField;
         }
 
         const String valudationPath = @"^([^ .{},[\]*]\.?)*([^*.[\]]+|\*)$";
@@ -66,14 +68,12 @@ namespace Storm.Execution
                 {
                     fields = x.Entity.entityFields
                         .Where(ef => ef.CodeName == item.Item2)
-                        .Select(ef => (ef.CodeName, ef.DBName))
-                        .Select(n => new SelectField() { fullPath = $"{x.FullPath}.{n.CodeName}", codeName = n.CodeName, dbName = n.DBName, node = x });
+                        .Select(ef => new SelectField() { fullPath = $"{x.FullPath}.{ef.CodeName}", entityField=ef, node = x });
                 }
                 else //wildcard = select all
                 {
                     fields = x.Entity.entityFields
-                        .Select(ef => (ef.CodeName, ef.DBName))
-                        .Select(n => new SelectField() { fullPath = $"{x.FullPath}.{n.CodeName}", codeName = n.CodeName, dbName=n.DBName, node = x });
+                        .Select(ef => new SelectField() { fullPath = $"{x.FullPath}.{ef.CodeName}", entityField=ef, node = x });
                 }
                 selectFields.AddRange(fields);
             }
@@ -86,13 +86,69 @@ namespace Storm.Execution
 
             foreach (var field in selectFields)
             {
-                base.query.Select($"{field.node.Alias}.{field.dbName} AS {field.node.Alias}${field.codeName}");
+                base.query.Select($"{field.node.Alias}.{field.DBName} AS {field.node.Alias}${field.CodeName}");
             }
         }
 
         internal override object Read(IDataReader dataReader)
         {
-            throw new NotImplementedException();
+            object FieldDefault(EntityField ef)
+            {
+                return ef.DefaultIfNull != null ?
+                       ef.DefaultIfNull :
+                       (ef.CodeType.IsValueType ? TypeHelper.DefValues[ef.CodeType] : null);
+            }
+
+
+            SelectResult result = new SelectResult(this.rootEntity);
+            int r = 0;
+            var col = new Dictionary<int, Column>();
+            var map = new Dictionary<Column, SelectField>();
+
+            while (dataReader.Read())
+            {
+                if (0 == r)
+                {
+                    for (int i = 0; i < dataReader.FieldCount; i++)
+                    {
+                        var c = new Column(dataReader.GetName(i));
+                        col.Add(i, c);
+                        map.Add(c, this.selectFields.First(f => f.DBName == c.Name && f.node.Alias == c.Alias));
+                    }
+                }
+
+                for (int i = 0; i < dataReader.FieldCount; i++)
+                {
+                    var f = map[col[i]];
+                    if (dataReader.IsDBNull(i))
+                    {
+                        var x = FieldDefault(f.entityField);
+                        result.Add(f.fullPath, x);
+                    }
+                    else
+                    {
+                        var v = dataReader.GetValue(i);
+                        if (v.GetType() == (f.entityField.CodeType))
+                        {
+                            result.Add(f.fullPath, v);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                var x = Convert.ChangeType(dataReader.GetValue(i), f.entityField.CodeType);
+                                result.Add(f.fullPath, x);
+                            }
+                            catch (InvalidCastException)
+                            {
+                                result.Add(f.fullPath, FieldDefault(f.entityField));
+                            }
+                        }
+                    }
+                }
+                r++;
+            }
+            return result;
         }
     }
 }

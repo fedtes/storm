@@ -19,7 +19,7 @@ namespace Storm.Execution
         internal BaseCommand(SchemaNavigator navigator, String from)
         {
             this.navigator = navigator;
-            this.rootEntity = from;
+            this.rootEntity = navigator.GetEntity(from).ID;
             this.query = new Query($"{navigator.GetEntity(from).DBName} as A0");
         }
 
@@ -57,7 +57,10 @@ namespace Storm.Execution
                 
                 try
                 {
-                    return Read(cmd.ExecuteReader());
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        return Read(reader);
+                    }
                 }
                 catch (Exception ex)
                 {
