@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Storm.Execution.Results;
 using Storm.Helpers;
 using Storm.Schema;
 
@@ -92,63 +93,15 @@ namespace Storm.Execution
 
         internal override object Read(IDataReader dataReader)
         {
-            object FieldDefault(EntityField ef)
-            {
-                return ef.DefaultIfNull != null ?
-                       ef.DefaultIfNull :
-                       (ef.CodeType.IsValueType ? TypeHelper.DefValues[ef.CodeType] : null);
-            }
+            StormResult sr = new StormResult(this.rootEntity);
+            var metadata = this.selectFields.Select(f => new ReaderMetadata() { FullPath = f.fullPath, EntityField = f.entityField, Alias = f.node.Alias });
+            sr.ReadData(dataReader, metadata);
+            return sr;
+        }
 
-
-            SelectResult result = new SelectResult(this.rootEntity);
-            int r = 0;
-            var col = new Dictionary<int, Column>();
-            var map = new Dictionary<Column, SelectField>();
-
-            while (dataReader.Read())
-            {
-                if (0 == r)
-                {
-                    for (int i = 0; i < dataReader.FieldCount; i++)
-                    {
-                        var c = new Column(dataReader.GetName(i));
-                        col.Add(i, c);
-                        map.Add(c, this.selectFields.First(f => f.DBName == c.Name && f.node.Alias == c.Alias));
-                    }
-                }
-
-                for (int i = 0; i < dataReader.FieldCount; i++)
-                {
-                    var f = map[col[i]];
-                    if (dataReader.IsDBNull(i))
-                    {
-                        var x = FieldDefault(f.entityField);
-                        result.Add(f.fullPath, x);
-                    }
-                    else
-                    {
-                        var v = dataReader.GetValue(i);
-                        if (v.GetType() == (f.entityField.CodeType))
-                        {
-                            result.Add(f.fullPath, v);
-                        }
-                        else
-                        {
-                            try
-                            {
-                                var x = Convert.ChangeType(dataReader.GetValue(i), f.entityField.CodeType);
-                                result.Add(f.fullPath, x);
-                            }
-                            catch (InvalidCastException)
-                            {
-                                result.Add(f.fullPath, FieldDefault(f.entityField));
-                            }
-                        }
-                    }
-                }
-                r++;
-            }
-            return result;
+        public new StormResult Execute()
+        {
+            return (StormResult)base.Execute();
         }
     }
 }

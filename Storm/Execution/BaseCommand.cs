@@ -29,7 +29,6 @@ namespace Storm.Execution
 
         public Object Execute()
         {
-
             using (var t = transaction == null ? connection.BeginTransaction(true) : transaction)
             {
                 Compiler compiler;
