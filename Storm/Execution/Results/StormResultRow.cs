@@ -41,5 +41,14 @@ namespace Storm.Execution.Results
         {
             return (IEnumerator)this.GetEnumerator();
         }
+
+        /// <summary>
+        /// Persist the row data into a dictionary structure.
+        /// </summary>
+        /// <returns></returns>
+        public Dictionary<string,object> ToDictionary()
+        {
+            return this.ToDictionary(x => x.Key, x => x.Value);
+        }
     }
 }

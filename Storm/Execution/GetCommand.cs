@@ -1,4 +1,5 @@
 ﻿using SqlKata;
+using Storm.Execution.Results;
 using Storm.Filters;
 using Storm.Schema;
 using System;
@@ -38,7 +39,17 @@ namespace Storm.Execution
         }
 
         internal override object Read(IDataReader dataReader)
-        {
+        { 
+            StormResult sr = new StormResult(this.rootEntity);
+
+            var metadata = this.requests
+                .SelectMany(r => {
+                    return r.Entity.entityFields
+                        .Select(f => new ReaderMetadata() { FullPath = $"{r.FullPath}.{f.CodeName}", EntityField = f, Alias = r.Alias });
+                });
+
+            sr.ReadData(dataReader, metadata);
+            return sr;
             throw new NotImplementedException();
         }
     }

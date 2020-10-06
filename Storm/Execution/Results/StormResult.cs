@@ -63,7 +63,7 @@ namespace Storm.Execution.Results
                     {
                         var c = new Column(dataReader.GetName(i));
                         var m = readerMetadata.FirstOrDefault(x => x.EntityField.DBName == c.Name && x.Alias == c.Alias);
-                        columnMap.Add(m.FullPath, i);
+                        columnMap.Add(NKey(m.FullPath), i);
                         tempMap.Add(i, m);
                     }
                 }
