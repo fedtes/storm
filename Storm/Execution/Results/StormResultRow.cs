@@ -10,31 +10,53 @@ namespace Storm.Execution.Results
     {
         private StormResult parent;
         private int index;
+        private readonly int min = 0;
+        private readonly int max;
 
         internal StormResultRow(StormResult parent, int index)
         {
             this.parent = parent;
             this.index = index;
+            this.max = parent.data[index].Length - 1;
         }
 
-        public object this[string key] => parent.data[index][parent.columnMap[parent.NKey(key)]];
+        internal StormResultRow(StormResult parent, int index, int min, int max)
+        {
+            this.parent = parent;
+            this.index = index;
+            this.min = min;
+            this.max = max > parent.data[index].Length -1 ? parent.data[index].Length - 1 : max;
+        }
 
-        public ICollection<string> Keys => parent.columnMap.Keys;
+        internal int Map(String key)
+        {
+            var idx = parent.Map(key);
+            if (idx < min || idx > max)
+                throw new IndexOutOfRangeException();
+            else
+                return idx;
+        }
 
-        public ICollection<object> Values => parent.data[index];
+        private IEnumerable<KeyValuePair<string, int>> rowColumns => parent.columnMap.Where(x => x.Value >= min && x.Value <= max);
 
-        public int Count => parent.columnMap.Count;
+        public object this[string key] => parent.data[index][Map(key)];
+
+        public ICollection<string> Keys => rowColumns.Select(x => x.Key).ToArray();
+
+        public ICollection<object> Values => parent.data[index].Take(max).Skip(min).ToArray();
+
+        public int Count => 1 + max - min;
 
         public bool IsReadOnly => true;
 
         public bool ContainsKey(string key)
         {
-            return parent.columnMap.ContainsKey(parent.NKey(key));
+            return rowColumns.Any(x => x.Key == parent.NKey(key));
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            return parent.columnMap.Keys.Select(k => new KeyValuePair<string, object>(k, this[k])).GetEnumerator();
+            return rowColumns.Select(x => x.Key).Select(k => new KeyValuePair<string, object>(k, this[k])).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()

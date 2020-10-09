@@ -39,6 +39,11 @@ namespace Storm.Execution.Results
             return key.StartsWith($"{root}.") ? key : $"{root}.{key}";
         }
 
+        internal int Map(String key)
+        {
+            return columnMap[NKey(key)];
+        }
+
         public IEnumerator<StormResultRow> GetEnumerator()
         {
            return data.Select((r, i) => new StormResultRow(this, i)).GetEnumerator();
