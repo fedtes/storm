@@ -93,15 +93,15 @@ namespace Storm.Execution
 
         internal override object Read(IDataReader dataReader)
         {
-            StormResult sr = new StormResult(this.rootEntity);
+            StormDataSet sr = new StormDataSet(this.rootEntity);
             var metadata = this.selectFields.Select(f => new ReaderMetadata() { FullPath = f.fullPath, EntityField = f.entityField, Alias = f.node.Alias });
             sr.ReadData(dataReader, metadata);
             return sr;
         }
 
-        public new StormResult Execute()
+        public new StormDataSet Execute()
         {
-            return (StormResult)base.Execute();
+            return (StormDataSet)base.Execute();
         }
     }
 }

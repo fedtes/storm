@@ -6,21 +6,21 @@ using System.Text;
 
 namespace Storm.Execution.Results
 {
-    public class StormResultRow : IEnumerable<KeyValuePair<string, object>>
+    public class StormRow : IEnumerable<KeyValuePair<string, object>>
     {
-        private StormResult parent;
+        private StormDataSet parent;
         private int index;
         private readonly int min = 0;
         private readonly int max;
 
-        internal StormResultRow(StormResult parent, int index)
+        internal StormRow(StormDataSet parent, int index)
         {
             this.parent = parent;
             this.index = index;
             this.max = parent.data[index].Length - 1;
         }
 
-        internal StormResultRow(StormResult parent, int index, int min, int max)
+        internal StormRow(StormDataSet parent, int index, int min, int max)
         {
             this.parent = parent;
             this.index = index;
@@ -37,15 +37,13 @@ namespace Storm.Execution.Results
                 return idx;
         }
 
-        private IEnumerable<KeyValuePair<string, int>> rowColumns => parent.columnMap.Where(x => x.Value >= min && x.Value <= max);
+        private IEnumerable<KeyValuePair<string, int>> rowColumns => parent.ColumnMap.Where(x => x.Value >= min && x.Value <= max);
 
         public object this[string key] => parent.data[index][Map(key)];
 
-        public ICollection<string> Keys => rowColumns.Select(x => x.Key).ToArray();
-
-        public ICollection<object> Values => parent.data[index].Take(max).Skip(min).ToArray();
-
         public int Count => 1 + max - min;
+
+        public IEnumerable<string> Keys => rowColumns.Select(x => x.Key);
 
         public bool IsReadOnly => true;
 

@@ -40,7 +40,7 @@ namespace Storm.Execution
 
         internal override object Read(IDataReader dataReader)
         { 
-            StormResult sr = new StormResult(this.rootEntity);
+            StormDataSet sr = new StormDataSet(this.rootEntity);
 
             var metadata = this.requests
                 .SelectMany(r => {
