@@ -34,7 +34,7 @@ namespace Storm.Execution
 
         internal EntityPath EnsurePath(string[] requestPath)
         {
-            return new EntityPath(root.FullPath.Path, String.Join(".", requestPath));
+            return new EntityPath(root.FullPath.Path, requestPath);
         }
 
         internal FromNode Resolve(string path)
