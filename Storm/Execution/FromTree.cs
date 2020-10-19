@@ -16,22 +16,25 @@ namespace Storm.Execution
             get => _root;
             set
             {
-                if (this.nodes == null) this.nodes = new Dictionary<string, FromNode>() { { value.FullPath, value } };
+                if (this.nodes == null)
+                {
+
+                    this.nodes = new Dictionary<EntityPath, FromNode>() { { value.FullPath, value } };
+                }
                 _root = value;
             }
         }
 
-        internal Dictionary<string, FromNode> nodes;
+        internal Dictionary<EntityPath, FromNode> nodes;
 
-        internal IEnumerable<string> EnsurePath(String requestPath)
+        internal EntityPath EnsurePath(String requestPath)
         {
-            var path = requestPath.Split('.');
-            return EnsurePath(path);
+            return new EntityPath(root.FullPath.Path, requestPath);
         }
 
-        internal IEnumerable<string> EnsurePath(string[] requestPath)
+        internal EntityPath EnsurePath(string[] requestPath)
         {
-            return requestPath[0] == root.Entity.ID ? requestPath : (new string[] { root.Entity.ID }).Concat(requestPath).ToArray();
+            return new EntityPath(root.FullPath.Path, String.Join(".", requestPath));
         }
 
         internal FromNode Resolve(string path)
@@ -44,12 +47,12 @@ namespace Storm.Execution
             return Resolve(root, 0, EnsurePath(path.ToArray()));
         }
 
-        internal FromNode Resolve(FromNode subTree, int idx, IEnumerable<string> path)
+        internal FromNode Resolve(FromNode subTree, int idx, EntityPath path)
         {
-            var head = path.Take(idx);
+            var head = path.Head(idx);
             var current = path.ElementAt(idx);
             var tail = path.Skip(idx + 1);
-            var partialPath = String.Join(".", head.Concat(new string[] { current }));
+            var partialPath = head.Append(current);
 
             if (!nodes.ContainsKey(partialPath))
             {
@@ -75,7 +78,7 @@ namespace Storm.Execution
 
     public class FromNode
     {
-        public String FullPath;
+        public EntityPath FullPath;
         public SchemaEdge Edge;
         public SchemaNode Entity;
         public String Alias;

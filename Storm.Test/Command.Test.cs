@@ -47,7 +47,7 @@ namespace Storm.Test
             Assert.Equal("Appointment", cmd.from.root.Entity.ID);
             Assert.Equal(2, cmd.from.root.children.Count);
             Assert.Single(cmd.from.root.children.First().children);
-            Assert.Equal("Appointment.Contact.OwnerUser", cmd.from.root.children.First().children.First().FullPath);
+            Assert.Equal("Appointment.Contact.OwnerUser", cmd.from.root.children.First().children.First().FullPath.Path);
 
         }
 

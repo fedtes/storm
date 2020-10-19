@@ -21,7 +21,7 @@ namespace Storm.Execution
                 root = new FromNode()
                 {
                     Alias = "A0",
-                    FullPath = from,
+                    FullPath = new EntityPath(from, ""),
                     Edge = null,
                     Entity = navigator.GetEntity(from),
                     children = new List<FromNode>()
