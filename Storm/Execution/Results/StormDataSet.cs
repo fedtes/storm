@@ -11,6 +11,7 @@ namespace Storm.Execution.Results
 {
     internal class ReaderMetadata
     {
+        public SchemaNode OwnerEntity;
         public EntityField EntityField;
         public String FullPath;
         public String Alias;
@@ -21,9 +22,19 @@ namespace Storm.Execution.Results
         }
     }
 
+    internal class IndexRange
+    {
+        public int Start;
+        public int End;
+    }
+
     public class StormDataSet : IEnumerable<StormRow>
     {
         internal Dictionary<string, int> ColumnMap = new Dictionary<string, int>();
+
+        internal Dictionary<SchemaNode, IndexRange> ObjectRanges = new Dictionary<SchemaNode, IndexRange>();
+
+        internal Dictionary<string, int> IdentityIndexes = new Dictionary<string, int>();
 
         protected String root;
 
@@ -70,13 +81,7 @@ namespace Storm.Execution.Results
                 // Calculate columns
                 if (0 == iteration)
                 {
-                    for (int i = 0; i < dataReader.FieldCount; i++)
-                    {
-                        var (_alias, _name) = splitColumnName(dataReader.GetName(i));
-                        var m = readerMetadata.FirstOrDefault(x => x.EntityField.DBName == _name && x.Alias == _alias);
-                        ColumnMap.Add(NKey(m.FullPath), i);
-                        tempMap.Add(i, m);
-                    }
+                    ComputeColumnMetadata(dataReader, readerMetadata, tempMap);
                 }
 
                 // Calculate data
@@ -114,6 +119,36 @@ namespace Storm.Execution.Results
 
                 this.data.Add(dataRow);
                 iteration++;
+            }
+        }
+
+        private void ComputeColumnMetadata(IDataReader dataReader, IEnumerable<ReaderMetadata> readerMetadata, Dictionary<int, ReaderMetadata> tempMap)
+        {
+            SchemaNode currentEntity = null;
+            for (int i = 0; i < dataReader.FieldCount; i++)
+            {
+                var (_alias, _name) = splitColumnName(dataReader.GetName(i));
+                var m = readerMetadata.FirstOrDefault(x => x.EntityField.CodeName == _name && x.Alias == _alias);
+
+                if (m.OwnerEntity != currentEntity)
+                {
+                    if (currentEntity != null)
+                    {
+                        this.ObjectRanges[currentEntity].End = i - 1;
+                    }
+                    this.ObjectRanges.Add(m.OwnerEntity, new IndexRange() { Start = i });
+                    currentEntity = m.OwnerEntity;
+                }
+                else if (i == dataReader.FieldCount - 1)
+                {
+                    this.ObjectRanges[currentEntity].End = i;
+                }
+
+                if (m.EntityField.IsPrimary)
+                    this.IdentityIndexes.Add(NKey(m.FullPath), i);
+
+                ColumnMap.Add(NKey(m.FullPath), i);
+                tempMap.Add(i, m);
             }
         }
     }   

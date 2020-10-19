@@ -45,10 +45,32 @@ namespace Storm.Execution
             var metadata = this.requests
                 .SelectMany(r => {
                     return r.Entity.entityFields
-                        .Select(f => new ReaderMetadata() { FullPath = $"{r.FullPath}.{f.CodeName}", EntityField = f, Alias = r.Alias });
+                        .Select(f => {
+                            return new ReaderMetadata()
+                            {
+                                OwnerEntity = r.Entity,
+                                EntityField = f,
+                                FullPath = $"{r.FullPath}.{f.CodeName}",
+                                Alias = r.Alias
+                            };
+                        });
                 });
 
             sr.ReadData(dataReader, metadata);
+
+            var result = new List<StormResult>();
+
+            var or = sr.ObjectRanges.First();
+
+            foreach (var item in sr.Select((x, i) => new StormRow(sr, i, or.Value.Start, or.Value.End)))
+            {
+                var r1 = new StormResult(item, or.Key);
+                if (!result.Contains(r1))
+                {
+                    result.Add(r1);
+                }
+            }
+
             return sr;
             throw new NotImplementedException();
         }

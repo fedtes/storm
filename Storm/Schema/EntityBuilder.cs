@@ -18,7 +18,8 @@ namespace Storm.Schema
                 DBType = field.DBType,
                 Size = field.Size,
                 ColumnAccess = field.ColumnAccess,
-                DefaultIfNull = field.DefaultIfNull
+                DefaultIfNull = field.DefaultIfNull,
+                IsPrimary = field.IsPrimary
             };
 
             efs.Add(f);
@@ -43,5 +44,6 @@ namespace Storm.Schema
         public int Size ;
         public ColumnAccess ColumnAccess ;
         public Object DefaultIfNull ;
+        public bool IsPrimary;
     }
 }

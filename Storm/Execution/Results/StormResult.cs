@@ -12,13 +12,13 @@ namespace Storm.Execution.Results
     {
         public Dictionary<string, StormResult> Relations = new Dictionary<string, StormResult>();
 
-        private StormRange _range;
+        private StormRow datarow;
         private SchemaNode _node;
         private Dictionary<string, string>  _propertyMap = new Dictionary<string, string>();
 
-        internal StormResult(StormRange range, SchemaNode node)
+        internal StormResult(StormRow datarow, SchemaNode node)
         {
-            _range = range;
+            this.datarow = datarow;
             _node = node;
             String getField(string x)
             {
@@ -26,7 +26,7 @@ namespace Storm.Execution.Results
                 return x.Substring(i + 1);
             };
 
-            foreach (var item in _range.Rows.First().Keys)
+            foreach (var item in this.datarow.Keys)
             {
                 var _fieldName = getField(item);
                 if (_node.entityFields.Any(x => x.CodeName.ToLowerInvariant() == _fieldName.ToLowerInvariant()))
@@ -40,7 +40,7 @@ namespace Storm.Execution.Results
         private dynamic _dynamicModel = null;
         private dynamic createDynamicModel()
         {
-            _dynamicModel =  new ModelItem(_range.Rows.First(), _propertyMap);
+            _dynamicModel =  new ModelItem(datarow, _propertyMap);
             return _dynamicModel;
         }
 
@@ -55,9 +55,9 @@ namespace Storm.Execution.Results
         {
             if (HasModel())
             {
-                if (!_range.Rows.Any()) return default(T);
+                if (datarow == null) return default(T);
 
-                var _val = _range.Rows.First();
+                var _val = datarow;
                 T obj = (T)Activator.CreateInstance(_node.TModel);
                 foreach (var fieldInfo in typeof(T).GetFields())
                 {
@@ -80,9 +80,9 @@ namespace Storm.Execution.Results
         public Dictionary<string,object> GetDictionary()
         {
             var result = new Dictionary<string, object>();
-            if (!_range.Rows.Any()) return result;
+            if (datarow == null) return result;
 
-            var _val = _range.Rows.First();
+            var _val = datarow;
             foreach (var item in _node.entityFields)
             {
                 result.Add(item.CodeName, _val[_propertyMap[item.CodeName]]);

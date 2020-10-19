@@ -70,6 +70,7 @@ namespace Storm.Schema
         public int Size { get; internal set; }
         public ColumnAccess ColumnAccess { get; internal set; }
         public Object DefaultIfNull { get; internal set; }
+        public bool IsPrimary { get; internal set; }
 
         internal override SchemaItem Clone()
         {
@@ -82,7 +83,8 @@ namespace Storm.Schema
                 DBType = DBType,
                 Size = Size,
                 ColumnAccess = ColumnAccess,
-                DefaultIfNull = DefaultIfNull
+                DefaultIfNull = DefaultIfNull,
+                IsPrimary = IsPrimary
             };
         }
     }

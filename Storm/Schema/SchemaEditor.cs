@@ -152,6 +152,7 @@ namespace Storm.Schema
                     f.Size = hasAttribute<StormColumnType>(x.attr) ? getAttribute<StormColumnType>(x.attr).size : 0;
                     f.ColumnAccess = hasAttribute<StormColumnAccess>(x.attr) ? getAttribute<StormColumnAccess>(x.attr).columnAccess : ColumnAccess.Full;
                     f.DefaultIfNull = hasAttribute<StormDefaultIfNull>(x.attr) ? getAttribute<StormDefaultIfNull>(x.attr).value : null;
+                    f.IsPrimary = hasAttribute<StormPrimaryKey>(x.attr);
 
                     if (schemaNode.entityFields == null)
                     {
