@@ -7,9 +7,9 @@ namespace Storm.Schema
 {
     public class EntityPath
     {
-        String[] tokens = new string[] { };
+        protected String[] tokens = new string[] { };
 
-        public String Path => String.Join(".", tokens);
+        public virtual String Path => String.Join(".", tokens);
         public String Root => tokens[0];
 
         public EntityPath(string root, string path)
@@ -97,6 +97,50 @@ namespace Storm.Schema
         internal int Count()
         {
             return tokens.Length;
+        }
+    }
+
+    public class FieldPath : EntityPath
+    {
+        public String Field => tokens.Last();
+        public EntityPath OwnerEntityPath => new EntityPath(this.Root, tokens.Take(tokens.Length - 1));
+
+        public FieldPath(string root, string path, string field) : base(root, path)
+        {
+            if (!String.IsNullOrEmpty(field))
+            {
+                tokens = tokens.Concat(new string[] { field }).ToArray();
+            }
+            else
+            {
+                throw new ArgumentNullException("field");
+            }
+        }
+
+        public FieldPath(string root, IEnumerable<string> path, string field) : base(root, path)
+        {
+            if (!String.IsNullOrEmpty(field))
+            {
+                tokens = tokens.Concat(new string[] { field }).ToArray();
+            }
+            else
+            {
+                throw new ArgumentNullException("field");
+            }
+        }
+
+        public static bool operator ==(FieldPath x, FieldPath y) => (EntityPath)x == (EntityPath)y;
+
+        public static bool operator !=(FieldPath x, FieldPath y) => (EntityPath)x != (EntityPath)y;
+
+        public override bool Equals(object obj)
+        {
+            return base.Equals(obj);
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
         }
     }
 }

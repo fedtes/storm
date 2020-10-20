@@ -46,12 +46,11 @@ namespace Storm.Execution
                 .SelectMany(r => {
                     return r.Entity.entityFields
                         .Select(f => {
-                            return new ReaderMetadata()
+                            return new SelectNode()
                             {
-                                OwnerEntity = r.Entity,
+                                FromNode = r,
                                 EntityField = f,
-                                FullPath = $"{r.FullPath}.{f.CodeName}",
-                                Alias = r.Alias
+                                FullPath = new FieldPath(r.FullPath.Root, r.FullPath.Path, f.CodeName),
                             };
                         });
                 });

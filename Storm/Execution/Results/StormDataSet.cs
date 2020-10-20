@@ -9,19 +9,6 @@ using System.Text;
 
 namespace Storm.Execution.Results
 {
-    internal class ReaderMetadata
-    {
-        public SchemaNode OwnerEntity;
-        public EntityField EntityField;
-        public String FullPath;
-        public String Alias;
-
-        public object FieldDefault()
-        {
-            return EntityField.DefaultIfNull != null ? EntityField.DefaultIfNull : (EntityField.CodeType.IsValueType ? TypeHelper.DefValues[EntityField.CodeType] : null);
-        }
-    }
-
     internal class IndexRange
     {
         public int Start;
@@ -30,11 +17,11 @@ namespace Storm.Execution.Results
 
     public class StormDataSet : IEnumerable<StormRow>
     {
-        internal Dictionary<string, int> ColumnMap = new Dictionary<string, int>();
+        internal Dictionary<FieldPath, int> ColumnMap = new Dictionary<FieldPath, int>();
 
         internal Dictionary<SchemaNode, IndexRange> ObjectRanges = new Dictionary<SchemaNode, IndexRange>();
 
-        internal Dictionary<string, int> IdentityIndexes = new Dictionary<string, int>();
+        internal Dictionary<EntityPath, int> IdentityIndexes = new Dictionary<EntityPath, int>();
 
         protected String root;
 
@@ -45,14 +32,26 @@ namespace Storm.Execution.Results
             this.root = Root;
         }
 
-        internal String NKey(String key)
+        internal FieldPath NKey(String key)
         {
-            return key.StartsWith($"{root}.") ? key : $"{root}.{key}";
+            //                 |a|b|c|.|e|f|g|.|h|i|
+            // lastDot = 7      |           | ^ |
+            // path = abc.efg   ^           ^   |
+            // field = hi                       ^ 
+            var lastDot = key.LastIndexOf('.');
+            var path = key.Substring(0, lastDot);
+            var field = key.Substring(lastDot + 1);
+            return new FieldPath(root, path, field);
         }
 
         internal int Map(String key)
         {
             return ColumnMap[NKey(key)];
+        }
+
+        internal int Map(FieldPath key)
+        {
+            return ColumnMap[key];
         }
 
         public IEnumerator<StormRow> GetEnumerator()
@@ -71,17 +70,17 @@ namespace Storm.Execution.Results
             return (x[0], x[1]);
         }
 
-        internal void ReadData(IDataReader dataReader, IEnumerable<ReaderMetadata> readerMetadata)
+        internal void ReadData(IDataReader dataReader, IEnumerable<SelectNode> selectNodes)
         {
             int iteration = 0;
-            var tempMap = new Dictionary<int, ReaderMetadata>();
+            var readerIdx_selectNode = new Dictionary<int, SelectNode>();
             this.data = new List<object[]>();
             while (dataReader.Read())
             {
                 // Calculate columns
                 if (0 == iteration)
                 {
-                    ComputeColumnMetadata(dataReader, readerMetadata, tempMap);
+                    ComputeColumnMetadata(dataReader, selectNodes, readerIdx_selectNode);
                 }
 
                 // Calculate data
@@ -89,16 +88,16 @@ namespace Storm.Execution.Results
 
                 for (int i = 0; i < dataReader.FieldCount; i++)
                 {
-                    var metadata = tempMap[i];
+                    var selectNode = readerIdx_selectNode[i];
 
                     if (dataReader.IsDBNull(i))
                     {
-                        dataRow[i] = metadata.FieldDefault();
+                        dataRow[i] = selectNode.FieldDefault;
                     }
                     else
                     {
                         var v = dataReader.GetValue(i);
-                        if (v.GetType() == (metadata.EntityField.CodeType))
+                        if (v.GetType() == (selectNode.EntityField.CodeType))
                         {
                             dataRow[i] = v;
                         }
@@ -106,12 +105,12 @@ namespace Storm.Execution.Results
                         {
                             try
                             {
-                                var x = Convert.ChangeType(dataReader.GetValue(i), metadata.EntityField.CodeType);
+                                var x = Convert.ChangeType(dataReader.GetValue(i), selectNode.EntityField.CodeType);
                                 dataRow[i] = x;
                             }
                             catch (InvalidCastException)
                             {
-                                dataRow[i] = metadata.FieldDefault();
+                                dataRow[i] = selectNode.FieldDefault;
                             }
                         }
                     }
@@ -122,13 +121,13 @@ namespace Storm.Execution.Results
             }
         }
 
-        private void ComputeColumnMetadata(IDataReader dataReader, IEnumerable<ReaderMetadata> readerMetadata, Dictionary<int, ReaderMetadata> tempMap)
+        private void ComputeColumnMetadata(IDataReader dataReader, IEnumerable<SelectNode> selectNodes, Dictionary<int, SelectNode> tempMap)
         {
             SchemaNode currentEntity = null;
             for (int i = 0; i < dataReader.FieldCount; i++)
             {
                 var (_alias, _name) = splitColumnName(dataReader.GetName(i));
-                var m = readerMetadata.FirstOrDefault(x => x.EntityField.CodeName == _name && x.Alias == _alias);
+                var m = selectNodes.FirstOrDefault(x => x.EntityField.CodeName == _name && x.Alias == _alias);
 
                 if (m.OwnerEntity != currentEntity)
                 {
@@ -145,9 +144,9 @@ namespace Storm.Execution.Results
                 }
 
                 if (m.EntityField.IsPrimary)
-                    this.IdentityIndexes.Add(NKey(m.FullPath), i);
+                    this.IdentityIndexes.Add(m.FullPath.OwnerEntityPath, i);
 
-                ColumnMap.Add(NKey(m.FullPath), i);
+                ColumnMap.Add(m.FullPath, i);
                 tempMap.Add(i, m);
             }
         }

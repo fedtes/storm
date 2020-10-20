@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Storm.Schema;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,13 +38,24 @@ namespace Storm.Execution.Results
                 return idx;
         }
 
-        private IEnumerable<KeyValuePair<string, int>> rowColumns => parent.ColumnMap.Where(x => x.Value >= min && x.Value <= max);
+        internal int Map(FieldPath key)
+        {
+            var idx = parent.Map(key);
+            if (idx < min || idx > max)
+                throw new IndexOutOfRangeException();
+            else
+                return idx;
+        }
+
+        private IEnumerable<KeyValuePair<FieldPath, int>> rowColumns => parent.ColumnMap.Where(x => x.Value >= min && x.Value <= max);
+
+        public object this[FieldPath key] => parent.data[index][Map(key)];
 
         public object this[string key] => parent.data[index][Map(key)];
 
         public int Count => 1 + max - min;
 
-        public IEnumerable<string> Keys => rowColumns.Select(x => x.Key);
+        public IEnumerable<string> Keys => rowColumns.Select(x => x.Key.Path);
 
         public bool IsReadOnly => true;
 
@@ -54,7 +66,7 @@ namespace Storm.Execution.Results
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            return rowColumns.Select(x => x.Key).Select(k => new KeyValuePair<string, object>(k, this[k])).GetEnumerator();
+            return rowColumns.Select(x => x.Key).Select(k => new KeyValuePair<string, object>(k.Path, this[k])).GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
