@@ -1,6 +1,7 @@
 ﻿using SqlKata;
 using Storm.Execution.Results;
 using Storm.Filters;
+using Storm.Helpers;
 using Storm.Schema;
 using System;
 using System.Collections.Generic;
@@ -57,21 +58,12 @@ namespace Storm.Execution
 
             sr.ReadData(dataReader, metadata);
 
-            var result = new List<StormResult>();
+            return GetCommandHelpers.ToResults(sr, this.navigator, requests, from);
+        }
 
-            var or = sr.ObjectRanges.First();
-
-            foreach (var item in sr.Select((x, i) => new StormRow(sr, i, or.Value.Start, or.Value.End)))
-            {
-                var r1 = new StormResult(item, or.Key);
-                if (!result.Contains(r1))
-                {
-                    result.Add(r1);
-                }
-            }
-
-            return sr;
-            throw new NotImplementedException();
+        public new IEnumerable<StormResult> Execute()
+        {
+            return (IEnumerable<StormResult>)base.Execute();
         }
     }
 }

@@ -26,7 +26,9 @@ namespace Storm.Schema
     {
         public Type TModel { get; internal set; }
         public string DBName { get; internal set; }
+        public EntityField PrimaryKey => entityFields.First(x => x.IsPrimary);
         public IEnumerable<EntityField> entityFields { get; internal set; }
+
 
         internal override SchemaItem Clone()
         {
@@ -37,6 +39,19 @@ namespace Storm.Schema
                 TModel = TModel,
                 entityFields = entityFields.Select(x => x.Clone()).Cast<EntityField>().ToList()
             };
+        }
+
+        public static bool operator ==(SchemaNode x, SchemaNode y) => x.ID == y.ID;
+        public static bool operator !=(SchemaNode x, SchemaNode y) => x.ID != y.ID;
+
+        public override bool Equals(object obj)
+        {
+            return this == (SchemaNode)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.ID.GetHashCode();
         }
     }
 

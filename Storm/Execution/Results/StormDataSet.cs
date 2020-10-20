@@ -21,9 +21,9 @@ namespace Storm.Execution.Results
 
         internal Dictionary<SchemaNode, IndexRange> ObjectRanges = new Dictionary<SchemaNode, IndexRange>();
 
-        internal Dictionary<EntityPath, int> IdentityIndexes = new Dictionary<EntityPath, int>();
+        internal Dictionary<EntityPath, FieldPath> IdentityIndexes = new Dictionary<EntityPath, FieldPath>();
 
-        protected String root;
+        internal String root;
 
         internal IList<Object[]> data;
 
@@ -144,7 +144,7 @@ namespace Storm.Execution.Results
                 }
 
                 if (m.EntityField.IsPrimary)
-                    this.IdentityIndexes.Add(m.FullPath.OwnerEntityPath, i);
+                    this.IdentityIndexes.Add(m.FullPath.OwnerEntityPath, m.FullPath);
 
                 ColumnMap.Add(m.FullPath, i);
                 tempMap.Add(i, m);

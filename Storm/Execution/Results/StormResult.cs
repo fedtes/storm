@@ -10,7 +10,7 @@ namespace Storm.Execution.Results
 
     public class StormResult
     {
-        public Dictionary<string, StormResult> Relations = new Dictionary<string, StormResult>();
+        public Dictionary<string, IEnumerable<StormResult>> Relations = new Dictionary<string, IEnumerable<StormResult>>();
 
         private StormRow datarow;
         private SchemaNode _node;
@@ -45,6 +45,8 @@ namespace Storm.Execution.Results
         }
 
         public dynamic Value => _dynamicModel == null ? createDynamicModel() : _dynamicModel;
+
+        public object PrimaryKey =>datarow[_propertyMap[_node.PrimaryKey.CodeName]];
 
         public bool HasModel()
         {
