@@ -13,7 +13,7 @@ namespace Storm.Execution
 {
     public class GetCommand : Command<GetCommand>
     {
-        protected List<FromNode> requests = new List<FromNode>();
+        internal List<FromNode> requests = new List<FromNode>();
 
         public GetCommand(SchemaNavigator navigator, String from) : base(navigator, from)
         {

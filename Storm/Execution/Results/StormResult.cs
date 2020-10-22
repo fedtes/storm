@@ -92,6 +92,11 @@ namespace Storm.Execution.Results
             return result;
         }
 
+        public override string ToString()
+        {
+            return $"PrimaryKey [{_node.PrimaryKey.CodeName}] = {PrimaryKey}";
+        }
+
     }
 
     public class ModelItem : DynamicObject

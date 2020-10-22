@@ -41,8 +41,8 @@ namespace Storm.Schema
             };
         }
 
-        public static bool operator ==(SchemaNode x, SchemaNode y) => x.ID == y.ID;
-        public static bool operator !=(SchemaNode x, SchemaNode y) => x.ID != y.ID;
+        public static bool operator ==(SchemaNode x, SchemaNode y) => !(x is null) && !(y is null) && x.ID == y.ID;
+        public static bool operator !=(SchemaNode x, SchemaNode y) => !(!(x is null) && !(y is null) && x.ID == y.ID);
 
         public override bool Equals(object obj)
         {

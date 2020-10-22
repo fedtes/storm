@@ -32,6 +32,11 @@ namespace Storm.Execution.Results
             this.root = Root;
         }
 
+        public override string ToString()
+        {
+            return $"Root: \"{root}\"; Rows: {this.Count()}; Cols: {ColumnMap.Count}; Objects: {ObjectRanges.Count};";
+        }
+
         internal FieldPath NKey(String key)
         {
             //                 |a|b|c|.|e|f|g|.|h|i|
@@ -39,8 +44,8 @@ namespace Storm.Execution.Results
             // path = abc.efg   ^           ^   |
             // field = hi                       ^ 
             var lastDot = key.LastIndexOf('.');
-            var path = key.Substring(0, lastDot);
-            var field = key.Substring(lastDot + 1);
+            var path = lastDot == -1 ? "" : key.Substring(0, lastDot);
+            var field = lastDot == -1 ? key : key.Substring(lastDot + 1);
             return new FieldPath(root, path, field);
         }
 
@@ -131,7 +136,7 @@ namespace Storm.Execution.Results
 
                 if (m.OwnerEntity != currentEntity)
                 {
-                    if (currentEntity != null)
+                    if (!(currentEntity is null))
                     {
                         this.ObjectRanges[currentEntity].End = i - 1;
                     }
