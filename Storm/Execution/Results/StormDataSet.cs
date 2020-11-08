@@ -23,7 +23,7 @@ namespace Storm.Execution.Results
 
         internal Dictionary<EntityPath, FieldPath> IdentityIndexes = new Dictionary<EntityPath, FieldPath>();
 
-        internal String root;
+        internal readonly String root;
 
         internal IList<Object[]> data;
 
@@ -37,7 +37,12 @@ namespace Storm.Execution.Results
             return $"Root: \"{root}\"; Rows: {this.Count()}; Cols: {ColumnMap.Count}; Objects: {ObjectRanges.Count};";
         }
 
-        internal FieldPath NKey(String key)
+        /// <summary>
+        /// Normalize Field key transformig into a FieldPath.
+        /// </summary>
+        /// <param name="key">String such as [root optional].[edge1].[egde2]...[edgeN].[fieldName]</param>
+        /// <returns></returns>
+        internal FieldPath NFieldKey(String key)
         {
             //                 |a|b|c|.|e|f|g|.|h|i|
             // lastDot = 7      |           | ^ |
@@ -49,9 +54,19 @@ namespace Storm.Execution.Results
             return new FieldPath(root, path, field);
         }
 
+        /// <summary>
+        /// Normalize a path key transformig into a EntityPath.
+        /// </summary>
+        /// <param name="key">String such as [root optional].[edge1].[egde2]...[edgeN]</param>
+        /// <returns></returns>
+        internal EntityPath NPathKey(String key)
+        {
+            return new EntityPath(root, key);
+        }
+
         internal int Map(String key)
         {
-            return ColumnMap[NKey(key)];
+            return ColumnMap[NFieldKey(key)];
         }
 
         internal int Map(FieldPath key)

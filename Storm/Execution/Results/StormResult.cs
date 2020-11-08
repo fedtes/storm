@@ -10,7 +10,7 @@ namespace Storm.Execution.Results
 
     public class StormResult
     {
-        public Dictionary<string, IEnumerable<StormResult>> Relations = new Dictionary<string, IEnumerable<StormResult>>();
+        internal Dictionary<string, IEnumerable<StormResult>> Relations = new Dictionary<string, IEnumerable<StormResult>>();
 
         private StormRow datarow;
         private SchemaNode _node;
@@ -92,6 +92,11 @@ namespace Storm.Execution.Results
             return result;
         }
 
+        public IEnumerable<StormResult> GetRelation(String Path)
+        {
+            return Relations[datarow.parent.NPathKey(Path).Path];
+        }
+
         public override string ToString()
         {
             return $"PrimaryKey [{_node.PrimaryKey.CodeName}] = {PrimaryKey}";
@@ -117,7 +122,7 @@ namespace Storm.Execution.Results
             // If the property name is found in a dictionary,
             // set the result parameter to the property value and return true.
             // Otherwise, return false.
-            if (_data.ContainsKey(binder.Name))
+            if (_data.ContainsKey(propertyMap[binder.Name]))
             {
                 result = _data[propertyMap[binder.Name]];
                 return true;

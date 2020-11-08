@@ -9,8 +9,8 @@ namespace Storm.Execution.Results
 {
     public class StormRow : IEnumerable<KeyValuePair<string, object>>
     {
-        private StormDataSet parent;
-        private int index;
+        internal readonly StormDataSet parent;
+        private readonly int index;
         private readonly int min = 0;
         private readonly int max;
 
@@ -61,7 +61,7 @@ namespace Storm.Execution.Results
 
         public bool ContainsKey(string key)
         {
-            return rowColumns.Any(x => x.Key == parent.NKey(key));
+            return rowColumns.Any(x => x.Key == parent.NFieldKey(key));
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
