@@ -10,7 +10,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Storm.Test", "Storm.Test\Storm.Test.csproj", "{DCB8BB18-3AF6-4415-AF2E-32C8EE640911}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Storm.Test", "Storm.Test\Storm.Test.csproj", "{DCB8BB18-3AF6-4415-AF2E-32C8EE640911}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Storm.Test.PublicAPI", "Storm.Test.PublicAPI\Storm.Test.PublicAPI.csproj", "{657AFF7D-D62D-4C30-AE74-0D41EC8A684C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -26,6 +28,10 @@ Global
 		{DCB8BB18-3AF6-4415-AF2E-32C8EE640911}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCB8BB18-3AF6-4415-AF2E-32C8EE640911}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCB8BB18-3AF6-4415-AF2E-32C8EE640911}.Release|Any CPU.Build.0 = Release|Any CPU
+		{657AFF7D-D62D-4C30-AE74-0D41EC8A684C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{657AFF7D-D62D-4C30-AE74-0D41EC8A684C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{657AFF7D-D62D-4C30-AE74-0D41EC8A684C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{657AFF7D-D62D-4C30-AE74-0D41EC8A684C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

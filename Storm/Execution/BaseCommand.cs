@@ -15,6 +15,7 @@ namespace Storm.Execution
         internal Query query;
         internal StormConnection connection;
         internal StormTransaction transaction;
+        internal Compiler compiler;
 
         internal BaseCommand(SchemaNavigator navigator, String from)
         {
@@ -31,12 +32,11 @@ namespace Storm.Execution
         {
             using (var t = transaction == null ? connection.BeginTransaction(true) : transaction)
             {
-                Compiler compiler;
                 IDbCommand cmd;
 
                 try
                 {
-                    compiler = new SqlServerCompiler();
+                    compiler = compiler == null ? new SqlServerCompiler() : compiler;
                     SqlResult result = compiler.Compile(query);
                     cmd = t.transaction.Connection.CreateCommand();
                     cmd.CommandText = result.Sql;

@@ -3,6 +3,7 @@ using System.Data;
 using System.Collections.Generic;
 using System.Text;
 using Storm.Schema;
+using SqlKata.Compilers;
 
 namespace Storm.Execution
 {
@@ -12,13 +13,15 @@ namespace Storm.Execution
         protected bool isOpen;
         protected IDbConnection connection;
         protected StormTransaction currentTransaction;
+        internal readonly SQLEngine engine;
         internal readonly SchemaNavigator navigator;
 
-        internal StormConnection(SchemaNavigator navigator, IDbConnection connection)
+        internal StormConnection(SchemaNavigator navigator, IDbConnection connection, SQLEngine engine)
         {
             isOpen = false;
             this.navigator = navigator;
             this.connection = connection;
+            this.engine = engine;
         }
 
         public StormTransaction BeginTransaction(bool AutoCommit = false)
@@ -34,6 +37,7 @@ namespace Storm.Execution
             return new GetCommand(navigator, EntityIdentifier)
             {
                 connection = this,
+                compiler = GetCompiler(),
                 transaction = null
             };
         }
@@ -43,6 +47,7 @@ namespace Storm.Execution
             return new SelectCommand(navigator, EntityIdentifier)
             {
                 connection = this,
+                compiler = GetCompiler(),
                 transaction = null
             };
         }
@@ -51,7 +56,8 @@ namespace Storm.Execution
         {
             if (!isOpen)
             {
-                connection.Open();
+                if (connection.State != ConnectionState.Open)
+                    connection.Open();
                 isOpen = true;
             }
         }
@@ -64,6 +70,21 @@ namespace Storm.Execution
                 throw new ApplicationException("There is already an open transaction!");
             }
         }      
+
+        internal Compiler GetCompiler()
+        {
+            switch (engine)
+            {
+                case SQLEngine.MSSQLServer:
+                    return new SqlServerCompiler();
+                case SQLEngine.MySQL:
+                    return new MySqlCompiler();
+                case SQLEngine.SQLite:
+                    return new SqliteCompiler();
+                default:
+                    return new SqlServerCompiler();
+            }
+        }
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls

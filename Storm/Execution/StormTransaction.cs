@@ -30,6 +30,7 @@ namespace Storm.Execution
             return new GetCommand(connection.navigator, EntityIdentifier)
             {
                 connection = this.connection,
+                compiler = connection.GetCompiler(),
                 transaction = this
             };
         }
@@ -39,6 +40,7 @@ namespace Storm.Execution
             return new SelectCommand(connection.navigator, EntityIdentifier)
             {
                 connection = this.connection,
+                compiler = connection.GetCompiler(),
                 transaction = this
             };
         }
