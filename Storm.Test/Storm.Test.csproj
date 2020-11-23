@@ -19,4 +19,9 @@
     <ProjectReference Include="..\Storm\Storm.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Helpers\" />
+    <Folder Include="MockAndModels\" />
+  </ItemGroup>
+
 </Project>
