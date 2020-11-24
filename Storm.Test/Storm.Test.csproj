@@ -21,7 +21,6 @@
 
   <ItemGroup>
     <Folder Include="Helpers\" />
-    <Folder Include="MockAndModels\" />
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 
 namespace Storm.Schema
 {
@@ -24,6 +25,11 @@ namespace Storm.Schema
 
             efs.Add(f);
             return this;
+        }
+
+        internal bool HasPrimaryKey()
+        {
+            return efs.Any(x => x.IsPrimary);
         }
 
         internal SchemaItem GetEntity()

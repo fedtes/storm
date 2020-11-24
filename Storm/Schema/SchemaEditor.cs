@@ -53,6 +53,10 @@ namespace Storm.Schema
             if (!schemaInstance.ContainsKey(identifier))
             {
                 var b = builder(new EntityBuilder());
+                if (!b.HasPrimaryKey())
+                {
+                    throw new NoPrimaryKeySpecifiedException("No primary key specified for " + identifier);
+                }
                 var e = b.GetEntity();
                 ((SchemaNode)e).DBName = sourceTable;
                 e.ID = identifier;
@@ -83,11 +87,11 @@ namespace Storm.Schema
             
             if (!schemaInstance.ContainsKey(sourceIdentifier))
             {
-                throw new ArgumentException($"Entity with identifier {identifier} not exists.");
+                throw new ArgumentException($"Entity with identifier {sourceIdentifier} not exists.");
             }
             else if (!schemaInstance.ContainsKey(targetIdentifier))
             {
-                throw new ArgumentException($"Entity with identifier {identifier} not exists.");
+                throw new ArgumentException($"Entity with identifier {targetIdentifier} not exists.");
             }
             else
             {
@@ -165,17 +169,22 @@ namespace Storm.Schema
 
             var ps = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
 
-            ps.Select(p => new { p.Name, p.PropertyType, attr = getAttributes(p) })
+            ps.Select(p => new { p.Name, PropertyType = p.PropertyType, attr = getAttributes(p) })
                 .Where(p => p.PropertyType.IsValueType || p.PropertyType == typeof(string))
                 .ToList()
                 .ForEach(mapToField);
 
             var fs = type.GetFields(BindingFlags.Instance | BindingFlags.Public);
 
-            fs.Select(p => new { p.Name, p.FieldType, attr = getAttributes(p) })
-                .Where(p => p.FieldType.IsValueType || p.FieldType == typeof(string))
+            fs.Select(p => new { p.Name, PropertyType = p.FieldType, attr = getAttributes(p) })
+                .Where(p => p.PropertyType.IsValueType || p.PropertyType == typeof(string))
                 .ToList()
                 .ForEach(mapToField);
+
+            if (!schemaNode.entityFields.Any(x => x.IsPrimary))
+            {
+                throw new NoPrimaryKeySpecifiedException("No primary key specified for " + identifier);
+            }
 
             return schemaNode;
         }
