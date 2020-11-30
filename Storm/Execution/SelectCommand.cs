@@ -19,7 +19,8 @@ namespace Storm.Execution
 
         public SelectCommand Select(string requestPath)
         {
-            var p = SelectCommandHelper.ValidatePath(requestPath);
+            var _requestPath = new EntityPath(from.root.Entity.ID, requestPath).Path;
+            var p = SelectCommandHelper.ValidatePath(_requestPath);
 
             foreach (var item in p)
             {

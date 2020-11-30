@@ -27,6 +27,7 @@ namespace Storm.Test.TestUnits
          *                     +------Model_2
          */
 
+        public const String Model_0 = "Model_0";
         public const String Model_1 = "Model_1";
         public const String Model_2 = "Model_2";
         public const String Model_3 = "Model_3";
@@ -38,6 +39,8 @@ namespace Storm.Test.TestUnits
                 .Add<Model_2>("Model_2", "Table_2")
                 .Add<Model_3>("Model_3", "Table_3")
                 .Add<Model_4>("Model_4", "Table_4")
+                .Add<Model_0>("Model_0", "Table_0")
+                .Connect("Child", "Model_0","Model_1", "Model1ID", "ID")
                 .Connect("Child_2", "Model_1", "Model_2", "ID", "ParentID")
                 .Connect("Child_3", "Model_1", "Model_3", "ID", "ParentID")
                 .Connect("Child_2", "Model_3", "Model_2", "ID", "ParentID")
@@ -516,98 +519,203 @@ namespace Storm.Test.TestUnits
         [Fact]
         public void Parse_Filter_And()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
+            var cmd1 = con.Get(Model_1)
+                .Where(e => e["data"].NotEqualTo.Val("data1") * e["data"].NotEqualTo.Val("data2"));
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("974D688381F9BC2CA380785805D3E408", Helpers.Checksum(sql1));
         }
 
 
         [Fact]
         public void Parse_Filter_Or()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
+            var cmd1 = con.Get(Model_1)
+                .Where(e => e["data"].EqualTo.Val("data1") + e["data"].EqualTo.Val("data2"));
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("1D43CA3B01D03F5E9373F71407EBD7BB", Helpers.Checksum(sql1));
         }
 
         [Fact]
         public void Parse_Filter_And_Or_Mixed()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
+            var cmd1 = con.Get(Model_1)
+                .Where(e => (e["Child_2.data"].EqualTo.Val("some data") * e["data"].EqualTo.Val("data1")) + e["data"].EqualTo.Val("data2") * e["Child_3.Child_2.data"].EqualTo.Val("some data"));
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("23066D56628CA30E68972E8F1EEAACB9", Helpers.Checksum(sql1));
         }
 
         [Fact]
         public void Parse_GetProjection()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
+            var cmd1 = con.Select(Model_0).Select("Model_0.Field1").Select("Model_0.Child.data");
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("D8401076EA9FCB0D614815BC14AE4531", Helpers.Checksum(sql1));
         }
 
         [Fact]
         public void Parse_GetProjection_ShortPathed()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
+            var cmd1 = con.Select(Model_0).Select("Field1").Select("Child.data");
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("D8401076EA9FCB0D614815BC14AE4531", Helpers.Checksum(sql1));
         }
 
         [Fact]
         public void Parse_GetProjection_Use_WildCard()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
+            var cmd1 = con.Select(Model_0).Select("Model_0.*");
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("B03BF0BC3009D5065961498447A558C0", Helpers.Checksum(sql1));
         }
 
         [Fact]
         public void Parse_GetProjection_Use_WildCard_ShortPathed()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
+            var cmd1 = con.Select(Model_0).Select("*");
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("B03BF0BC3009D5065961498447A558C0", Helpers.Checksum(sql1));
         }
 
         [Fact]
         public void Parse_GetProjection_Use_Bracket_List()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
+            var cmd1 = con.Select(Model_0).Select("Model_0.{Field1, Field4,Field3}");
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("AB1631108D6E3CDFFC67CBF51BE38286", Helpers.Checksum(sql1));
         }
 
         [Fact]
         public void Parse_GetProjection_Use_Bracket_List_ShortPathed()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
-        }
+            var cmd1 = con.Select(Model_0).Select("{Field1, Field4,Field3}");
 
-        [Fact]
-        public void Parse_GetProjection_With_Relation()
-        {
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
 
-        }
-
-        [Fact]
-        public void Parse_GetProjection_With_Relation_ShortPathed()
-        {
-
-        }
+            // Previusly Calculated check sum integrity
+            Assert.Equal("AB1631108D6E3CDFFC67CBF51BE38286", Helpers.Checksum(sql1));
+        } 
 
         [Fact]
         public void Parse_GetProjection_With_Relation_Use_WildCard()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
-        }
+            var cmd1 = con.Select(Model_0).Select("Child.*");
 
-        [Fact]
-        public void Parse_GetProjection_With_Relation_Use_WildCard_ShortPathed()
-        {
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
 
+            // Previusly Calculated check sum integrity
+            Assert.Equal("6CAA11070463C8B00411B8FC7A721F44", Helpers.Checksum(sql1));
         }
 
         [Fact]
         public void Parse_GetProjection_With_Relation_Use_Bracket_List()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
-        }
+            var cmd1 = con.Select(Model_0).Select("Child.{ data }");
 
-        [Fact]
-        public void Parse_GetProjection_With_Relation_Use_Bracket_List_ShortPathed()
-        {
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
 
-        }
-
-        [Fact]
-        public void Should_AutoAdd_Relation_For_Select()
-        {
-
+            // Previusly Calculated check sum integrity
+            Assert.Equal("2BA8729405B8B935A99702A4B14DDEB8", Helpers.Checksum(sql1));
         }
 
         [Fact]

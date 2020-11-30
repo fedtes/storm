@@ -6,6 +6,24 @@ using Storm.Schema;
 
 namespace Storm.Test.MockAndModels
 {
+    public class Model_0
+    {
+        [StormPrimaryKey]
+        public int ID;
+
+        public int Model1ID;
+
+        public string Field1;
+
+        public string Field2;
+
+        public string Field3;
+
+        public string Field4;
+
+        public string Field5;
+    }
+
     public class Model_1
     {
         [StormPrimaryKey]
@@ -45,4 +63,5 @@ namespace Storm.Test.MockAndModels
 
         public string data;
     }
+
 }
