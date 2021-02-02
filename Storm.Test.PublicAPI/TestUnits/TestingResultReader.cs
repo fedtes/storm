@@ -1,14 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Storm.Schema;
 using Xunit;
 
-
-namespace Storm.Test.TestUnits
+namespace Storm.Test.PublicAPI
 {
     public class TestingResultReader
     {
+
         [Fact]
         public void Should_Read_Projection_Result()
         {
@@ -44,5 +43,6 @@ namespace Storm.Test.TestUnits
         {
 
         }
+
     }
 }

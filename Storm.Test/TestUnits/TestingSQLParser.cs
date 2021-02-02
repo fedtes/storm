@@ -582,7 +582,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Select(Model_0).Select("Model_0.Field1").Select("Model_0.Child.data");
+            var cmd1 = con.Projection(Model_0).Select("Model_0.Field1").Select("Model_0.Child.data");
 
             cmd1.ParseSQL();
             SqlResult result1 = compiler.Compile(cmd1.query);
@@ -600,7 +600,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Select(Model_0).Select("Field1").Select("Child.data");
+            var cmd1 = con.Projection(Model_0).Select("Field1").Select("Child.data");
 
             cmd1.ParseSQL();
             SqlResult result1 = compiler.Compile(cmd1.query);
@@ -618,7 +618,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Select(Model_0).Select("Model_0.*");
+            var cmd1 = con.Projection(Model_0).Select("Model_0.*");
 
             cmd1.ParseSQL();
             SqlResult result1 = compiler.Compile(cmd1.query);
@@ -636,7 +636,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Select(Model_0).Select("*");
+            var cmd1 = con.Projection(Model_0).Select("*");
 
             cmd1.ParseSQL();
             SqlResult result1 = compiler.Compile(cmd1.query);
@@ -654,7 +654,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Select(Model_0).Select("Model_0.{Field1, Field4,Field3}");
+            var cmd1 = con.Projection(Model_0).Select("Model_0.{Field1, Field4,Field3}");
 
             cmd1.ParseSQL();
             SqlResult result1 = compiler.Compile(cmd1.query);
@@ -672,7 +672,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Select(Model_0).Select("{Field1, Field4,Field3}");
+            var cmd1 = con.Projection(Model_0).Select("{Field1, Field4,Field3}");
 
             cmd1.ParseSQL();
             SqlResult result1 = compiler.Compile(cmd1.query);
@@ -690,7 +690,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Select(Model_0).Select("Child.*");
+            var cmd1 = con.Projection(Model_0).Select("Child.*");
 
             cmd1.ParseSQL();
             SqlResult result1 = compiler.Compile(cmd1.query);
@@ -708,7 +708,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Select(Model_0).Select("Child.{ data }");
+            var cmd1 = con.Projection(Model_0).Select("Child.{ data }");
 
             cmd1.ParseSQL();
             SqlResult result1 = compiler.Compile(cmd1.query);
@@ -721,7 +721,19 @@ namespace Storm.Test.TestUnits
         [Fact]
         public void Parse_GetProjection_With_Where_And_Relation()
         {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
 
+            var cmd1 = con.Projection(Model_0).Select("Child.Child_2.data");
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("C1303A7DB6A3824E53A935606DD4F2B5", Helpers.Checksum(sql1));
         }
 
     }

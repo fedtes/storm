@@ -37,6 +37,7 @@ namespace Storm.Execution
                 try
                 {
                     compiler = compiler == null ? new SqlServerCompiler() : compiler;
+                    this.ParseSQL();
                     SqlResult result = compiler.Compile(query);
                     cmd = t.transaction.Connection.CreateCommand();
                     cmd.CommandText = result.Sql;

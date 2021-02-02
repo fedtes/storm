@@ -82,5 +82,10 @@ namespace Storm.Execution.Results
         {
             return this.ToDictionary(x => x.Key, x => x.Value);
         }
+
+        public override string ToString()
+        {
+            return $"[{ String.Join(", ",this.Select(kv => "{\"" + kv.Key + "\": " + "\"" + (kv.Value == null ? "" : kv.Value.ToString()) + "\"}")) }]";
+        }
     }
 }

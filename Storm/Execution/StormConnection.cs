@@ -42,7 +42,7 @@ namespace Storm.Execution
             };
         }
 
-        public SelectCommand Select(String EntityIdentifier)
+        public SelectCommand Projection(String EntityIdentifier)
         {
             return new SelectCommand(navigator, EntityIdentifier)
             {
