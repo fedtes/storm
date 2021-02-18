@@ -38,7 +38,42 @@ namespace Storm.Test.PublicAPI.Helpers
             {
                 return e.Add<User>("User", "Users")
                     .Add<Task>("Task", "Tasks")
-                    .Connect("User", "Task", "User", "UserID", "ID");
+                    .Connect("User", "Task", "User", "UserID", "ID")
+                    .Add("TaskInfo", "TaskInfos", builder =>
+                    {
+                        return builder.Add(new Schema.FieldConfig()
+                        {
+                            CodeName = "ID",
+                            CodeType = typeof(Int32),
+                            DBName = "ID",
+                            DBType = DbType.Int32,
+                            IsPrimary = true
+                        }).Add(new Schema.FieldConfig()
+                        {
+                            CodeName = "Field1",
+                            CodeType = typeof(string),
+                            DBName = "Field1",
+                            DBType = DbType.String,
+                        }).Add(new Schema.FieldConfig()
+                        {
+                            CodeName = "Field2",
+                            CodeType = typeof(Int32),
+                            DBName = "Field2",
+                            DBType = DbType.Int32,
+                        }).Add(new Schema.FieldConfig()
+                        {
+                            CodeName = "Field3",
+                            CodeType = typeof(bool),
+                            DBName = "Field3",
+                            DBType = DbType.Boolean,
+                        }).Add(new Schema.FieldConfig()
+                        {
+                            CodeName = "Field4",
+                            CodeType = typeof(string),
+                            DBName = "Field4",
+                            DBType = DbType.String,
+                        });
+                    }).Connect("Info", "Task", "TaskInfo", "ID", "ID");
             };
 
             s.EditSchema(editor);

@@ -46,7 +46,11 @@ namespace Storm.Execution
 
         public virtual C Where(Func<Expression, Filter> where)
         {
-            this.where = where(new Expression());
+            if (this.where == null)
+                this.where = where(new Expression());
+            else
+                this.where = this.where * where(new Expression());
+
             return (C)(BaseCommand)this;
         }
 
