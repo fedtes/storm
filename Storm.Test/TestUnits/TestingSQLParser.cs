@@ -32,6 +32,7 @@ namespace Storm.Test.TestUnits
         public const String Model_2 = "Model_2";
         public const String Model_3 = "Model_3";
         public const String Model_4 = "Model_4";
+        public const String Model_5 = "Model_5";
 
         public SchemaEditor SampleSchema(SchemaEditor e)
         {
@@ -40,12 +41,14 @@ namespace Storm.Test.TestUnits
                 .Add<Model_3>("Model_3", "Table_3")
                 .Add<Model_4>("Model_4", "Table_4")
                 .Add<Model_0>("Model_0", "Table_0")
+                .Add<Model_5>("Model_5", "Table_5")
                 .Connect("Child", "Model_0","Model_1", "Model1ID", "ID")
                 .Connect("Child_2", "Model_1", "Model_2", "ID", "ParentID")
                 .Connect("Child_3", "Model_1", "Model_3", "ID", "ParentID")
                 .Connect("Child_2", "Model_3", "Model_2", "ID", "ParentID")
                 .Connect("Child_4", "Model_3", "Model_4", "ID", "ParentID")
-                .Connect("Child_2", "Model_4", "Model_2", "ID", "ParentID");
+                .Connect("Child_2", "Model_4", "Model_2", "ID", "ParentID")
+                .Connect("Child_5", "Model_5", "Model_2", ctx => ctx["source.ParentID"].EqualTo.Ref("target.ID") * ctx["source.ParentData"].Like.Ref("target.data"));
         }
 
         [Fact]
@@ -735,6 +738,28 @@ namespace Storm.Test.TestUnits
             // Previusly Calculated check sum integrity
             Assert.Equal("C1303A7DB6A3824E53A935606DD4F2B5", Helpers.Checksum(sql1));
         }
+
+
+        [Fact]
+        public void Parse_GetProjection_Using_JoinExpressions()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+
+            var cmd1 = con.Projection(Model_5).Select("Child_5.data");
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("C5E2C68D6792A7C0CD4C3CDC768A1825", Helpers.Checksum(sql1));
+
+        }
+
 
     }
 }

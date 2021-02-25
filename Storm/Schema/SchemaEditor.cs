@@ -108,16 +108,37 @@ namespace Storm.Schema
             return this;
         }
 
-        public SchemaEditor Connect(String identifier, String sourceIdentifier, String targetIdentifier, Func<Expression, Expression, Filter> joinExpression)
+        /// <summary>
+        /// Connect 2 Entities give a specific identifier.
+        /// </summary>
+        /// <param name="identifier">Identifier of the relation</param>
+        /// <param name="sourceIdentifier">Source (or left) entity identifier</param>
+        /// <param name="targetIdentifier">Target (or right) entity identifier</param>
+        /// <param name="joinExpression">Expression that describe how to join. In the sintax refer as 'source' for the source object and 'target' for the target</param>
+        /// <returns></returns>
+        public SchemaEditor Connect(String identifier, String sourceIdentifier, String targetIdentifier, Func<JoinContext, Filter> joinExpression)
         {
-            var x = new SchemaEdge
+
+            if (!schemaInstance.ContainsKey(sourceIdentifier))
             {
-                ID = identifier,
-                OnExpression = joinExpression(new Expression(), new Expression()),
-                SourceID = sourceIdentifier,
-                TargetID = targetIdentifier
-            };
-            schemaInstance.Add(x.ID, x);
+                throw new ArgumentException($"Entity with identifier {sourceIdentifier} not exists.");
+            }
+            else if (!schemaInstance.ContainsKey(targetIdentifier))
+            {
+                throw new ArgumentException($"Entity with identifier {targetIdentifier} not exists.");
+            }
+            else
+            {
+                var x = new SchemaEdge
+                {
+                    ID = $"{sourceIdentifier}.{identifier}",
+                    OnExpression = joinExpression(new JoinContext()),
+                    SourceID = sourceIdentifier,
+                    TargetID = targetIdentifier
+                };
+                schemaInstance.Add(x.ID, x);
+            }
+
             return this;
         }
 

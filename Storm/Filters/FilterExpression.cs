@@ -136,43 +136,40 @@ namespace Storm.Filters
         }
     }
 
-    public class Expression
+    public class FilterContext
     {
-        public FluentOperationSelectorSyntax this[string path] => continueSintax(path);
+        public Operator this[string path] => continueSintax(path);
+        public Operator Filter(string path) => continueSintax(path);
+        private Operator continueSintax(string path) => new Operator(path);
 
-        private FluentOperationSelectorSyntax continueSintax(string path)
-        {
-            return new FluentOperationSelectorSyntax(path);
-        }
-
-        public class FluentOperationSelectorSyntax
+        public class Operator
         {
             private readonly string _path;
 
-            internal FluentOperationSelectorSyntax(string path)
+            internal Operator(string path)
             {
                 _path = path;
             }
 
-            public FluentValueSelecetorSintax EqualTo => new FluentValueSelecetorSintax(new EqualToFilter() { Left = new ReferenceFilterValue(_path) });
+            public ValueOperand EqualTo => new ValueOperand(new EqualToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax NotEqualTo => new FluentValueSelecetorSintax(new NotEqualToFilter() { Left = new ReferenceFilterValue(_path) });
+            public ValueOperand NotEqualTo => new ValueOperand(new NotEqualToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax GreaterTo => new FluentValueSelecetorSintax(new GreaterToFilter() { Left = new ReferenceFilterValue(_path) });
+            public ValueOperand GreaterTo => new ValueOperand(new GreaterToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax GreaterOrEqualTo => new FluentValueSelecetorSintax(new GreaterOrEqualToFilter() { Left = new ReferenceFilterValue(_path) });
+            public ValueOperand GreaterOrEqualTo => new ValueOperand(new GreaterOrEqualToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax LessTo => new FluentValueSelecetorSintax(new LessToFilter() { Left = new ReferenceFilterValue(_path) });
+            public ValueOperand LessTo => new ValueOperand(new LessToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax LessOrEqualTo => new FluentValueSelecetorSintax(new LessOrEqualToFilter() { Left = new ReferenceFilterValue(_path) });
+            public ValueOperand LessOrEqualTo => new ValueOperand(new LessOrEqualToFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax Like => new FluentValueSelecetorSintax(new LikeFilter() { Left = new ReferenceFilterValue(_path) });
+            public ValueOperand Like => new ValueOperand(new LikeFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentValueSelecetorSintax NotLike => new FluentValueSelecetorSintax(new NotLikeFilter() { Left = new ReferenceFilterValue(_path) });
+            public ValueOperand NotLike => new ValueOperand(new NotLikeFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentIEnumerableValueSelectorSintax In => new FluentIEnumerableValueSelectorSintax(new InFilter() { Left = new ReferenceFilterValue(_path) });
+            public EnumerableOperand In => new EnumerableOperand(new InFilter() { Left = new ReferenceFilterValue(_path) });
 
-            public FluentIEnumerableValueSelectorSintax NotIn => new FluentIEnumerableValueSelectorSintax(new NotInFilter() { Left = new ReferenceFilterValue(_path) });
+            public EnumerableOperand NotIn => new EnumerableOperand(new NotInFilter() { Left = new ReferenceFilterValue(_path) });
 
             public Filter IsNull => new IsNullFilter() { Left = new ReferenceFilterValue(_path) }; 
             
@@ -180,11 +177,11 @@ namespace Storm.Filters
 
         }
 
-        public class FluentValueSelecetorSintax
+        public class ValueOperand
         {
             private readonly Filter _filter;
 
-            internal FluentValueSelecetorSintax(Filter filter)
+            internal ValueOperand(Filter filter)
             {
                 _filter = filter;
             }
@@ -202,10 +199,10 @@ namespace Storm.Filters
             }
         }
 
-        public class FluentIEnumerableValueSelectorSintax
+        public class EnumerableOperand
         {
             private readonly Filter _filter;
-            internal FluentIEnumerableValueSelectorSintax(Filter filter)
+            internal EnumerableOperand(Filter filter)
             {
                 _filter = filter;
             }
@@ -218,4 +215,66 @@ namespace Storm.Filters
 
         }
     }
+
+    public class JoinContext
+    {
+        public Operator this[string path] => continueSintax(path);
+        public Operator Filter(string path) => continueSintax(path);
+        private Operator continueSintax(string path) => new Operator(path);
+
+        public class Operator
+        {
+            private readonly string _path;
+
+            internal Operator(string path)
+            {
+                this._path = path;
+            }
+
+            public ValueOperand EqualTo => new ValueOperand(new EqualToFilter() { Left = new ReferenceFilterValue(_path) });
+
+            public ValueOperand NotEqualTo => new ValueOperand(new NotEqualToFilter() { Left = new ReferenceFilterValue(_path) });
+
+            public ValueOperand GreaterTo => new ValueOperand(new GreaterToFilter() { Left = new ReferenceFilterValue(_path) });
+
+            public ValueOperand GreaterOrEqualTo => new ValueOperand(new GreaterOrEqualToFilter() { Left = new ReferenceFilterValue(_path) });
+
+            public ValueOperand LessTo => new ValueOperand(new LessToFilter() { Left = new ReferenceFilterValue(_path) });
+
+            public ValueOperand LessOrEqualTo => new ValueOperand(new LessOrEqualToFilter() { Left = new ReferenceFilterValue(_path) });
+
+            public ValueOperand Like => new ValueOperand(new LikeFilter() { Left = new ReferenceFilterValue(_path) });
+
+            public ValueOperand NotLike => new ValueOperand(new NotLikeFilter() { Left = new ReferenceFilterValue(_path) });
+
+            public Filter IsNull => new IsNullFilter() { Left = new ReferenceFilterValue(_path) };
+
+            public Filter IsNotNull => new IsNotNullFilter() { Left = new ReferenceFilterValue(_path) };
+
+        }
+
+        public class ValueOperand
+        {
+            private readonly Filter _filter;
+
+            internal ValueOperand(Filter filter)
+            {
+                _filter = filter;
+            }
+
+            public Filter Ref(string path)
+            {
+                ((MonoFilter)_filter).Right = new ReferenceFilterValue(path);
+                return _filter;
+            }
+
+            public Filter Val(object value)
+            {
+                ((MonoFilter)_filter).Right = new DataFilterValue(value);
+                return _filter;
+            }
+        }
+    }
+
+
 }

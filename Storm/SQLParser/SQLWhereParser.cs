@@ -13,27 +13,27 @@ namespace Storm.SQLParser
     class SQLWhereParser : SQLParser
     {
         protected FromTree fromTree;
-        protected Filter where;
+        protected Filter filter;
 
-        public SQLWhereParser(FromTree fromTree, Filter where, SchemaNavigator schemaNavigator, Query query) : base(schemaNavigator, query)
+        public SQLWhereParser(FromTree fromTree, Filter filter, SchemaNavigator schemaNavigator, Query query) : base(schemaNavigator, query)
         {
             this.fromTree = fromTree;
-            this.where = where;
+            this.filter = filter;
         }
 
         public override Query Parse()
         {
-            base.query = ParseFilter(where, base.query, Op.And);
+            base.query = ParseFilter<Query>(filter, base.query, Op.And);
             return query;
         }
 
-        private enum Op
+        protected enum Op
         {
             And = 0,
             Or = 1
         }
 
-        private Query ParseFilter(Filter filter, Query query, Op op)
+        protected Q ParseFilter<Q>(Filter filter, BaseQuery<Q> query, Op op) where Q : BaseQuery<Q>
         {
             switch (filter)
             {
@@ -141,12 +141,12 @@ namespace Storm.SQLParser
                     {
                         if (op == Op.And)
                             if (f.Right is DataFilterValue data)
-                                query.Where(ParseReferenceStringLeft(f), "like", data.value);
+                                query.Where(ParseReferenceStringLeft(f), "like", "%" + (data.value == null ? "" : data.value) + "%");
                             else
                                 query.WhereColumns(ParseReferenceStringLeft(f), "like", ParseReferenceStringRight(f));
                         else
                             if (f.Right is DataFilterValue data)
-                                query.OrWhere(ParseReferenceStringLeft(f), "like", data.value);
+                                query.OrWhere(ParseReferenceStringLeft(f), "like", "%" + (data.value == null ? "" : data.value));
                             else
                                 query.OrWhereColumns(ParseReferenceStringLeft(f), "like", ParseReferenceStringRight(f));
                         break;
@@ -155,12 +155,12 @@ namespace Storm.SQLParser
                     {
                         if (op == Op.And)
                             if (f.Right is DataFilterValue data)
-                                query.Where(ParseReferenceStringLeft(f), "not like", data.value);
+                                query.Where(ParseReferenceStringLeft(f), "not like", "%" + (data.value == null ? "" : data.value) + "%");
                             else
                                 query.WhereColumns(ParseReferenceStringLeft(f), "not like", ParseReferenceStringRight(f));
                         else
                             if (f.Right is DataFilterValue data)
-                                query.OrWhere(ParseReferenceStringLeft(f), "not like", data.value);
+                                query.OrWhere(ParseReferenceStringLeft(f), "not like", "%" + (data.value == null ? "" : data.value) + "%");
                             else
                                 query.OrWhereColumns(ParseReferenceStringLeft(f), "not like", ParseReferenceStringRight(f));
                         break;
@@ -212,21 +212,21 @@ namespace Storm.SQLParser
                 default:
                     break;
             }
-            return query;
+            return (Q)query;
         }
 
-        private string ParseReferenceStringLeft(MonoFilter f)
+        protected string ParseReferenceStringLeft(MonoFilter f)
         {
             ReferenceFilterValue rfv = (ReferenceFilterValue)f.Left;
             return ParseReferenceFilterValue(rfv);
         }
-        private string ParseReferenceStringRight(MonoFilter f)
+        protected string ParseReferenceStringRight(MonoFilter f)
         {
             ReferenceFilterValue rfv = (ReferenceFilterValue)f.Right;
             return ParseReferenceFilterValue(rfv);
         }
 
-        private string ParseReferenceFilterValue(ReferenceFilterValue rfv)
+        protected virtual string ParseReferenceFilterValue(ReferenceFilterValue rfv)
         {
             var ps = rfv.Path.Split('.');
             var path = ps.Take(ps.Length - 1);

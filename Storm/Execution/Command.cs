@@ -44,12 +44,12 @@ namespace Storm.Execution
             return (C)(BaseCommand)this;
         }
 
-        public virtual C Where(Func<Expression, Filter> where)
+        public virtual C Where(Func<FilterContext, Filter> where)
         {
             if (this.where == null)
-                this.where = where(new Expression());
+                this.where = where(new FilterContext());
             else
-                this.where = this.where * where(new Expression());
+                this.where = this.where * where(new FilterContext());
 
             return (C)(BaseCommand)this;
         }

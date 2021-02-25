@@ -64,4 +64,14 @@ namespace Storm.Test.MockAndModels
         public string data;
     }
 
+    public class Model_5
+    {
+        [StormPrimaryKey]
+        public int ID;
+
+        public int ParentID;
+
+        public string ParentData;
+    }
+
 }

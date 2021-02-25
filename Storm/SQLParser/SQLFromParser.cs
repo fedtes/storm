@@ -23,19 +23,35 @@ namespace Storm.SQLParser
             return query;
         }
 
-        private Query ParseTableTree(FromNode parentTree, FromNode subTree, Query query)
+        /// <summary>
+        /// Parse each join where the left (source) are the parent and the right(target) is a child in the FromTree rappresentation
+        /// </summary>
+        /// <remarks>
+        /// --sourceNode
+        ///      |
+        ///      +--targetNode
+        ///      |
+        ///      +--targetNode
+        ///      ...
+        /// </remarks>
+        /// <param name="sourceNode"></param>
+        /// <param name="targetNode"></param>
+        /// <param name="query"></param>
+        /// <returns></returns>
+        private Query ParseTableTree(FromNode sourceNode, FromNode targetNode, Query query)
         {
-            if (subTree.Edge.OnExpression is null)
+            if (targetNode.Edge.OnExpression is null)
             {
-                String sourceCol = resolveSourceColumnName(subTree);
-                String targetCol = resolveTargetColumnName(subTree);
-                query.LeftJoin($"{subTree.Entity.DBName} as {subTree.Alias}", $"{parentTree.Alias}.{sourceCol}", $"{subTree.Alias}.{targetCol}");
+                String sourceCol = resolveSourceColumnName(targetNode);
+                String targetCol = resolveTargetColumnName(targetNode);
+                query.LeftJoin($"{targetNode.Entity.DBName} as {targetNode.Alias}", $"{sourceNode.Alias}.{sourceCol}", $"{targetNode.Alias}.{targetCol}");
             }
             else
             {
-
+                var joinParser = new SQLJoinParser(sourceNode, targetNode, fromTree, targetNode.Edge.OnExpression, navigator, query);
+                this.query = joinParser.Parse();
             }
-            return subTree.children.Aggregate(query, (q, n) => ParseTableTree(subTree, n, q));
+            return targetNode.children.Aggregate(query, (q, n) => ParseTableTree(targetNode, n, q));
         }
 
         private string resolveTargetColumnName(FromNode subTree)

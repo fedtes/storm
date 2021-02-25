@@ -10,8 +10,13 @@ namespace Storm
         { }
     }
 
-    public class SchemaOutOfDateException: System.Exception
+    public class SchemaOutOfDateException : System.Exception
     {
 
+    }
+
+    public class WrongSchemaDefinitionException : System.Exception
+    {
+        public WrongSchemaDefinitionException(string message) : base(message) { }
     }
 }

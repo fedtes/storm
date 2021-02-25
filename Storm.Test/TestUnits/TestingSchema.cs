@@ -245,7 +245,31 @@ namespace Storm.Test.TestUnits
         [Fact]
         public void Assert_Add_Connection_Using_Expression()
         {
-            throw new NotImplementedException("Missing implementation");
+            Storm storm = new Storm();
+            storm.EditSchema(e =>
+            {
+                e.Add<TestModel>("TestModel", "TABTest");
+                e.Add("SomeDynModel", "Table", b =>
+                {
+                    b.Add(new FieldConfig() { CodeName = "ID", IsPrimary = true, CodeType = typeof(int) });
+                    b.Add(new FieldConfig() { CodeName = "TestModelID", CodeType = typeof(int) });
+                    return b;
+                });
+
+                e.Connect("TestModel", "SomeDynModel", "TestModel", ctx => ctx["source.TestModelID"].EqualTo.Ref("target.ID"));
+                return e;
+            });
+
+            var nav = storm.schema.GetNavigator();
+            var s = nav.GetEntity("SomeDynModel");
+            var t = nav.GetEntity("TestModel");
+            var x = nav.GetEdge("SomeDynModel.TestModel");
+            Assert.Equal(s.ID, x.SourceID);
+            Assert.Equal(t.ID, x.TargetID);
+            Assert.NotNull(x.OnExpression);
+            var f = Assert.IsType<Filters.EqualToFilter>(x.OnExpression);
+            Assert.Equal("source.TestModelID", f.Left.Path);
+            Assert.Equal("target.ID", ((Filters.ReferenceFilterValue)f.Right).Path);
         }
 
         [Fact]
