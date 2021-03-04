@@ -460,7 +460,20 @@ namespace Storm.Test.TestUnits
         [Fact]
         public void Parse_Filter_In_List()
         {
-            throw new NotImplementedException("Missing implementation");
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Get(Model_1)
+                .Where(e => e["data"].In.Val(new[] {1,2,3,4,5}));
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("BAE98D2CF661558CB2CF1D6C26AB098A", Helpers.Checksum(sql1));
         }
 
         [Fact]
@@ -472,7 +485,20 @@ namespace Storm.Test.TestUnits
         [Fact]
         public void Parse_Filter_NotIn_List()
         {
-            throw new NotImplementedException("Missing implementation");
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Get(Model_1)
+                .Where(e => e["data"].NotIn.Val(new[] { 1, 2, 3, 4, 5 }));
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("893AEFFC92B73345339EEA3BA39EC54B", Helpers.Checksum(sql1));
         }
 
         [Fact]
