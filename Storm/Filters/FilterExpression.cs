@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Storm.Execution;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -136,6 +137,16 @@ namespace Storm.Filters
         }
     }
 
+    public class SubQueryFilterValue : FilterValue
+    {
+        internal readonly Func<SubQueryContext, NestedCommand> subquery;
+
+        public SubQueryFilterValue(Func<SubQueryContext, NestedCommand> subquery)
+        {
+            this.subquery = subquery;
+        }
+    }
+
     public class FilterContext
     {
         public Operator this[string path] => continueSintax(path);
@@ -213,6 +224,28 @@ namespace Storm.Filters
                 return _filter;
             }
 
+            public Filter SubQuery(Func<SubQueryContext, NestedCommand> subquery)
+            {
+                ((MonoFilter)_filter).Right = new SubQueryFilterValue(subquery);
+                return _filter;
+            }
+
+        }
+    }
+
+
+    public class SubQueryContext
+    {
+        private readonly Schema.SchemaNavigator navigator;
+
+        internal SubQueryContext(Schema.SchemaNavigator navigator)
+        {
+            this.navigator = navigator;
+        }
+
+        public NestedCommand From(String EntityIdentifier)
+        {
+            return new NestedCommand(navigator, EntityIdentifier);
         }
     }
 

@@ -4,9 +4,7 @@ using Storm.Filters;
 using Storm.Schema;
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Storm.SQLParser
 {
@@ -170,13 +168,25 @@ namespace Storm.SQLParser
                         if (op == Op.And)
                             if (f.Right is DataFilterValue data)
                                 query.WhereIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                            else if (f.Right is SubQueryFilterValue subQueryExpr)
+                            {
+                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.navigator));
+                                nestedCmd.ParseSQL();
+                                query.WhereIn(ParseReferenceStringLeft(f), nestedCmd.query);
+                            }
                             else
-                                query.WhereColumns(ParseReferenceStringLeft(f), "in", ParseReferenceStringRight(f));
+                                throw new Exception("Code should not pass here");
                         else
                             if (f.Right is DataFilterValue data)
                                 query.OrWhereIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                            else if (f.Right is SubQueryFilterValue subQueryExpr)
+                            {
+                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.navigator));
+                                nestedCmd.ParseSQL();
+                                query.OrWhereIn(ParseReferenceStringLeft(f), nestedCmd.query);
+                            }
                             else
-                                query.OrWhereColumns(ParseReferenceStringLeft(f), "in", ParseReferenceStringRight(f));
+                                throw new Exception("Code should not pass here");
                         break;
                     }
                 case NotInFilter f:
@@ -184,13 +194,25 @@ namespace Storm.SQLParser
                         if (op == Op.And)
                             if (f.Right is DataFilterValue data)
                                 query.WhereNotIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                            else if (f.Right is SubQueryFilterValue subQueryExpr)
+                            {
+                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.navigator));
+                                nestedCmd.ParseSQL();
+                                query.WhereNotIn(ParseReferenceStringLeft(f), nestedCmd.query);
+                            }
                             else
-                                query.WhereColumns(ParseReferenceStringLeft(f), "not in", ParseReferenceStringRight(f));
+                                throw new Exception("Code should not pass here");
                         else
                             if (f.Right is DataFilterValue data)
-                            query.OrWhereNotIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
-                        else
-                            query.OrWhereColumns(ParseReferenceStringLeft(f), "not in", ParseReferenceStringRight(f));
+                                query.OrWhereNotIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
+                            else if (f.Right is SubQueryFilterValue subQueryExpr)
+                            {
+                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.navigator));
+                                nestedCmd.ParseSQL();
+                                query.OrWhereNotIn(ParseReferenceStringLeft(f), nestedCmd.query);
+                            }
+                            else
+                                throw new Exception("Code should not pass here");
                         break;
                     }
                 case IsNullFilter f:
