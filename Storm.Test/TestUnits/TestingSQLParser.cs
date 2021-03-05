@@ -479,7 +479,24 @@ namespace Storm.Test.TestUnits
         [Fact]
         public void Parse_Filter_In_SubQuery()
         {
-            throw new NotImplementedException("Missing implementation");
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Get(Model_1)
+                .Where(e => 
+                    e["data"].In.SubQuery(q => 
+                        q.From(Model_2).Where(x => x["ID"].GreaterTo.Val(-1) * x["ParentID"].IsNotNull).Select("data")
+                    )
+                );
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("12E59D7E3E10AF08B9AA6C5AB1182099", Helpers.Checksum(sql1));
         }
 
         [Fact]
@@ -504,7 +521,24 @@ namespace Storm.Test.TestUnits
         [Fact]
         public void Parse_Filter_NotIn_SubQuery()
         {
-            throw new NotImplementedException("Missing implementation");
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Get(Model_1)
+                .Where(e =>
+                    e["data"].NotIn.SubQuery(q =>
+                        q.From(Model_2).Where(x => x["ID"].GreaterTo.Val(-1) * x["ParentID"].IsNotNull).Select("data")
+                    )
+                );
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("5B0285F0689036D3E033E9FF3910EC66", Helpers.Checksum(sql1));
         }
 
         [Fact]
