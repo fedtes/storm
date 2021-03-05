@@ -50,18 +50,7 @@ namespace Storm.Execution
             if (item.Item2 == "*")
                 throw new ArgumentException("Select all not allowed in sub queries.");
 
-            var x = from.Resolve(item.Item1);
-            outputField = x.Entity.entityFields
-                .Where(ef => ef.CodeName == item.Item2)
-                .Select(ef => {
-                    return new SelectNode()
-                    {
-                        FullPath = new FieldPath(x.FullPath.Root, x.FullPath.Path, ef.CodeName),
-                        EntityField = ef,
-                        FromNode = x
-                    };
-                })
-                .FirstOrDefault();
+            outputField = SelectCommandHelper.GenerateSingleSelectNode(item, from);
 
             return this;
         }

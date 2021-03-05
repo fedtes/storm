@@ -3,8 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Storm.Filters;
-using SqlKata;
 using Storm.SQLParser;
+using Storm.Helpers;
 
 namespace Storm.Execution
 {
@@ -12,6 +12,8 @@ namespace Storm.Execution
     {    
         internal Filter where;
         internal FromTree from;
+        internal List<(SelectNode, bool)> orderBy = null;
+        internal (int,int) paging = (-1, -1);
         
         internal Command(SchemaNavigator navigator, String from) : base(navigator, from)
         {
@@ -36,6 +38,19 @@ namespace Storm.Execution
 
             SQLFromParser fromParser = new SQLFromParser(from, navigator, query);
             query = fromParser.Parse();
+
+            if (paging.Item1 != -1 && paging.Item2 != -1)
+            {
+                SQLPagingParser pagingParser = new SQLPagingParser(paging, navigator, query);
+                query = pagingParser.Parse();
+            }
+
+            if (orderBy != null && orderBy.Any())
+            {
+                SQLOrderByParser orderByParser = new SQLOrderByParser(orderBy, navigator, query);
+                query = orderByParser.Parse();
+            }
+
         }
 
         public virtual C With(String requestPath)
@@ -54,7 +69,43 @@ namespace Storm.Execution
             return (C)(BaseCommand)this;
         }
 
+        public virtual C OrderBy(String requestPath, bool asc = true)
+        {
+            var _requestPath = new EntityPath(from.root.Entity.ID, requestPath).Path;
+            var p = SelectCommandHelper.ValidatePath(_requestPath);
 
+            (string[], string) item;
+
+            if (p.Count() > 1)
+                throw new ArgumentException("Only one field should be used in OrderBy. If you need more field in you're OrderBy call this method multiple times.");
+            else if (p.Count() == 0)
+                throw new ArgumentException("At least one field should be used in OrderBy");
+            else
+                item = p.First();
+
+            if (item.Item2 == "*")
+                throw new ArgumentException("* is not allowed in OrderBy.");
+
+            var f = SelectCommandHelper.GenerateSingleSelectNode(item, from);
+
+            if (this.orderBy == null)
+                this.orderBy = new List<(SelectNode, bool)>();
+
+            this.orderBy.Add((f, asc));
+
+            return (C)(BaseCommand)this;
+        }
+
+        public virtual C ForPage(int page, int pageSize)
+        {
+            if (page < 1)
+                throw new ArgumentException("First page is 1. 0 or less value not allowed.");
+            if (pageSize < 0)
+                throw new ArgumentException("Page size cannot be less than 0.");
+
+            this.paging = (page, pageSize);
+            return (C)(BaseCommand)this;
+        }
 
     }
 }

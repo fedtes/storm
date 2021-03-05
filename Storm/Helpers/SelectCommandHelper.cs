@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Storm.Execution;
+using Storm.Schema;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -40,6 +42,22 @@ namespace Storm.Helpers
             {
                 throw new ArgumentException($"Invalid select path {RequestPath}");
             }
+        }
+
+        public static SelectNode GenerateSingleSelectNode((String[], string) validatedPath, FromTree fromTree)
+        {
+            var x = fromTree.Resolve(validatedPath.Item1);
+            return x.Entity.entityFields
+                .Where(ef => ef.CodeName == validatedPath.Item2)
+                .Select(ef => {
+                    return new SelectNode()
+                    {
+                        FullPath = new FieldPath(x.FullPath.Root, x.FullPath.Path, ef.CodeName),
+                        EntityField = ef,
+                        FromNode = x
+                    };
+                })
+                .FirstOrDefault();
         }
 
     }
