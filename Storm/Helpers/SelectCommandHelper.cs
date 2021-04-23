@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using Storm.Origins;
 
 namespace Storm.Helpers
 {
@@ -44,7 +45,7 @@ namespace Storm.Helpers
             }
         }
 
-        public static SelectNode GenerateSingleSelectNode((String[], string) validatedPath, FromTree fromTree)
+        public static SelectNode GenerateSingleSelectNode((String[], string) validatedPath, OriginTree fromTree)
         {
             var x = fromTree.Resolve(validatedPath.Item1);
             return x.Entity.entityFields

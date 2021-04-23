@@ -8,12 +8,13 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using Storm.Origins;
 
 namespace Storm.Execution
 {
     public class GetCommand : Command<GetCommand>
     {
-        internal List<FromNode> requests = new List<FromNode>();
+        internal List<Origin> requests = new List<Origin>();
 
         public GetCommand(SchemaNavigator navigator, String from) : base(navigator, from)
         {

@@ -3,12 +3,13 @@ using Storm.Schema;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using Storm.Origins;
 
 namespace Storm.Execution
 {
     public class SelectNode
     {
-        public FromNode FromNode;
+        public Origin FromNode;
         public SchemaNode OwnerEntity => FromNode.Entity;
         public EntityField EntityField;
         public FieldPath FullPath;

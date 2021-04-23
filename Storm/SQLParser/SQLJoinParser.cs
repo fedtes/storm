@@ -6,15 +6,16 @@ using SqlKata;
 using Storm.Execution;
 using Storm.Filters;
 using Storm.Schema;
+using Storm.Origins;
 
 namespace Storm.SQLParser
 {
     class SQLJoinParser : SQLWhereParser
     {
-        private readonly FromNode sourceNode;
-        private readonly FromNode targetNode;
+        private readonly Origin sourceNode;
+        private readonly Origin targetNode;
 
-        public SQLJoinParser(FromNode sourceNode, FromNode targetNode, FromTree fromTree, Filter join, SchemaNavigator schemaNavigator, Query query) : base(fromTree, join, schemaNavigator, query)
+        public SQLJoinParser(Origin sourceNode, Origin targetNode, OriginTree fromTree, Filter join, SchemaNavigator schemaNavigator, Query query) : base(fromTree, join, schemaNavigator, query)
         {
             this.sourceNode = sourceNode;
             this.targetNode = targetNode;

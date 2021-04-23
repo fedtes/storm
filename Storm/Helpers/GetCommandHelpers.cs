@@ -1,10 +1,10 @@
 ﻿using Storm.Execution;
-using Storm.Execution;
 using Storm.Schema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Storm.Origins;
 
 namespace Storm.Helpers
 {
@@ -20,7 +20,7 @@ namespace Storm.Helpers
             public Dictionary<EntityPath, FieldPath> PrimaryKeys;
         }
 
-        static (Object, StormResult) CreateResult(FromNode fromNode,RecCtx ctx)
+        static (Object, StormResult) CreateResult(Origin fromNode,RecCtx ctx)
         {
             var range = ctx.Ranges[fromNode.Entity];
             var row = new StormRow(ctx.Data, ctx.Index, range.Start, range.End);
@@ -29,7 +29,7 @@ namespace Storm.Helpers
         }
         
         static void CreateResultRelations(RecCtx ctx, 
-                                          List<FromNode> requests,
+                                          List<Origin> requests,
                                           StormResult result)
         {
             if (requests.Any())
@@ -49,8 +49,8 @@ namespace Storm.Helpers
 
         public static IList<StormResult> ToResults(StormDataSet data, 
                                             SchemaNavigator navigator, 
-                                            List<FromNode> requests,
-                                            FromTree fromTree)
+                                            List<Origin> requests,
+                                            OriginTree fromTree)
         {
             var root = navigator.GetEntity(data.root);
             var ranges = data.ObjectRanges;

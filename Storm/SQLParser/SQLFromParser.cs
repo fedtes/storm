@@ -5,14 +5,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Storm.Origins;
 
 namespace Storm.SQLParser
 {
     class SQLFromParser: SQLParser
     {
-        protected FromTree fromTree;
+        protected OriginTree fromTree;
 
-        public SQLFromParser(FromTree fromTree, SchemaNavigator schemaNavigator, Query query) : base(schemaNavigator, query)
+        public SQLFromParser(OriginTree fromTree, SchemaNavigator schemaNavigator, Query query) : base(schemaNavigator, query)
         {
             this.fromTree = fromTree;
         }
@@ -38,7 +39,7 @@ namespace Storm.SQLParser
         /// <param name="targetNode"></param>
         /// <param name="query"></param>
         /// <returns></returns>
-        private Query ParseTableTree(FromNode sourceNode, FromNode targetNode, Query query)
+        private Query ParseTableTree(Origin sourceNode, Origin targetNode, Query query)
         {
             if (targetNode.Edge.OnExpression is null)
             {
@@ -54,7 +55,7 @@ namespace Storm.SQLParser
             return targetNode.children.Aggregate(query, (q, n) => ParseTableTree(targetNode, n, q));
         }
 
-        private string resolveTargetColumnName(FromNode subTree)
+        private string resolveTargetColumnName(Origin subTree)
         {
             string targetCol = string.Empty;
             var target = navigator.GetEntity(subTree.Edge.TargetID);
@@ -76,7 +77,7 @@ namespace Storm.SQLParser
             return targetCol;
         }
 
-        private string resolveSourceColumnName(FromNode subTree)
+        private string resolveSourceColumnName(Origin subTree)
         {
             string sourceCol = string.Empty;
             var source = navigator.GetEntity(subTree.Edge.SourceID);

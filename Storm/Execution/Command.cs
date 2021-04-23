@@ -5,28 +5,29 @@ using System.Linq;
 using Storm.Filters;
 using Storm.SQLParser;
 using Storm.Helpers;
+using Storm.Origins;
 
 namespace Storm.Execution
 {
     public abstract class Command<C> : BaseCommand where C : BaseCommand
     {    
         internal Filter where;
-        internal FromTree from;
+        internal OriginTree from;
         internal List<(SelectNode, bool)> orderBy = null;
         internal (int,int) paging = (-1, -1);
         
         internal Command(SchemaNavigator navigator, String from) : base(navigator, from)
         {
-            this.from = new FromTree()
+            this.from = new OriginTree()
             {
                 navigator = navigator,
-                root = new FromNode()
+                root = new Origin()
                 {
                     Alias = "A0",
                     FullPath = new EntityPath(from, ""),
                     Edge = null,
                     Entity = navigator.GetEntity(from),
-                    children = new List<FromNode>()
+                    children = new List<Origin>()
                 }
             };
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using Storm.Origins;
 using Xunit;
 
 namespace Storm.Test
@@ -73,10 +74,10 @@ namespace Storm.Test
             Storm s = StormDefine();
             var nav = s.schema.GetNavigator();
             var entity = nav.GetEntity("Test");
-            FromNode fromNode = new FromNode()
+            Origin fromNode = new Origin()
             {
                 Alias = "A1",
-                children = new List<FromNode>(),
+                children = new List<Origin>(),
                 Entity = entity,
                 Edge = null,
                 FullPath = new Schema.EntityPath("Test", "")
@@ -112,19 +113,19 @@ namespace Storm.Test
             var nav = s.schema.GetNavigator();
             var entity = nav.GetEntity("Test");
             var entity2 = nav.GetEntity("Test2");
-            FromNode fromNode1 = new FromNode()
+            Origin fromNode1 = new Origin()
             {
                 Alias = "A1",
-                children = new List<FromNode>(),
+                children = new List<Origin>(),
                 Entity = entity,
                 Edge = null,
                 FullPath = new Schema.EntityPath("Test", "")
             };
 
-            FromNode fromNode2 = new FromNode()
+            Origin fromNode2 = new Origin()
             {
                 Alias = "A2",
-                children = new List<FromNode>(),
+                children = new List<Origin>(),
                 Entity = entity2,
                 Edge = null,
                 FullPath = new Schema.EntityPath("Test", "ExtraInfos")

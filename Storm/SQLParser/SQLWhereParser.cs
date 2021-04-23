@@ -5,15 +5,16 @@ using Storm.Schema;
 using System;
 using System.Collections;
 using System.Linq;
+using Storm.Origins;
 
 namespace Storm.SQLParser
 {
     class SQLWhereParser : SQLParser
     {
-        protected FromTree fromTree;
+        protected OriginTree fromTree;
         protected Filter filter;
 
-        public SQLWhereParser(FromTree fromTree, Filter filter, SchemaNavigator schemaNavigator, Query query) : base(schemaNavigator, query)
+        public SQLWhereParser(OriginTree fromTree, Filter filter, SchemaNavigator schemaNavigator, Query query) : base(schemaNavigator, query)
         {
             this.fromTree = fromTree;
             this.filter = filter;
