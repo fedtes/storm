@@ -89,8 +89,7 @@ namespace Storm.Test.PublicAPI
                 var r = con.Get("Task")
                     .With("User")
                     .Where(x => x["ID"].EqualTo.Val("10"))
-                    .Execute()
-                    .Cast<dynamic>();
+                    .Execute();
 
                 Assert.Single(r);
                 var user = r.First().User[0];
@@ -111,8 +110,7 @@ namespace Storm.Test.PublicAPI
                     .With("User")
                     .With("Info")
                     .Where(x => x["Info.ID"].EqualTo.Val("10"))
-                    .Execute()
-                    .Cast<dynamic>();
+                    .Execute();
 
                 Assert.Single(r);
                 var user = r.First().GetRelation("User")[0].GetModel<User>();
@@ -139,8 +137,7 @@ namespace Storm.Test.PublicAPI
                     .With("User")
                     .With("Info")
                     .Where(x => x["Info.ID"].EqualTo.Val("10") + x["ID"].EqualTo.Val("11"))
-                    .Execute()
-                    .Cast<dynamic>();
+                    .Execute();
 
                 Assert.Equal(2, r.Count());
 
