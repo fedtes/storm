@@ -5,7 +5,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Text;
 
-namespace Storm.Execution.Results
+namespace Storm.Execution
 {
 
     public class StormResult : DynamicObject

@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 using System.IO;
 using System.Data;
 using Storm;
-using Storm.Execution.Results;
+using Storm.Execution;
 using System.Linq;
 using Storm.Test.PublicAPI.Helpers;
 

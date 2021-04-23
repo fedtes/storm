@@ -7,7 +7,7 @@ using System.Data;
 using System.Linq;
 using System.Text;
 
-namespace Storm.Execution.Results
+namespace Storm.Execution
 {
     internal class IndexRange
     {
