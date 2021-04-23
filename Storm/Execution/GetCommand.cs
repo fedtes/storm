@@ -61,9 +61,9 @@ namespace Storm.Execution
             return GetCommandHelpers.ToResults(sr, this.navigator, requests, from);
         }
 
-        public new IEnumerable<StormResult> Execute()
+        public new IEnumerable<dynamic> Execute()
         {
-            return (IEnumerable<StormResult>)base.Execute();
+            return (IEnumerable<dynamic>)base.Execute();
         }
     }
 }

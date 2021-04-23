@@ -32,14 +32,14 @@ namespace Storm.Test
             (Storm s, Schema.SchemaNavigator nav, StormDataSet data) = PrepareDataSet();
             GetCommand cmd = new GetCommand(nav, "Test");
 
-            var res = GetCommandHelpers.ToResults(data, nav, cmd.requests, cmd.from);
-            Assert.Equal(18, res.Count);
-            Assert.Equal(1, res.First().Value.ID);
-            Assert.Equal("Mario", res.First().Value.FirstName);
-            Assert.Equal("Bianchi", res.First().Value.LastName);
-            Assert.Equal("asd@mail.it", res.First().Value.Email);
-            Assert.Equal(18, res.Last().Value.ID);
-            Assert.Equal("33333133331", res.Last().Value.Mobile);
+            var res = GetCommandHelpers.ToResults(data, nav, cmd.requests, cmd.from).Cast<dynamic>();
+            Assert.Equal(18, res.Count());
+            Assert.Equal(1, res.First().ID);
+            Assert.Equal("Mario", res.First().FirstName);
+            Assert.Equal("Bianchi", res.First().LastName);
+            Assert.Equal("asd@mail.it", res.First().Email);
+            Assert.Equal(18, res.Last().ID);
+            Assert.Equal("33333133331", res.Last().Mobile);
         }
 
         [Fact]
@@ -49,22 +49,22 @@ namespace Storm.Test
             GetCommand cmd = new GetCommand(nav, "Test");
             cmd.With("ExtraInfos");
 
-            var res = GetCommandHelpers.ToResults(data, nav, cmd.requests, cmd.from);
-            Assert.Equal(18, res.Count);
+            var res = GetCommandHelpers.ToResults(data, nav, cmd.requests, cmd.from).Cast<dynamic>();
+            Assert.Equal(18, res.Count());
             var _mario = res.First();
-            var extraInfo = _mario.GetRelation("ExtraInfos");
-            Assert.Equal(1, extraInfo.First().Value.ID);
-            Assert.Equal("Pet", extraInfo.First().Value.Info1);
-            Assert.Equal("Food", extraInfo.First().Value.Info2);
-            Assert.Equal("Sport", extraInfo.First().Value.Info3);
+            var extraInfo = _mario.ExtraInfos[0];
+            Assert.Equal(1, extraInfo.ID);
+            Assert.Equal("Pet", extraInfo.Info1);
+            Assert.Equal("Food", extraInfo.Info2);
+            Assert.Equal("Sport", extraInfo.Info3);
 
 
-            var _maria = res[1];
-            extraInfo = _maria.GetRelation("ExtraInfos");
-            Assert.Equal(2, extraInfo.First().Value.ID);
-            Assert.Equal("Movies", extraInfo.First().Value.Info1);
-            Assert.Equal("Food", extraInfo.First().Value.Info2);
-            Assert.Equal("Games", extraInfo.First().Value.Info3);
+            var _maria = res.Skip(1).First();
+            extraInfo = _maria.ExtraInfos[0];
+            Assert.Equal(2, extraInfo.ID);
+            Assert.Equal("Movies", extraInfo.Info1);
+            Assert.Equal("Food", extraInfo.Info2);
+            Assert.Equal("Games", extraInfo.Info3);
 
 
         }

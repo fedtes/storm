@@ -8,13 +8,14 @@ using System.Text;
 namespace Storm.Execution.Results
 {
 
-    public class StormResult
+    public class StormResult : DynamicObject
     {
-        internal Dictionary<string, IEnumerable<StormResult>> Relations = new Dictionary<string, IEnumerable<StormResult>>();
-
         private StormRow datarow;
         private SchemaNode _node;
         private Dictionary<string, string>  _propertyMap = new Dictionary<string, string>();
+
+        internal Dictionary<string, IEnumerable<StormResult>> Relations = new Dictionary<string, IEnumerable<StormResult>>();
+
 
         internal StormResult(StormRow datarow, SchemaNode node)
         {
@@ -37,14 +38,24 @@ namespace Storm.Execution.Results
 
         }
 
-        private dynamic _dynamicModel = null;
-        private dynamic createDynamicModel()
+        public override bool TryGetMember(GetMemberBinder binder, out object result)
         {
-            _dynamicModel =  new ModelItem(datarow, _propertyMap);
-            return _dynamicModel;
+            if (_propertyMap.ContainsKey(binder.Name) && datarow.ContainsKey(_propertyMap[binder.Name]))
+            {
+                result = datarow[_propertyMap[binder.Name]];
+                return true;
+            }
+            else
+            {
+                result = GetRelation(binder.Name);
+                return null != result;
+            }
         }
 
-        public dynamic Value => _dynamicModel == null ? createDynamicModel() : _dynamicModel;
+        public override bool TrySetMember(SetMemberBinder binder, object value)
+        {
+            return false;
+        }
 
         public object PrimaryKey =>datarow[_propertyMap[_node.PrimaryKey.CodeName]];
 
@@ -94,7 +105,10 @@ namespace Storm.Execution.Results
 
         public IEnumerable<StormResult> GetRelation(String Path)
         {
-            return Relations[datarow.parent.NPathKey(Path).Path];
+            if (Relations.ContainsKey(datarow.parent.NPathKey(Path).Path))
+                return Relations[datarow.parent.NPathKey(Path).Path];
+            else
+                return null;
         }
 
         public override string ToString()
@@ -104,40 +118,4 @@ namespace Storm.Execution.Results
 
     }
 
-    public class ModelItem : DynamicObject
-    {
-
-        private readonly StormRow _data;
-        private readonly Dictionary<string, string> propertyMap;
-
-        internal ModelItem(StormRow data, Dictionary<string,string> PropertyMap)
-        {
-            _data = data;
-            propertyMap = PropertyMap;
-        }
-        // If you try to get a value of a property
-        // not defined in the class, this method is called.
-        public override bool TryGetMember(GetMemberBinder binder, out object result)
-        {
-            // If the property name is found in a dictionary,
-            // set the result parameter to the property value and return true.
-            // Otherwise, return false.
-            if (_data.ContainsKey(propertyMap[binder.Name]))
-            {
-                result = _data[propertyMap[binder.Name]];
-                return true;
-            } else
-            {
-                result = null;
-                return false;
-            }
-        }
-
-        // If you try to set a value of a property that is
-        // not defined in the class, this method is called.
-        public override bool TrySetMember(SetMemberBinder binder, object value)
-        {
-            return false;
-        }
-    }
 }
