@@ -164,6 +164,110 @@ namespace Storm.Test.PublicAPI
         }
 
 
+        [Fact]
+        public void Should_Add_NewElement()
+        {
+            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            {
+                var r = con.Set("Task")
+                    .Value(new Task()
+                    {
+                        Completed = false,
+                        Subject = "New Task element",
+                        TaskType = "test",
+                        UserID = 1,
+                        DateStart = new DateTime(2021, 04, 21, 14, 00, 00),
+                        DateEnd = new DateTime(2021, 04, 21, 15, 00, 00),
+                        ID = 999999 /// should be ignored
+                    }).Execute();
+
+                var rows = r.RowsAffected;
+                var id = r.ObjectId;
+
+                Assert.NotEqual(999999, id);
+                Assert.Equal(1, rows);
+
+
+                var task = con.Get("Task").Where(f => f["ID"].EqualTo.Val(id)).Execute().First();
+
+                Assert.False(task.Completed);
+                Assert.Equal("New Task element", task.Subject);
+                Assert.Equal("test", task.TaskType);
+                Assert.Equal(1, task.UserID);
+                Assert.Equal(new DateTime(2021, 04, 21, 14, 00, 00), task.DateStart);
+                Assert.Equal(new DateTime(2021, 04, 21, 15, 00, 00), task.DateEnd);
+                Assert.Equal(id.ToString(), task.ID.ToString());
+
+            }
+        }
+
+        [Fact]
+        public void Should_Update_Element()
+        {
+            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            {
+
+                var task = con.Get("Task").Where(f => f["ID"].EqualTo.Val(1)).Execute().First();
+
+                var r = con.Set("Task", task.ID)
+                    .Value(new Task()
+                    {
+                        Completed = task.Completed,
+                        Subject = task.Subject,
+                        TaskType = task.TaskType,
+                        UserID = task.UserID,
+                        DateStart = ((DateTime)task.DateStart).AddDays(1),
+                        DateEnd = ((DateTime)task.DateEnd).AddDays(2),
+                    }).Execute();
+
+                var rows = r.RowsAffected;
+                var id = r.ObjectId;
+
+                Assert.Equal(task.ID, id);
+                Assert.Equal(1, rows);
+
+
+                var task2 = con.Get("Task").Where(f => f["ID"].EqualTo.Val(id)).Execute().First();
+
+                Assert.Equal(task.Completed, task2.Completed);
+                Assert.Equal(task.Subject, task2.Subject);
+                Assert.Equal(task.TaskType, task2.TaskType);
+                Assert.Equal(task.UserID, task2.UserID);
+                Assert.Equal(((DateTime)task.DateStart).AddDays(1), task2.DateStart);
+                Assert.Equal(((DateTime)task.DateEnd).AddDays(2), task2.DateEnd);
+
+            }
+        }
+
+
+        [Fact]
+        public void Should_NotUpdate_Element()
+        {
+            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            {
+
+                var r = con.Set("Task", 99999) // id not exists!!
+                    .Value(new Task()
+                    {
+                        Completed = false,
+                        Subject = "New Task element",
+                        TaskType = "test",
+                        UserID = 1,
+                        DateStart = new DateTime(2021, 04, 21, 14, 00, 00),
+                        DateEnd = new DateTime(2021, 04, 21, 15, 00, 00)
+                    }).Execute();
+
+                var rows = r.RowsAffected;
+                var id = r.ObjectId;
+
+                Assert.Equal(0, rows);
+
+                var elements = con.Get("Task").Where(f => f["ID"].EqualTo.Val(99999)).Execute();
+                Assert.Empty(elements);
+
+            }
+        }
+
 
     }
 }

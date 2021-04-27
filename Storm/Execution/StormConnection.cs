@@ -52,6 +52,26 @@ namespace Storm.Execution
             };
         }
 
+        public SetCommand Set(String EntityIdentifier)
+        {
+            return new SetCommand(navigator, EntityIdentifier)
+            {
+                connection = this,
+                compiler = GetCompiler(),
+                transaction = null
+            };
+        }
+
+        public SetCommand Set(String EntityIdentifier, object id)
+        {
+            return new SetCommand(navigator, EntityIdentifier, id)
+            {
+                connection = this,
+                compiler = GetCompiler(),
+                transaction = null
+            };
+        }
+
         public void Open()
         {
             if (!isOpen)

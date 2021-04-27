@@ -821,5 +821,120 @@ namespace Storm.Test.TestUnits
         }
 
 
+        [Fact]
+        public void Parse_SetCommand_Insert()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Set(Model_0)
+                .Value(new Dictionary<string, object>() {
+                    {"ID","asd"}, //<= this shold not take in consideration because it's primary key of the entity
+                    {"Model1ID","1" },
+                    {"Field1","value1" },
+                    {"Field2","value2" },
+                    {"Field3","value3" },
+                    {"Field4","value4" },
+                    {"Field5","value5" },
+                    {"NotExistingField","some value" } // <= this shold not take in consideration because it's not a field of the entity
+                });
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("EBF6145BC25366C39C939E8B13B9DDA6", Helpers.Checksum(sql1));
+        }
+
+        [Fact]
+        public void Parse_SetCommand_Insert_UsingModel()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Set(Model_0)
+                .Value(new Model_0() {
+                    ID= 12, //<= this shold not take in consideration because it's primary key of the entity
+                    Model1ID =1,
+                    Field1= "value1",
+                    Field2= "value2",
+                    Field3= "value3",
+                    Field4= "value4",
+                    Field5= "value5",
+                });
+
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("EBF6145BC25366C39C939E8B13B9DDA6", Helpers.Checksum(sql1));
+        }
+
+
+        [Fact]
+        public void Parse_SetCommand_Update()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Set(Model_0, 12)
+                .Value(new Dictionary<string, object>() {
+                    {"ID","asd"}, //<= this shold not take in consideration because it's primary key of the entity
+                    {"Model1ID","1" },
+                    {"Field1","value1" },
+                    {"Field2","value2" },
+                    {"Field3","value3" },
+                    {"Field4","value4" },
+                    {"Field5","value5" },
+                    {"NotExistingField","some value" } // <= this shold not take in consideration because it's not a field of the entity
+                });
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("ADD301250F02D5AF0240ACE77079032E", Helpers.Checksum(sql1));
+        }
+
+        [Fact]
+        public void Parse_SetCommand_Update_UsingModel()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Set(Model_0, 12)
+                .Value(new Model_0()
+                {
+                    ID = 12, //<= this shold not take in consideration because it's primary key of the entity
+                    Model1ID = 1,
+                    Field1 = "value1",
+                    Field2 = "value2",
+                    Field3 = "value3",
+                    Field4 = "value4",
+                    Field5 = "value5",
+                });
+
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("ADD301250F02D5AF0240ACE77079032E", Helpers.Checksum(sql1));
+        }
+
+
     }
 }

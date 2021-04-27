@@ -83,18 +83,19 @@ namespace Storm.Execution
 
         internal override object Read(IDataReader dataReader)
         {
+            object output_id = null;
             if (IsInsert())
-            {
-                object output_id = null;
                 while (dataReader.Read())
                 {
                     output_id = dataReader.GetValue(0);
                 }
-                return output_id;
-            } else
-            {
-                return this.id;
-            }
+            
+            return new StormSetResult(output_id ?? this.id, dataReader.RecordsAffected);
+        }
+
+        public new StormSetResult Execute()
+        {
+            return (StormSetResult)base.Execute();
         }
     }
 }
