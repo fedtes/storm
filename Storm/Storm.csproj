@@ -2,6 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Federico Tesser</Authors>
+    <Company>fedtes</Company>
+    <PackageId>Storm.SQLConnector</PackageId>
+    <Product>Storm.SQLConnector</Product>
+    <PackageTags>SQL ORM</PackageTags>
+    <Description>ORM for SQL engines</Description>
+    <PackageProjectUrl>https://github.com/fedtes/storm</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/fedtes/storm/blob/master/LICENSE</PackageLicenseUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
