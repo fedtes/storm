@@ -11,15 +11,12 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'build'
-    projects: 'Storm/Storm.csproj'
 
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
   inputs:
     command: 'pack'
     packagesToPack: 'Storm/*.csproj'
+    includesymbols: true
     versioningScheme: 'off'
 
 - task: PublishBuildArtifacts@1
