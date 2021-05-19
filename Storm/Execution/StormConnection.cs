@@ -72,6 +72,16 @@ namespace Storm.Execution
             };
         }
 
+        public DeleteCommand Delete(String EntityIdentifier)
+        {
+            return new DeleteCommand(navigator, EntityIdentifier)
+            {
+                connection = this,
+                compiler = GetCompiler(),
+                transaction = null
+            };
+        }
+
         public void Open()
         {
             if (!isOpen)

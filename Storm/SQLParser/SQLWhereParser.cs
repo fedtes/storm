@@ -256,7 +256,8 @@ namespace Storm.SQLParser
             var name = ps.Last();
             var fn = fromTree.Resolve(path);
             var field = fn.Entity.entityFields.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
-            return $"{fn.Alias}.{field.DBName}";
+            var alias = String.IsNullOrEmpty(fn.Alias) ? "" : fn.Alias + ".";
+            return $"{alias}{field.DBName}";
         }
     }
 }

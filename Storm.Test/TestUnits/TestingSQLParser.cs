@@ -936,5 +936,60 @@ namespace Storm.Test.TestUnits
         }
 
 
+        [Fact]
+        public void Parse_DeleteCommand_NoFilter()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Delete(Model_0);
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("3671297C80C511F80B64CF061D91CA6F", Helpers.Checksum(sql1));
+
+        }
+
+        [Fact]
+        public void Parse_DeleteCommand_SimpleFilter()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Delete(Model_0).Where(x => x["Field1"].IsNotNull * x["Field2"].GreaterTo.Val(100));
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("4EAAE38C3FD27E0728FE85D172227FD7", Helpers.Checksum(sql1));
+        }
+
+        [Fact]
+        public void Parse_DeleteCommand_FilterInSecondaryEntity()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+            var cmd1 = con.Delete(Model_0).Where(x => x["Child.Child_2.data"].IsNotNull * x["Field2"].GreaterTo.Val(100));
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            string sql1 = result1.Sql;
+
+            // Previusly Calculated check sum integrity
+            Assert.Equal("3E640C0F9D2EAF88BA7050CE7B8C1374", Helpers.Checksum(sql1));
+        }
+
     }
 }
