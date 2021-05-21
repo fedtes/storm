@@ -41,6 +41,7 @@ namespace Storm.Execution
                     SqlResult result = compiler.Compile(query);
                     cmd = t.transaction.Connection.CreateCommand();
                     cmd.CommandText = result.Sql;
+                    cmd.Transaction = t.transaction;
 
                     foreach (var binding in result.NamedBindings)
                     {
