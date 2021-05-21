@@ -25,11 +25,20 @@ namespace Storm
             this.engine = engine;
         }
 
+        /// <summary>
+        /// Edit the schema of Storm. Schema contains all the metadata needed to generate and execute queries. The first time you call this method the schema is empty, you can call it multiple times to add more metadata step by step.
+        /// </summary>
+        /// <param name="editor"></param>
         public void EditSchema(Func<SchemaEditor, SchemaEditor> editor)
         {
             schema.EditSchema(editor);
         }
 
+        /// <summary>
+        /// Open a new StormConnection to execute queries. StormConnection implements IDisposable and should be disposed. When a new StormConnection is open a snapshot of the schema is used. Changes made the schema while a connection is open do not reflects on the queries executed by the connections. Storm DO NOT keep tracks of connection string.
+        /// </summary>
+        /// <param name="sqlConnection"></param>
+        /// <returns></returns>
         public StormConnection OpenConnection(IDbConnection sqlConnection)
         {
             var c = new StormConnection(schema.GetNavigator(), sqlConnection, engine);

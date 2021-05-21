@@ -8,6 +8,9 @@ using System.Text;
 
 namespace Storm.Schema
 {
+    /// <summary>
+    /// Allow to manipulate the schema that storm uses for generating queries
+    /// </summary>
     public class SchemaEditor
     {
         internal SchemaInstance schemaInstance;
@@ -34,6 +37,13 @@ namespace Storm.Schema
         }
         */
 
+        /// <summary>
+        /// Add new Entity to the schema. Use StormAttributes to decorate the fields and properties of the TModel to describe the entity.
+        /// </summary>
+        /// <typeparam name="TModel"></typeparam>
+        /// <param name="identifier"></param>
+        /// <param name="sourceTable"></param>
+        /// <returns></returns>
         public SchemaEditor Add<TModel>(String identifier, String sourceTable)
         {
             if (!schemaInstance.ContainsKey(identifier))
@@ -47,7 +57,13 @@ namespace Storm.Schema
             return this;
         }
 
-
+        /// <summary>
+        /// Add new Entity to the schema. This Entity does not has a strong-typed model so use the EntityBuilder to describe it.
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="sourceTable"></param>
+        /// <param name="builder"></param>
+        /// <returns></returns>
         public SchemaEditor Add(String identifier, String sourceTable, Func<EntityBuilder, EntityBuilder> builder)
         {
             if (!schemaInstance.ContainsKey(identifier))
@@ -69,6 +85,11 @@ namespace Storm.Schema
             return this;
         }
 
+        /// <summary>
+        /// Remove an object from the schema, can be either an Entity or an Edge. For edges use SourceEntityIdentifier.Identifier as argument of this method. You should be sure that removing an items all other elements already registered are consistent.
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <returns></returns>
         public SchemaEditor Remove(String identifier)
         {
             if (schemaInstance.ContainsKey(identifier))
@@ -82,6 +103,14 @@ namespace Storm.Schema
             return this;
         }
 
+        /// <summary>
+        /// Connect 2 Entities give a specific identifier.
+        /// </summary>
+        /// <param name="identifier">Identifier of the relation</param>
+        /// <param name="sourceIdentifier">Source (or left) entity identifier</param>
+        /// <param name="targetIdentifier">Target (or right) entity identifier</param>
+        /// <param name="joinExpression">Expression that describe how to join. In the sintax refer as 'source' for the source object and 'target' for the target</param>
+        /// <returns></returns>
         public SchemaEditor Connect(String identifier, String sourceIdentifier, String targetIdentifier, String sourceField, String targetField)
         {
             

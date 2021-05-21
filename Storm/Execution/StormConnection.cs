@@ -7,6 +7,9 @@ using SqlKata.Compilers;
 
 namespace Storm.Execution
 {
+    /// <summary>
+    /// Wraps the logics of interaction with the database. Use the methods Get, Set, Delete, Projection here or begin a new transaction if you want to operate on transactional scope.
+    /// </summary>
     public class StormConnection : IDisposable
     {
 
@@ -24,6 +27,11 @@ namespace Storm.Execution
             this.engine = engine;
         }
 
+        /// <summary>
+        /// Open a new StormTransaction to execute queries in a transactional scope. If AutoCommit is set to True then when the Dispose method is call the transaction is automattically commited else is automatically rollbacked (unless rollback and commit are called explicitally). StormTransaction implements IDisposable and should be disposed.
+        /// </summary>
+        /// <param name="AutoCommit"></param>
+        /// <returns></returns>
         public StormTransaction BeginTransaction(bool AutoCommit = false)
         {
             EnsureTransaction();
@@ -31,7 +39,12 @@ namespace Storm.Execution
             currentTransaction = new StormTransaction(this, t, AutoCommit); ;
             return currentTransaction;
         }
-
+        
+        /// <summary>
+        /// Execute a Get command to fetch one or more entities from the database given some conditions
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <returns></returns>
         public GetCommand Get(String EntityIdentifier)
         {
             return new GetCommand(navigator, EntityIdentifier)
@@ -41,7 +54,12 @@ namespace Storm.Execution
                 transaction = null
             };
         }
-
+        
+        /// <summary>
+        /// Execute a Projection command to fetch some columns of one or more entities from the database given some conditions
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <returns></returns>
         public SelectCommand Projection(String EntityIdentifier)
         {
             return new SelectCommand(navigator, EntityIdentifier)
@@ -52,6 +70,11 @@ namespace Storm.Execution
             };
         }
 
+        /// <summary>
+        /// Execute a Set command to INSERT a new record into the database referencing a specific Entity
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <returns></returns>
         public SetCommand Set(String EntityIdentifier)
         {
             return new SetCommand(navigator, EntityIdentifier)
@@ -62,6 +85,12 @@ namespace Storm.Execution
             };
         }
 
+        /// <summary>
+        /// Execute a Set command to UPDATAE a record into the database referencing a specific Entity. id is the PrimaryKey value of the Entity to update.
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public SetCommand Set(String EntityIdentifier, object id)
         {
             return new SetCommand(navigator, EntityIdentifier, id)
@@ -71,7 +100,12 @@ namespace Storm.Execution
                 transaction = null
             };
         }
-
+        
+        /// <summary>
+        /// Execute a DELETE command removing records referencing a specific Entity from the database give some conditions
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <returns></returns>
         public DeleteCommand Delete(String EntityIdentifier)
         {
             return new DeleteCommand(navigator, EntityIdentifier)
@@ -82,7 +116,7 @@ namespace Storm.Execution
             };
         }
 
-        public void Open()
+        internal void Open()
         {
             if (!isOpen)
             {

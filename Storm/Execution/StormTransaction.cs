@@ -45,6 +45,37 @@ namespace Storm.Execution
             };
         }
 
+        public SetCommand Set(String EntityIdentifier)
+        {
+            return new SetCommand(connection.navigator, EntityIdentifier)
+            {
+                connection = this.connection,
+                compiler = connection.GetCompiler(),
+                transaction = this
+            };
+        }
+
+        public SetCommand Set(String EntityIdentifier, object id)
+        {
+            return new SetCommand(connection.navigator, EntityIdentifier, id)
+            {
+                connection = this.connection,
+                compiler = connection.GetCompiler(),
+                transaction = this
+            };
+        }
+
+        public DeleteCommand Delete(String EntityIdentifier)
+        {
+            return new DeleteCommand(connection.navigator, EntityIdentifier)
+            {
+                connection = this.connection,
+                compiler = connection.GetCompiler(),
+                transaction = this
+            };
+        }
+
+
         public void Commit()
         {
             if (!isCompleted)

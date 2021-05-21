@@ -5,16 +5,25 @@ using System.Linq;
 
 namespace Storm.Schema
 {
+
+    /// <summary>
+    /// Use the Add methods to describe your entity by defining which fields it has.
+    /// </summary>
     public class EntityBuilder
     {
         private List<EntityField> efs = new List<EntityField>();
-
+        
+        /// <summary>
+        /// Add a field to the Entity. Only one field should be mark as primary and an Entity must has a primary field declared
+        /// </summary>
+        /// <param name="field"></param>
+        /// <returns></returns>
         public EntityBuilder Add(FieldConfig field)
         {
             var f = new EntityField
             {
                 CodeName = field.CodeName,
-                DBName = field.DBName,
+                DBName = String.IsNullOrEmpty(field.DBName)? field.CodeName : field.DBName,
                 CodeType = field.CodeType,
                 DBType = field.DBType,
                 Size = field.Size,
@@ -38,6 +47,84 @@ namespace Storm.Schema
             {
                 entityFields = efs
             };
+        }
+    }
+
+    public static class EntityBuilderExt
+    {
+
+        /// <summary>
+        /// Add a field to the Entity
+        /// </summary>
+        /// <returns></returns>
+        public static EntityBuilder Add(this EntityBuilder self, String codeName, Type codeType)
+        {
+            return self.Add(new FieldConfig()
+            {
+                CodeName = codeName,
+                CodeType = codeType
+            });
+        }
+
+        /// <summary>
+        /// Add a field to the Entity
+        /// </summary>
+        /// <returns></returns>
+        public static EntityBuilder Add(this EntityBuilder self, String codeName,Type codeType, String dbName, DbType dbType)
+        {
+            return self.Add(new FieldConfig()
+            {
+                CodeName = codeName,
+                CodeType = codeType,
+                DBName = dbName,
+                DBType = dbType
+            });
+        }
+
+        /// <summary>
+        /// Add a field to the Entity
+        /// </summary>
+        /// <returns></returns>
+        public static EntityBuilder Add(this EntityBuilder self, String codeName, Type codeType, String dbName, DbType dbType, Object defaultIfNull)
+        {
+            return self.Add(new FieldConfig()
+            {
+                CodeName = codeName,
+                CodeType = codeType,
+                DBName = dbName,
+                DBType = dbType,
+                DefaultIfNull = defaultIfNull
+            });
+        }
+
+        /// <summary>
+        /// Add a primary field to the Entity. Only one field should be mark as primary and an Entity must has a primary field declared
+        /// </summary>
+        /// <returns></returns>
+        public static EntityBuilder AddPrimary(this EntityBuilder self, String codeName, Type codeType)
+        {
+            return self.Add(new FieldConfig()
+            {
+                CodeName = codeName,
+                CodeType = codeType,
+                IsPrimary = true
+            });
+        }
+
+        /// <summary>
+        /// Add a primary field to the Entity. Only one field should be mark as primary and an Entity must has a primary field declared
+        /// </summary>
+        /// <returns></returns>
+        public static EntityBuilder AddPrimary(this EntityBuilder self, String codeName, Type codeType, String dbName, DbType dbType)
+        {
+            return self.Add(new FieldConfig()
+            {
+                CodeName = codeName,
+                CodeType = codeType,
+                DBName = dbName,
+                DBType = dbType,
+                IsPrimary = true
+            });
         }
     }
 
