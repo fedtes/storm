@@ -20,6 +20,8 @@ jobs:
         dotnet-version: 5.0.x
       env:
           NUGET_AUTH_TOKEN: ${{secrets.NUGET_KEY}}
+    - name: build
+      run: dotnet build --configuration Release 
     - name: Pack
       run: dotnet pack -c Release -o out
     - name: Push generated package 
