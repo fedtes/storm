@@ -1,4 +1,4 @@
-name: .NET
+name: nuget-push
 
 on:
   workflow_dispatch:
