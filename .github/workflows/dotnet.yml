@@ -1,0 +1,27 @@
+name: nuget-push
+
+on:
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        description: Git Ref (Optional)    
+        required: false
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.x
+      
+    - name: build
+      run: dotnet build --configuration Release 
+    - name: Pack
+      run: dotnet pack -c Release -o out
+    - name: Push generated package
+      run: dotnet nuget push "./out/*.nupkg" -s "https://api.nuget.org/v3/index.json" -k ${{secrets.NUGET_KEY}}
