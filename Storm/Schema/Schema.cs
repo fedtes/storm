@@ -4,6 +4,7 @@ using System.Text;
 using System.Data;
 using Storm.Filters;
 using System.Linq;
+using Storm.Plugin;
 
 namespace Storm.Schema
 {
@@ -122,6 +123,7 @@ namespace Storm.Schema
     {
         private Object monitor = new object();
         private Dictionary<long, SchemaInstance> _schemas;
+        private Dictionary<Guid, ILogService> _logServices = null;
         private long _current = 0;
 
         public Schema()
@@ -132,7 +134,8 @@ namespace Storm.Schema
 
         public SchemaNavigator GetNavigator()
         {
-            return new SchemaNavigator(this._schemas[_current]);
+            Logger logger = new Logger(_logServices.Values.ToArray(), Guid.NewGuid());
+            return new SchemaNavigator(this._schemas[_current], logger);
         }
 
         public void EditSchema(Func<SchemaEditor, SchemaEditor> editor)
@@ -148,6 +151,36 @@ namespace Storm.Schema
                 }
             }
         }
+
+
+        public Guid AddLogger(ILogService log)
+        {
+            lock (monitor)
+            {
+                var g = Guid.NewGuid();
+                if (_logServices == null) _logServices = new Dictionary<Guid, ILogService>();
+                _logServices.Add(g, log);
+                return g;
+            }
+        }
+
+        public bool RemoveLogger(Guid serviceid)
+        {
+            lock (monitor)
+            {
+                if (_logServices == null) _logServices = new Dictionary<Guid, ILogService>();
+                if (_logServices.ContainsKey(serviceid))
+                {
+                    _logServices.Remove(serviceid);
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
+
     }
 
 }

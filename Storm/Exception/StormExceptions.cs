@@ -19,4 +19,9 @@ namespace Storm
     {
         public WrongSchemaDefinitionException(string message) : base(message) { }
     }
+
+    public class TransactionAlreadyOpenException : System.Exception
+    {
+       
+    }
 }

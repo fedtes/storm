@@ -25,6 +25,11 @@ namespace Storm.Execution
             this.connection = connection;
         }
 
+        /// <summary>
+        /// Execute a Get command to fetch one or more entities from the database given some conditions
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <returns></returns>
         public GetCommand Get(String EntityIdentifier)
         {
             return new GetCommand(connection.navigator, EntityIdentifier)
@@ -35,6 +40,11 @@ namespace Storm.Execution
             };
         }
 
+        /// <summary>
+        /// Execute a Projection command to fetch some columns of one or more entities from the database given some conditions
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <returns></returns>
         public SelectCommand Projection(String EntityIdentifier)
         {
             return new SelectCommand(connection.navigator, EntityIdentifier)
@@ -45,6 +55,11 @@ namespace Storm.Execution
             };
         }
 
+        /// <summary>
+        /// Execute a Set command to INSERT a new record into the database referencing a specific Entity
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <returns></returns>
         public SetCommand Set(String EntityIdentifier)
         {
             return new SetCommand(connection.navigator, EntityIdentifier)
@@ -55,6 +70,12 @@ namespace Storm.Execution
             };
         }
 
+        /// <summary>
+        /// Execute a Set command to UPDATAE a record into the database referencing a specific Entity. id is the PrimaryKey value of the Entity to update.
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public SetCommand Set(String EntityIdentifier, object id)
         {
             return new SetCommand(connection.navigator, EntityIdentifier, id)
@@ -65,6 +86,11 @@ namespace Storm.Execution
             };
         }
 
+        /// <summary>
+        /// Execute a DELETE command removing records referencing a specific Entity from the database give some conditions
+        /// </summary>
+        /// <param name="EntityIdentifier"></param>
+        /// <returns></returns>
         public DeleteCommand Delete(String EntityIdentifier)
         {
             return new DeleteCommand(connection.navigator, EntityIdentifier)
@@ -82,6 +108,7 @@ namespace Storm.Execution
             {
                 transaction.Commit();
                 isCompleted = true;
+                connection.navigator.GetLogger().Info("Transaction", $"Commit");
             }
         }
 
@@ -91,6 +118,7 @@ namespace Storm.Execution
             {
                 transaction.Rollback();
                 isCompleted = true;
+                connection.navigator.GetLogger().Info("Transaction", $"Rollback");
             }
         }
 

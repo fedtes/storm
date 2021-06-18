@@ -1,4 +1,5 @@
 ﻿using Storm.Execution;
+using Storm.Plugin;
 using Storm.Schema;
 using System;
 using System.Data;
@@ -44,6 +45,16 @@ namespace Storm
             var c = new StormConnection(schema.GetNavigator(), sqlConnection, engine);
             c.Open();
             return c;
+        }
+
+        public Guid RegisterLogger(ILogService log)
+        {
+            return schema.AddLogger(log);
+        }
+
+        public bool UnRegisterLogger(Guid serviceid)
+        {
+            return schema.RemoveLogger(serviceid);
         }
     }
 

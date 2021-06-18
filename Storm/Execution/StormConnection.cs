@@ -36,7 +36,8 @@ namespace Storm.Execution
         {
             EnsureTransaction();
             var t = connection.BeginTransaction();
-            currentTransaction = new StormTransaction(this, t, AutoCommit); ;
+            currentTransaction = new StormTransaction(this, t, AutoCommit);
+            navigator.GetLogger().Info("Connection", $"Begin Transaction; AutoCommit={AutoCommit}");
             return currentTransaction;
         }
         
@@ -118,6 +119,7 @@ namespace Storm.Execution
 
         internal void Open()
         {
+            navigator.GetLogger().Info("Connection", "Open");
             if (!isOpen)
             {
                 if (connection.State != ConnectionState.Open)
@@ -131,7 +133,7 @@ namespace Storm.Execution
         {
             if (currentTransaction != null && !currentTransaction.isCompleted)
             {
-                throw new ApplicationException("There is already an open transaction!");
+                throw new TransactionAlreadyOpenException();
             }
         }      
 
@@ -162,6 +164,7 @@ namespace Storm.Execution
                     // TODO: dispose managed state (managed objects).
                     if (isOpen)
                     {
+                        navigator.GetLogger().Info("Connection", "Close");
                         connection.Close();
                     }
                 }

@@ -5,6 +5,7 @@ using System.Data;
 using System.Collections.Generic;
 using System.Text;
 using SqlKata.Compilers;
+using System.Diagnostics;
 
 namespace Storm.Execution
 {
@@ -16,12 +17,17 @@ namespace Storm.Execution
         internal StormConnection connection;
         internal StormTransaction transaction;
         internal Compiler compiler;
+        internal Guid commandId;
+        internal Stopwatch sw;
 
         internal BaseCommand(SchemaNavigator navigator, String from)
         {
             this.navigator = navigator;
             this.rootEntity = navigator.GetEntity(from).ID;
             this.query = new Query($"{navigator.GetEntity(from).DBName} as A0");
+            commandId = Guid.NewGuid();
+            sw = new Stopwatch();
+            navigator.GetLogger().Info($"Command-{commandId}", "Initalized");
         }
 
         internal abstract void ParseSQL();
