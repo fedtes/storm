@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.Linq;
+using Storm.Helpers;
 using Storm.Schema;
 using Xunit;
 
@@ -50,6 +51,18 @@ namespace Storm.Test
             Assert.Equal("AppointmentCf", appointmentCf.ID);
             Assert.Equal(5, appointmentCf.entityFields.Count());
 
+        }
+
+
+        [Fact]
+        public void TestRandomStringGenerator()
+        {
+            for (int i = 0; i < 10000; i++)
+            {
+                var a = Util.UCode();
+                Assert.Matches("[a-z]{8}", a);
+            }
+            
         }
     }
 }
