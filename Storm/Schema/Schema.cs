@@ -152,7 +152,11 @@ namespace Storm.Schema
             }
         }
 
-
+        /// <summary>
+        /// Register a logger to Storm. Return the unique id (guid) that allow to de-register it later.
+        /// </summary>
+        /// <param name="log"></param>
+        /// <returns></returns>
         public Guid AddLogger(ILogService log)
         {
             lock (monitor)
@@ -164,6 +168,11 @@ namespace Storm.Schema
             }
         }
 
+        /// <summary>
+        /// Unregister a previously registered logger with a given unique id (guid)
+        /// </summary>
+        /// <param name="serviceid"></param>
+        /// <returns></returns>
         public bool RemoveLogger(Guid serviceid)
         {
             lock (monitor)

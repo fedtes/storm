@@ -53,6 +53,8 @@ namespace Storm.Execution
                 }
                 selectFields.AddRange(fields);
             }
+
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "SelectCommand", $"{{\"Action\":\"Select\", \"Path\":\"{requestPath}\"}}");
             return this;
         }
 

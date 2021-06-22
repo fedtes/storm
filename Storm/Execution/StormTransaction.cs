@@ -2,6 +2,7 @@
 using System.Data;
 using System.Collections.Generic;
 using System.Text;
+using Storm.Helpers;
 
 namespace Storm.Execution
 {
@@ -11,11 +12,13 @@ namespace Storm.Execution
         internal IDbTransaction transaction;
         protected StormConnection connection;
         internal bool isCompleted = false;
+        internal readonly String transactionid;
 
         internal StormTransaction(StormConnection connection, IDbTransaction transaction)
         {
             this.transaction = transaction;
             this.connection = connection;
+            this.transactionid = Util.UCode();
         }
 
         internal StormTransaction(StormConnection connection, IDbTransaction transaction, bool AutoCommit)
@@ -23,6 +26,7 @@ namespace Storm.Execution
             this.autoCommit = AutoCommit;
             this.transaction = transaction;
             this.connection = connection;
+            this.transactionid = Util.UCode();
         }
 
         /// <summary>
@@ -108,7 +112,7 @@ namespace Storm.Execution
             {
                 transaction.Commit();
                 isCompleted = true;
-                connection.navigator.GetLogger().Info("Transaction", $"Commit");
+                connection.navigator.GetLogger().Info("Transaction", $"{{\"Action\":\"Commit\"}}", this.connection.connectionId, this.transactionid);
             }
         }
 
@@ -118,7 +122,7 @@ namespace Storm.Execution
             {
                 transaction.Rollback();
                 isCompleted = true;
-                connection.navigator.GetLogger().Info("Transaction", $"Rollback");
+                connection.navigator.GetLogger().Info("Transaction", $"{{\"Action\":\"Rollback\"}}", this.connection.connectionId, this.transactionid);
             }
         }
 

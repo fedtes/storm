@@ -8,14 +8,15 @@ namespace Storm
 {
     public enum LogLevel
     {
-        Profile = 0,
-        Info = 1,
-        Error = 2
+        Trace = 0,
+        Debug = 1,
+        Info = 2,
+        Error = 3
     }
 
     public class LogEvent
     {
-        public Guid ConnectionID { get; internal set; }
+        public string EventID { get; internal set; }
         public DateTime EventTime { get; internal set; }
         public LogLevel Level { get; internal set; }
         public String Source { get; internal set; }
@@ -25,19 +26,17 @@ namespace Storm
     internal class Logger
     {
         private readonly ILogService[] service;
-        private Guid connectionID;
 
-        public Logger(ILogService[] service, Guid connectionID)
+        public Logger(ILogService[] service)
         {
             this.service = service;
-            this.connectionID = connectionID;
         }
 
-        public void Error(String source, String payload)
+        public void Error(String source, String payload, String connectionId = "00000000", String transactionId = "00000000", String commandId = "00000000")
         {
             var e = new LogEvent()
             {
-                ConnectionID = this.connectionID,
+                EventID = $"{connectionId}.{transactionId}.{commandId}",
                 EventTime = DateTime.UtcNow,
                 Level = LogLevel.Error,
                 Source = source,
@@ -50,11 +49,11 @@ namespace Storm
             }
         }
 
-        public void Info(String source, String payload)
+        public void Info(String source, String payload, String connectionId = "00000000", String transactionId = "00000000", String commandId = "00000000")
         {
             var e = new LogEvent()
             {
-                ConnectionID = this.connectionID,
+                EventID = $"{connectionId}.{transactionId}.{commandId}",
                 EventTime = DateTime.UtcNow,
                 Level = LogLevel.Info,
                 Source = source,
@@ -67,13 +66,30 @@ namespace Storm
             }
         }
 
-        public void Profile(String source, String payload)
+        public void Trace(String source, String payload, String connectionId = "00000000", String transactionId = "00000000", String commandId = "00000000")
         {
             var e = new LogEvent()
             {
-                ConnectionID = this.connectionID,
+                EventID = $"{connectionId}.{transactionId}.{commandId}",
                 EventTime = DateTime.UtcNow,
-                Level = LogLevel.Profile,
+                Level = LogLevel.Trace,
+                Source = source,
+                Payload = payload
+            };
+
+            foreach (var s in service)
+            {
+                s.OnEvent(e);
+            }
+        }
+
+        public void Debug(String source, String payload, String connectionId = "00000000", String transactionId = "00000000", String commandId = "00000000")
+        {
+            var e = new LogEvent()
+            {
+                EventID = $"{connectionId}.{transactionId}.{commandId}",
+                EventTime = DateTime.UtcNow,
+                Level = LogLevel.Debug,
                 Source = source,
                 Payload = payload
             };

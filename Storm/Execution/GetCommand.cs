@@ -25,6 +25,7 @@ namespace Storm.Execution
         {
             var x = from.Resolve(requestPath);
             requests.Add(x);
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "GetCommand", $"{{\"Action\":\"With\", \"Entity\":\"{requestPath}\"}}");
             return this;
         }
 

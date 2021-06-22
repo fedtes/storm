@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using Storm.Schema;
 using SqlKata.Compilers;
+using Storm.Helpers;
 
 namespace Storm.Execution
 {
@@ -18,6 +19,7 @@ namespace Storm.Execution
         protected StormTransaction currentTransaction;
         internal readonly SQLEngine engine;
         internal readonly SchemaNavigator navigator;
+        internal readonly String connectionId;
 
         internal StormConnection(SchemaNavigator navigator, IDbConnection connection, SQLEngine engine)
         {
@@ -25,6 +27,7 @@ namespace Storm.Execution
             this.navigator = navigator;
             this.connection = connection;
             this.engine = engine;
+            this.connectionId = Util.UCode();
         }
 
         /// <summary>
@@ -37,7 +40,7 @@ namespace Storm.Execution
             EnsureTransaction();
             var t = connection.BeginTransaction();
             currentTransaction = new StormTransaction(this, t, AutoCommit);
-            navigator.GetLogger().Info("Connection", $"Begin Transaction; AutoCommit={AutoCommit}");
+            navigator.GetLogger().Info("Connection", $"{{\"Action\":\"Begin Transaction\",\"AutoCommit\":\"{AutoCommit}\"}}", this.connectionId);
             return currentTransaction;
         }
         
@@ -119,7 +122,7 @@ namespace Storm.Execution
 
         internal void Open()
         {
-            navigator.GetLogger().Info("Connection", "Open");
+            navigator.GetLogger().Info("Connection", $"{{\"Action\":\"Open\"}}", this.connectionId);
             if (!isOpen)
             {
                 if (connection.State != ConnectionState.Open)
@@ -164,7 +167,7 @@ namespace Storm.Execution
                     // TODO: dispose managed state (managed objects).
                     if (isOpen)
                     {
-                        navigator.GetLogger().Info("Connection", "Close");
+                        navigator.GetLogger().Info("Connection", $"{{\"Action\":\"Close\"}}", this.connectionId);
                         connection.Close();
                     }
                 }

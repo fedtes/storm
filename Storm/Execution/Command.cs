@@ -30,6 +30,8 @@ namespace Storm.Execution
                     children = new List<Origin>()
                 }
             };
+
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"From\", \"Entity\":\"{from}\"}}");
         }
 
         internal override void ParseSQL()
@@ -57,6 +59,7 @@ namespace Storm.Execution
         public virtual C With(String requestPath)
         {
             from.Resolve(requestPath);
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"With\", \"Entity\":\"{requestPath}\"}}");
             return (C)(BaseCommand)this;
         }
 
@@ -94,6 +97,8 @@ namespace Storm.Execution
 
             this.orderBy.Add((f, asc));
 
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"OrderBy\", \"Entity\":\"{requestPath}\", \"Direction\":\"{(asc ? "ASC" : "DESC")}\"}}");
+
             return (C)(BaseCommand)this;
         }
 
@@ -105,6 +110,7 @@ namespace Storm.Execution
                 throw new ArgumentException("Page size cannot be less than 0.");
 
             this.paging = (page, pageSize);
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Paging\", \"Page\":\"{page}\", \"PageSize\":\"{pageSize}\"}}");
             return (C)(BaseCommand)this;
         }
 

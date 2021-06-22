@@ -6,6 +6,7 @@ using System.Linq;
 using System.Data;
 using System.Reflection;
 using System.Text;
+using Storm.Helpers;
 
 namespace Storm.Execution
 {
@@ -20,12 +21,14 @@ namespace Storm.Execution
         internal SetCommand(SchemaNavigator navigator, String from):base(navigator, from)
         {
             entity = navigator.GetEntity(this.rootEntity);
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "SetCommand", $"{{\"Action\":\"Update\", \"Entity\":\"{from}\"}}");
         }
 
         internal SetCommand(SchemaNavigator navigator, String from, Object id) : base(navigator, from)
         {
             this.id = id;
             entity = navigator.GetEntity(this.rootEntity);
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "SetCommand", $"{{\"Action\":\"Insert\", \"Entity\":\"{from}\"}}");
         }
 
         public SetCommand Value(Object model)

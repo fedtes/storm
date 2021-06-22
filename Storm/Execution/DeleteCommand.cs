@@ -1,5 +1,6 @@
 ﻿using SqlKata;
 using Storm.Filters;
+using Storm.Helpers;
 using Storm.Origins;
 using Storm.Schema;
 using Storm.SQLParser;
@@ -30,6 +31,8 @@ namespace Storm.Execution
                     children = new List<Origin>()
                 }
             };
+
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "DeleteCommand", $"{{\"Action\":\"Delete\", \"Entity\":\"{from}\"}}");
         }
 
         public virtual DeleteCommand Where(Func<FilterContext, Filter> where)
