@@ -15,7 +15,7 @@ namespace Storm.Execution
     {
 
         protected bool isOpen;
-        protected IDbConnection connection;
+        internal IDbConnection connection;
         protected StormTransaction currentTransaction;
         internal readonly SQLEngine engine;
         internal readonly SchemaNavigator navigator;

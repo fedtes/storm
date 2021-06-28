@@ -37,56 +37,67 @@ namespace Storm.Execution
 
         public Object Execute()
         {
-            using (var t = transaction == null ? connection.BeginTransaction(true) : transaction)
+
+            this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Begin\"}}");
+            IDbCommand cmd;
+            sw.Start();
+
+            try
             {
-                this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Execute\"}}");
-                IDbCommand cmd;
-                sw.Start();
+                compiler = compiler == null ? new SqlServerCompiler() : compiler;
+                this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Selected Compiler\", \"Time\":\"{sw.ElapsedMilliseconds}\", \"Compiler\":\"{compiler.GetType().Name}\" }}");
 
-                try
-                {
-                    compiler = compiler == null ? new SqlServerCompiler() : compiler;
-                    this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Selected Compiler\", \"Time\":\"{sw.ElapsedMilliseconds}\", \"Compiler\":\"{compiler.GetType().Name}\" }}");
+                this.ParseSQL();
+                this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Parsed SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
 
-                    this.ParseSQL();
-                    this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Parsed SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
+                SqlResult result = compiler.Compile(query);
 
-                    SqlResult result = compiler.Compile(query);
-
-                    cmd = t.transaction.Connection.CreateCommand();
-                    cmd.CommandText = result.Sql;
-                    cmd.Transaction = t.transaction;
-
-                    foreach (var binding in result.NamedBindings)
-                    {
-                        var p = cmd.CreateParameter();
-                        p.ParameterName = binding.Key;
-                        p.Value = binding.Value;
-                        cmd.Parameters.Add(p);
-                    }
-
-                    this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Compiled SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
-                    this.CommandLog(LogLevel.Debug, "Command", $"{{\"SQL\":\"{result.Sql}\", \"Params\":\"{result.NamedBindings.Select(nb => nb.Key + "=" + nb.Value)}\" }}");
-                }
-                catch (Exception ex)
-                {
-                    throw new ApplicationException("Error parsing query", ex);
-                }
+                cmd = connection.connection.CreateCommand();
+                cmd.CommandText = result.Sql;
                 
-                try
+
+                foreach (var binding in result.NamedBindings)
                 {
-                    using (var reader = cmd.ExecuteReader())
-                    {
-                        this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Executed\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
-                        return Read(reader);
-                    }
+                    var p = cmd.CreateParameter();
+                    p.ParameterName = binding.Key;
+                    p.Value = binding.Value;
+                    cmd.Parameters.Add(p);
                 }
-                catch (Exception ex)
+
+                this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Compiled SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
+                this.CommandLog(LogLevel.Debug, "Command", $"{{\"SQL\":\"{result.Sql}\", \"Params\":\"{result.NamedBindings.Select(nb => nb.Key + "=" + nb.Value)}\" }}");
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error parsing query", ex);
+            }
+
+            bool isLocalTransaction = transaction == null;
+            transaction = isLocalTransaction ? connection.BeginTransaction(true) : transaction;
+
+            try
+            {
+                this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Execute\", \"Transaction\":\"{(isLocalTransaction ? "Local" : "External")}\"}}");
+                cmd.Transaction = transaction.transaction;
+                using (var reader = cmd.ExecuteReader())
                 {
-                    t.Rollback();
-                    throw new ApplicationException("Error executing query", ex);
+                    this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Executed\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
+                    return Read(reader);
                 }
             }
+            catch (Exception ex)
+            {
+                transaction.Rollback();
+                throw new ApplicationException("Error executing query", ex);
+            }
+            finally
+            {
+                if (isLocalTransaction)
+                {
+                    transaction.Dispose();
+                }
+            }
+            
         }
 
     }

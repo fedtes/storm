@@ -23,7 +23,7 @@ namespace Storm.Helpers
             switch (level)
             {
                 case LogLevel.Trace:
-                    command.navigator.GetLogger().Info(source, payload, conid, tranid, cmdid);
+                    command.navigator.GetLogger().Trace(source, payload, conid, tranid, cmdid);
                     break;
                 case LogLevel.Debug:
                     command.navigator.GetLogger().Debug(source, payload, conid, tranid, cmdid);
