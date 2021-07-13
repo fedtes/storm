@@ -134,7 +134,7 @@ namespace Storm.Schema
 
         public SchemaNavigator GetNavigator()
         {
-            Logger logger = new Logger(_logServices.Values.ToArray(), Guid.NewGuid());
+            Logger logger = new Logger(_logServices.Values.ToArray());
             return new SchemaNavigator(this._schemas[_current], logger);
         }
 
