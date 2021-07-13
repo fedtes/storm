@@ -25,3 +25,4 @@ jobs:
       run: dotnet pack -c Release -o out
     - name: Push generated package
       run: dotnet nuget push "./out/*.nupkg" -s "https://api.nuget.org/v3/index.json" -k ${{secrets.NUGET_KEY}}
+
