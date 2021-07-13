@@ -150,6 +150,8 @@ namespace Storm.Execution
                     return new MySqlCompiler();
                 case SQLEngine.SQLite:
                     return new SqliteCompiler();
+                case SQLEngine.PostgreSQL:
+                    return new PostgresCompiler();
                 default:
                     return new SqlServerCompiler();
             }

@@ -62,6 +62,7 @@ namespace Storm
     {
         MSSQLServer = 0,
         MySQL = 1,
-        SQLite = 2
+        SQLite = 2,
+        PostgreSQL = 3
     }
 }
