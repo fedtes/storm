@@ -12,12 +12,12 @@ namespace Storm.SQLParser
 {
     abstract class SQLParser
     {
-        protected SchemaNavigator navigator;
+        protected Context ctx;
         protected Query query;
 
-        public SQLParser(SchemaNavigator navigator, Query query)
+        public SQLParser(Context ctx, Query query)
         {
-            this.navigator = navigator;
+            this.ctx = ctx;
             this.query = query;
         }
 

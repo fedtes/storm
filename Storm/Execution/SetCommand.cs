@@ -18,16 +18,16 @@ namespace Storm.Execution
         protected object id = null;
         protected SchemaNode entity;
 
-        internal SetCommand(SchemaNavigator navigator, String from):base(navigator, from)
+        internal SetCommand(Context ctx, String from):base(ctx, from)
         {
-            entity = navigator.GetEntity(this.rootEntity);
+            entity = ctx.Navigator.GetEntity(this.rootEntity);
             ((BaseCommand)this).CommandLog(LogLevel.Info, "SetCommand", $"{{\"Action\":\"Update\", \"Entity\":\"{from}\"}}");
         }
 
-        internal SetCommand(SchemaNavigator navigator, String from, Object id) : base(navigator, from)
+        internal SetCommand(Context ctx, String from, Object id) : base(ctx, from)
         {
             this.id = id;
-            entity = navigator.GetEntity(this.rootEntity);
+            entity = ctx.Navigator.GetEntity(this.rootEntity);
             ((BaseCommand)this).CommandLog(LogLevel.Info, "SetCommand", $"{{\"Action\":\"Insert\", \"Entity\":\"{from}\"}}");
         }
 

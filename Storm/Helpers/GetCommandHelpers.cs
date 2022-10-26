@@ -20,11 +20,11 @@ namespace Storm.Helpers
             public Dictionary<EntityPath, FieldPath> PrimaryKeys;
         }
 
-        static (Object, StormResult) CreateResult(Origin fromNode,RecCtx ctx)
+        static (Object, StormResult) CreateResult(Origin fromNode,RecCtx recCtx)
         {
-            var range = ctx.Ranges[fromNode.Entity];
-            var row = new StormRow(ctx.Data, ctx.Index, range.Start, range.End);
-            var primaryKey = row[ctx.PrimaryKeys[fromNode.FullPath]];
+            var range = recCtx.Ranges[fromNode.Entity];
+            var row = new StormRow(recCtx.Data, recCtx.Index, range.Start, range.End);
+            var primaryKey = row[recCtx.PrimaryKeys[fromNode.FullPath]];
             return (primaryKey, new StormResult(row, fromNode.Entity));
         }
         
@@ -48,11 +48,11 @@ namespace Storm.Helpers
         }
 
         public static IList<StormResult> ToResults(StormDataSet data, 
-                                            SchemaNavigator navigator, 
+                                            Context ctx, 
                                             List<Origin> requests,
                                             OriginTree fromTree)
         {
-            var root = navigator.GetEntity(data.root);
+            var root = ctx.Navigator.GetEntity(data.root);
             var ranges = data.ObjectRanges;
             var primaryKeys = data.IdentityIndexes;
             var items = new Dictionary<EntityPath, Dictionary<object, StormResult>>();
@@ -60,7 +60,7 @@ namespace Storm.Helpers
 
             for (int i = 0; i < data.Count(); i++)
             {
-                var ctx = new RecCtx()
+                var recCtx = new RecCtx()
                 {
                     Data = data,
                     Index = i,
@@ -69,13 +69,13 @@ namespace Storm.Helpers
                     Root = root
                 };
 
-                var (pk, r) = CreateResult(fromTree.root, ctx);
+                var (pk, r) = CreateResult(fromTree.root, recCtx);
 
                 if (!results.Any(x => x.PrimaryKey == pk))
                     results.Add(r);
 
                 r = results.First(x => x.PrimaryKey == pk);
-                CreateResultRelations(ctx, requests.Where(x => x.FullPath != fromTree.root.FullPath).ToList(), r);
+                CreateResultRelations(recCtx, requests.Where(x => x.FullPath != fromTree.root.FullPath).ToList(), r);
             }
 
             return results;

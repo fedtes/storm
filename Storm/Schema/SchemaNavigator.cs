@@ -7,13 +7,8 @@ namespace Storm.Schema
     public class SchemaNavigator
     {
         private SchemaInstance p;
-        private Logger logger;
 
-        internal SchemaNavigator(SchemaInstance p, Logger logger)
-        {
-            this.p = p;
-            this.logger = logger;
-        }
+        internal SchemaNavigator(SchemaInstance p) => this.p = p;
 
         public SchemaItem Get(String identifier)
         {
@@ -62,8 +57,6 @@ namespace Storm.Schema
                 return null;
             }
         }
-
-        internal Logger GetLogger() => logger;
 
     }
 }

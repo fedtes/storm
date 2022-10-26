@@ -16,7 +16,7 @@ namespace Storm.Test
         [Fact]
         public void SelectResult_DataSetRead()
         {
-            (Storm s, Schema.SchemaNavigator nav, StormDataSet data) = PrepareDataSet();
+            (Storm s, Context nav, StormDataSet data) = PrepareDataSet();
 
             Assert.Equal(18, data.Count());
             Assert.Equal(1, data.First()["ID"]);
@@ -29,10 +29,10 @@ namespace Storm.Test
         [Fact]
         public void GetResult_DataSetRead()
         {
-            (Storm s, Schema.SchemaNavigator nav, StormDataSet data) = PrepareDataSet();
-            GetCommand cmd = new GetCommand(nav, "Test");
+            (Storm s, Context ctx, StormDataSet data) = PrepareDataSet();
+            GetCommand cmd = new GetCommand(ctx, "Test");
 
-            var res = GetCommandHelpers.ToResults(data, nav, cmd.requests, cmd.from).Cast<dynamic>();
+            var res = GetCommandHelpers.ToResults(data, ctx, cmd.requests, cmd.from).Cast<dynamic>();
             Assert.Equal(18, res.Count());
             Assert.Equal(1, res.First().ID);
             Assert.Equal("Mario", res.First().FirstName);
@@ -45,11 +45,11 @@ namespace Storm.Test
         [Fact]
         void GetResult_DataSetRead_2Entities()
         {
-            (Storm s, Schema.SchemaNavigator nav, StormDataSet data) = PrepareDataSet2();
-            GetCommand cmd = new GetCommand(nav, "Test");
+            (Storm s, Context ctx, StormDataSet data) = PrepareDataSet2();
+            GetCommand cmd = new GetCommand(ctx, "Test");
             cmd.With("ExtraInfos");
 
-            var res = GetCommandHelpers.ToResults(data, nav, cmd.requests, cmd.from).Cast<dynamic>();
+            var res = GetCommandHelpers.ToResults(data, ctx, cmd.requests, cmd.from).Cast<dynamic>();
             Assert.Equal(18, res.Count());
             var _mario = res.First();
             var extraInfo = _mario.ExtraInfos[0];
@@ -69,11 +69,11 @@ namespace Storm.Test
 
         }
 
-        private static (Storm,Schema.SchemaNavigator,StormDataSet) PrepareDataSet()
+        private static (Storm,Context,StormDataSet) PrepareDataSet()
         {
             Storm s = StormDefine();
-            var nav = s.schema.GetNavigator();
-            var entity = nav.GetEntity("Test");
+            var ctx = s.CreateContext();
+            var entity = ctx.Navigator.GetEntity("Test");
             Origin fromNode = new Origin()
             {
                 Alias = "A1",
@@ -104,15 +104,15 @@ namespace Storm.Test
 
 
             data.ReadData(new MonoEntityMockDataSources().GetReader(), nodes);
-            return (s,nav,data);
+            return (s,ctx,data);
         }
 
-        private static (Storm, Schema.SchemaNavigator, StormDataSet) PrepareDataSet2()
+        private static (Storm, Context, StormDataSet) PrepareDataSet2()
         {
             Storm s = StormDefine();
-            var nav = s.schema.GetNavigator();
-            var entity = nav.GetEntity("Test");
-            var entity2 = nav.GetEntity("Test2");
+            var ctx = s.CreateContext();
+            var entity = ctx.Navigator.GetEntity("Test");
+            var entity2 = ctx.Navigator.GetEntity("Test2");
             Origin fromNode1 = new Origin()
             {
                 Alias = "A1",
@@ -165,7 +165,7 @@ namespace Storm.Test
 
 
             data.ReadData(new TwoEntityMockDataSources().GetReader(), nodes);
-            return (s, nav, data);
+            return (s, ctx, data);
         }
 
 

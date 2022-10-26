@@ -14,7 +14,7 @@ namespace Storm.Execution
     public abstract class BaseCommand
     {
         internal String rootEntity;
-        internal SchemaNavigator navigator;
+        internal Context ctx;
         internal Query query;
         internal StormConnection connection;
         internal StormTransaction transaction;
@@ -22,11 +22,11 @@ namespace Storm.Execution
         internal String commandId;
         internal Stopwatch sw;
 
-        internal BaseCommand(SchemaNavigator navigator, String from)
+        internal BaseCommand(Context ctx, String from)
         {
-            this.navigator = navigator;
-            this.rootEntity = navigator.GetEntity(from).ID;
-            this.query = new Query($"{navigator.GetEntity(from).DBName} as A0");
+            this.ctx = ctx;
+            this.rootEntity = ctx.Navigator.GetEntity(from).ID;
+            this.query = new Query($"{ctx.Navigator.GetEntity(from).DBName} as A0");
             commandId = Helpers.Util.UCode();
             sw = new Stopwatch();
         }
@@ -38,17 +38,17 @@ namespace Storm.Execution
         public Object Execute()
         {
 
-            this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Begin\"}}");
+            this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Begin\"}}");
             IDbCommand cmd;
             sw.Start();
 
             try
             {
                 compiler = compiler == null ? new SqlServerCompiler() : compiler;
-                this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Selected Compiler\", \"Time\":\"{sw.ElapsedMilliseconds}\", \"Compiler\":\"{compiler.GetType().Name}\" }}");
+                this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Selected Compiler\", \"Time\":\"{sw.ElapsedMilliseconds}\", \"Compiler\":\"{compiler.GetType().Name}\" }}");
 
                 this.ParseSQL();
-                this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Parsed SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
+                this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Parsed SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
 
                 SqlResult result = compiler.Compile(query);
 
@@ -64,7 +64,7 @@ namespace Storm.Execution
                     cmd.Parameters.Add(p);
                 }
 
-                this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Compiled SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
+                this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Compiled SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
                 this.CommandLog(LogLevel.Debug, "Command", $"{{\"SQL\":\"{result.Sql}\", \"Params\":\"{result.NamedBindings.Select(nb => nb.Key + "=" + nb.Value)}\" }}");
             }
             catch (Exception ex)
@@ -77,11 +77,11 @@ namespace Storm.Execution
 
             try
             {
-                this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Execute\", \"Transaction\":\"{(isLocalTransaction ? "Local" : "External")}\"}}");
+                this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Execute\", \"Transaction\":\"{(isLocalTransaction ? "Local" : "External")}\"}}");
                 cmd.Transaction = transaction.transaction;
                 using (var reader = cmd.ExecuteReader())
                 {
-                    this.CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Executed\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
+                    this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Executed\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
                     return Read(reader);
                 }
             }

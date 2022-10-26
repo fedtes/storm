@@ -18,13 +18,13 @@ namespace Storm.Execution
         internal IDbConnection connection;
         protected StormTransaction currentTransaction;
         internal readonly SQLEngine engine;
-        internal readonly SchemaNavigator navigator;
+        internal readonly Context ctx;
         internal readonly String connectionId;
 
-        internal StormConnection(SchemaNavigator navigator, IDbConnection connection, SQLEngine engine)
+        internal StormConnection(Context ctx, IDbConnection connection, SQLEngine engine)
         {
             isOpen = false;
-            this.navigator = navigator;
+            this.ctx = ctx;
             this.connection = connection;
             this.engine = engine;
             this.connectionId = Util.UCode();
@@ -40,7 +40,7 @@ namespace Storm.Execution
             EnsureTransaction();
             var t = connection.BeginTransaction();
             currentTransaction = new StormTransaction(this, t, AutoCommit);
-            navigator.GetLogger().Info("Connection", $"{{\"Action\":\"Begin Transaction\",\"AutoCommit\":\"{AutoCommit}\"}}", this.connectionId);
+            ctx.GetLogger().Info("Connection", $"{{\"Action\":\"Begin Transaction\",\"AutoCommit\":\"{AutoCommit}\"}}", this.connectionId);
             return currentTransaction;
         }
         
@@ -51,7 +51,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public GetCommand Get(String EntityIdentifier)
         {
-            return new GetCommand(navigator, EntityIdentifier)
+            return new GetCommand(ctx, EntityIdentifier)
             {
                 connection = this,
                 compiler = GetCompiler(),
@@ -66,7 +66,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public SelectCommand Projection(String EntityIdentifier)
         {
-            return new SelectCommand(navigator, EntityIdentifier)
+            return new SelectCommand(ctx, EntityIdentifier)
             {
                 connection = this,
                 compiler = GetCompiler(),
@@ -81,7 +81,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public SetCommand Set(String EntityIdentifier)
         {
-            return new SetCommand(navigator, EntityIdentifier)
+            return new SetCommand(ctx, EntityIdentifier)
             {
                 connection = this,
                 compiler = GetCompiler(),
@@ -97,7 +97,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public SetCommand Set(String EntityIdentifier, object id)
         {
-            return new SetCommand(navigator, EntityIdentifier, id)
+            return new SetCommand(ctx, EntityIdentifier, id)
             {
                 connection = this,
                 compiler = GetCompiler(),
@@ -112,7 +112,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public DeleteCommand Delete(String EntityIdentifier)
         {
-            return new DeleteCommand(navigator, EntityIdentifier)
+            return new DeleteCommand(ctx, EntityIdentifier)
             {
                 connection = this,
                 compiler = GetCompiler(),
@@ -122,7 +122,7 @@ namespace Storm.Execution
 
         internal void Open()
         {
-            navigator.GetLogger().Info("Connection", $"{{\"Action\":\"Open\"}}", this.connectionId);
+            ctx.GetLogger().Info("Connection", $"{{\"Action\":\"Open\"}}", this.connectionId);
             if (!isOpen)
             {
                 if (connection.State != ConnectionState.Open)
@@ -169,7 +169,7 @@ namespace Storm.Execution
                     // TODO: dispose managed state (managed objects).
                     if (isOpen)
                     {
-                        navigator.GetLogger().Info("Connection", $"{{\"Action\":\"Close\"}}", this.connectionId);
+                        ctx.GetLogger().Info("Connection", $"{{\"Action\":\"Close\"}}", this.connectionId);
                         connection.Close();
                     }
                 }

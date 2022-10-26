@@ -15,7 +15,7 @@ namespace Storm.SQLParser
         private readonly Origin sourceNode;
         private readonly Origin targetNode;
 
-        public SQLJoinParser(Origin sourceNode, Origin targetNode, OriginTree fromTree, Filter join, SchemaNavigator schemaNavigator, Query query) : base(fromTree, join, schemaNavigator, query)
+        public SQLJoinParser(Origin sourceNode, Origin targetNode, OriginTree fromTree, Filter join, Context ctx, Query query) : base(fromTree, join, ctx, query)
         {
             this.sourceNode = sourceNode;
             this.targetNode = targetNode;

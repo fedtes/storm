@@ -2,7 +2,9 @@
 using Storm.Plugin;
 using Storm.Schema;
 using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Storm.Test")]
@@ -12,6 +14,7 @@ namespace Storm
     public class Storm
     {
         internal readonly Schema.Schema schema;
+        internal readonly Dictionary<Guid, ILogService> _logServices = new Dictionary<Guid, ILogService>();
         internal readonly SQLEngine engine;
 
         public Storm()
@@ -42,19 +45,35 @@ namespace Storm
         /// <returns></returns>
         public StormConnection OpenConnection(IDbConnection sqlConnection)
         {
-            var c = new StormConnection(schema.GetNavigator(), sqlConnection, engine);
+            var c = new StormConnection(this.CreateContext(), sqlConnection, engine);
             c.Open();
             return c;
         }
 
+        internal Context CreateContext() => 
+            new Context(schema.GetNavigator(), new Logger(this._logServices.Values.ToArray()));
+
+        /// <summary>
+        /// Register a logger to Storm. Return the unique id (guid) that allow to de-register it later.
+        /// </summary>
+        /// <param name="log"></param>
+        /// <returns></returns>
         public Guid RegisterLogger(ILogService log)
         {
-            return schema.AddLogger(log);
+            var id = Guid.NewGuid();
+            _logServices.Add(id, log);
+            return id;
         }
 
+
+        /// <summary>
+        /// Unregister a previously registered logger with a given unique id (guid)
+        /// </summary>
+        /// <param name="serviceid"></param>
+        /// <returns></returns>
         public bool UnRegisterLogger(Guid serviceid)
         {
-            return schema.RemoveLogger(serviceid);
+           return _logServices.Remove(serviceid);
         }
     }
 

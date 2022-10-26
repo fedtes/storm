@@ -11,7 +11,7 @@ namespace Storm.Origins
     /// </summary>
     public class OriginTree
     {
-        internal SchemaNavigator navigator;
+        internal Context ctx;
 
         private Origin _root;
         internal Origin root 
@@ -62,13 +62,13 @@ namespace Storm.Origins
 
             if (!nodes.ContainsKey(partialPath))
             {
-                var _edge = navigator.GetEdge($"{subTree.Entity.ID}.{current}");
+                var _edge = ctx.Navigator.GetEdge($"{subTree.Entity.ID}.{current}");
                 var node = new Origin()
                 {
                     Alias = $"A{nodes.Count}",
                     children = new List<Origin>(),
                     Edge = _edge,
-                    Entity = navigator.GetEntity(_edge.TargetID),
+                    Entity = ctx.Navigator.GetEntity(_edge.TargetID),
                     FullPath = partialPath
                 };
                 nodes.Add(partialPath, node);

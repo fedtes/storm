@@ -14,7 +14,7 @@ namespace Storm.SQLParser
         protected OriginTree fromTree;
         protected Filter filter;
 
-        public SQLWhereParser(OriginTree fromTree, Filter filter, SchemaNavigator schemaNavigator, Query query) : base(schemaNavigator, query)
+        public SQLWhereParser(OriginTree fromTree, Filter filter, Context ctx, Query query) : base(ctx, query)
         {
             this.fromTree = fromTree;
             this.filter = filter;
@@ -171,7 +171,7 @@ namespace Storm.SQLParser
                                 query.WhereIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
                             else if (f.Right is SubQueryFilterValue subQueryExpr)
                             {
-                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.navigator));
+                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.ctx));
                                 nestedCmd.ParseSQL();
                                 query.WhereIn(ParseReferenceStringLeft(f), nestedCmd.query);
                             }
@@ -182,7 +182,7 @@ namespace Storm.SQLParser
                                 query.OrWhereIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
                             else if (f.Right is SubQueryFilterValue subQueryExpr)
                             {
-                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.navigator));
+                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.ctx));
                                 nestedCmd.ParseSQL();
                                 query.OrWhereIn(ParseReferenceStringLeft(f), nestedCmd.query);
                             }
@@ -197,7 +197,7 @@ namespace Storm.SQLParser
                                 query.WhereNotIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
                             else if (f.Right is SubQueryFilterValue subQueryExpr)
                             {
-                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.navigator));
+                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.ctx));
                                 nestedCmd.ParseSQL();
                                 query.WhereNotIn(ParseReferenceStringLeft(f), nestedCmd.query);
                             }
@@ -208,7 +208,7 @@ namespace Storm.SQLParser
                                 query.OrWhereNotIn<Object>(ParseReferenceStringLeft(f), ((IEnumerable)data.value).Cast<Object>());
                             else if (f.Right is SubQueryFilterValue subQueryExpr)
                             {
-                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.navigator));
+                                var nestedCmd = subQueryExpr.subquery(new SubQueryContext(this.ctx));
                                 nestedCmd.ParseSQL();
                                 query.OrWhereNotIn(ParseReferenceStringLeft(f), nestedCmd.query);
                             }

@@ -15,7 +15,7 @@ namespace Storm.Execution
         const String valudationPath = @"^([^ .{},[\]*]\.?)*([^*.[\]]+|\*)$";
         protected List<SelectNode> selectFields = new List<SelectNode>();
 
-        public SelectCommand(SchemaNavigator navigator, string from) : base(navigator, from) { }
+        public SelectCommand(Context ctx, string from) : base(ctx, from) { }
 
         public SelectCommand Select(string requestPath)
         {

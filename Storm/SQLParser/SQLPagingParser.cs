@@ -10,7 +10,7 @@ namespace Storm.SQLParser
     {
         private readonly (int, int) paging;
 
-        public SQLPagingParser((int, int) paging, SchemaNavigator navigator, Query query) : base(navigator, query)
+        public SQLPagingParser((int, int) paging, Context ctx, Query query) : base(ctx, query)
         {
             this.paging = paging;
         }

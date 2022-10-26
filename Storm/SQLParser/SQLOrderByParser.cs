@@ -11,7 +11,7 @@ namespace Storm.SQLParser
     {
         private readonly List<(SelectNode, bool)> orderBy;
 
-        public SQLOrderByParser(List<(SelectNode, bool)> orderBy, SchemaNavigator navigator, Query query) : base(navigator, query)
+        public SQLOrderByParser(List<(SelectNode, bool)> orderBy, Context ctx, Query query) : base(ctx, query)
         {
             this.orderBy = orderBy;
         }

@@ -10,8 +10,7 @@ namespace Storm
     {
         Trace = 0,
         Debug = 1,
-        Info = 2,
-        Error = 3
+        Info= 2
     }
 
     public class LogEvent
@@ -32,22 +31,22 @@ namespace Storm
             this.service = service;
         }
 
-        public void Error(String source, String payload, String connectionId = "00000000", String transactionId = "00000000", String commandId = "00000000")
-        {
-            var e = new LogEvent()
-            {
-                EventID = $"{connectionId}.{transactionId}.{commandId}",
-                EventTime = DateTime.UtcNow,
-                Level = LogLevel.Error,
-                Source = source,
-                Payload = payload
-            };
+        //public void Error(String source, String payload, String connectionId = "00000000", String transactionId = "00000000", String commandId = "00000000")
+        //{
+        //    var e = new LogEvent()
+        //    {
+        //        EventID = $"{connectionId}.{transactionId}.{commandId}",
+        //        EventTime = DateTime.UtcNow,
+        //        Level = LogLevel.Error,
+        //        Source = source,
+        //        Payload = payload
+        //    };
 
-            foreach (var s in service)
-            {
-                s.OnEvent(e);
-            }
-        }
+        //    foreach (var s in service)
+        //    {
+        //        s.OnEvent(e);
+        //    }
+        //}
 
         public void Info(String source, String payload, String connectionId = "00000000", String transactionId = "00000000", String commandId = "00000000")
         {

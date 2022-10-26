@@ -13,7 +13,7 @@ namespace Storm.SQLParser
     {
         protected OriginTree fromTree;
 
-        public SQLFromParser(OriginTree fromTree, SchemaNavigator schemaNavigator, Query query) : base(schemaNavigator, query)
+        public SQLFromParser(OriginTree fromTree, Context ctx, Query query) : base(ctx, query)
         {
             this.fromTree = fromTree;
         }
@@ -49,7 +49,7 @@ namespace Storm.SQLParser
             }
             else
             {
-                var joinParser = new SQLJoinParser(sourceNode, targetNode, fromTree, targetNode.Edge.OnExpression, navigator, query);
+                var joinParser = new SQLJoinParser(sourceNode, targetNode, fromTree, targetNode.Edge.OnExpression, ctx, query);
                 this.query = joinParser.Parse();
             }
             return targetNode.children.Aggregate(query, (q, n) => ParseTableTree(targetNode, n, q));
@@ -58,7 +58,7 @@ namespace Storm.SQLParser
         private string resolveTargetColumnName(Origin subTree)
         {
             string targetCol = string.Empty;
-            var target = navigator.GetEntity(subTree.Edge.TargetID);
+            var target = ctx.Navigator.GetEntity(subTree.Edge.TargetID);
             if (target.entityFields != null && target.entityFields.Any())
             {
                 var field = target
@@ -80,7 +80,7 @@ namespace Storm.SQLParser
         private string resolveSourceColumnName(Origin subTree)
         {
             string sourceCol = string.Empty;
-            var source = navigator.GetEntity(subTree.Edge.SourceID);
+            var source = ctx.Navigator.GetEntity(subTree.Edge.SourceID);
             if (source.entityFields != null && source.entityFields.Any())
             {
                 var field = source

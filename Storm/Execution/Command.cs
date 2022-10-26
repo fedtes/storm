@@ -16,41 +16,41 @@ namespace Storm.Execution
         internal List<(SelectNode, bool)> orderBy = null;
         internal (int,int) paging = (-1, -1);
         
-        internal Command(SchemaNavigator navigator, String from) : base(navigator, from)
+        internal Command(Context ctx, String from) : base(ctx, from)
         {
             this.from = new OriginTree()
             {
-                navigator = navigator,
+                ctx = ctx,
                 root = new Origin()
                 {
                     Alias = "A0",
                     FullPath = new EntityPath(from, ""),
                     Edge = null,
-                    Entity = navigator.GetEntity(from),
+                    Entity = ctx.Navigator.GetEntity(from),
                     children = new List<Origin>()
                 }
             };
 
-            ((BaseCommand)this).CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"From\", \"Entity\":\"{from}\"}}");
+            ((BaseCommand)this).CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"From\", \"Entity\":\"{from}\"}}");
         }
 
         internal override void ParseSQL()
         {
-            SQLWhereParser whereParser = new SQLWhereParser(from, where, navigator, query);
+            SQLWhereParser whereParser = new SQLWhereParser(from, where, ctx, query);
             query = whereParser.Parse();
 
-            SQLFromParser fromParser = new SQLFromParser(from, navigator, query);
+            SQLFromParser fromParser = new SQLFromParser(from, ctx, query);
             query = fromParser.Parse();
 
             if (paging.Item1 != -1 && paging.Item2 != -1)
             {
-                SQLPagingParser pagingParser = new SQLPagingParser(paging, navigator, query);
+                SQLPagingParser pagingParser = new SQLPagingParser(paging, ctx, query);
                 query = pagingParser.Parse();
             }
 
             if (orderBy != null && orderBy.Any())
             {
-                SQLOrderByParser orderByParser = new SQLOrderByParser(orderBy, navigator, query);
+                SQLOrderByParser orderByParser = new SQLOrderByParser(orderBy, ctx, query);
                 query = orderByParser.Parse();
             }
 
@@ -59,7 +59,7 @@ namespace Storm.Execution
         public virtual C With(String requestPath)
         {
             from.Resolve(requestPath);
-            ((BaseCommand)this).CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"With\", \"Entity\":\"{requestPath}\"}}");
+            ((BaseCommand)this).CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"With\", \"Entity\":\"{requestPath}\"}}");
             return (C)(BaseCommand)this;
         }
 
@@ -97,7 +97,7 @@ namespace Storm.Execution
 
             this.orderBy.Add((f, asc));
 
-            ((BaseCommand)this).CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"OrderBy\", \"Entity\":\"{requestPath}\", \"Direction\":\"{(asc ? "ASC" : "DESC")}\"}}");
+            ((BaseCommand)this).CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"OrderBy\", \"Entity\":\"{requestPath}\", \"Direction\":\"{(asc ? "ASC" : "DESC")}\"}}");
 
             return (C)(BaseCommand)this;
         }
@@ -110,7 +110,7 @@ namespace Storm.Execution
                 throw new ArgumentException("Page size cannot be less than 0.");
 
             this.paging = (page, pageSize);
-            ((BaseCommand)this).CommandLog(LogLevel.Info, "Command", $"{{\"Action\":\"Paging\", \"Page\":\"{page}\", \"PageSize\":\"{pageSize}\"}}");
+            ((BaseCommand)this).CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Paging\", \"Page\":\"{page}\", \"PageSize\":\"{pageSize}\"}}");
             return (C)(BaseCommand)this;
         }
 

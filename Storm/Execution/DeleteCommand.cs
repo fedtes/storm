@@ -17,17 +17,17 @@ namespace Storm.Execution
         internal Func<FilterContext, Filter> whereLambda;
         internal OriginTree from;
 
-        internal DeleteCommand(SchemaNavigator navigator, String from) : base(navigator, from)
+        internal DeleteCommand(Context ctx, String from) : base(ctx, from)
         {
             this.from = new OriginTree()
             {
-                navigator = navigator,
+                ctx = ctx,
                 root = new Origin()
                 {
                     Alias = "",
                     FullPath = new EntityPath(from, ""),
                     Edge = null,
-                    Entity = navigator.GetEntity(from),
+                    Entity = ctx.Navigator.GetEntity(from),
                     children = new List<Origin>()
                 }
             };
@@ -51,7 +51,8 @@ namespace Storm.Execution
                 Filter _whereDelete(FilterContext ctx) => ctx[this.from.root.Entity.PrimaryKey.CodeName].In
                     .SubQuery(s => s.From(this.from.root.Entity.ID).Where(whereLambda));
 
-                SQLWhereParser whereParser = new SQLWhereParser(from, _whereDelete(new FilterContext()), navigator, query);
+                SQLWhereParser whereParser = 
+                    new SQLWhereParser(from, _whereDelete(new FilterContext()), ctx, query);
                 query = whereParser.Parse();
             }
 

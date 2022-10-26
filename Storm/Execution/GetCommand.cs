@@ -16,7 +16,7 @@ namespace Storm.Execution
     {
         internal List<Origin> requests = new List<Origin>();
 
-        public GetCommand(SchemaNavigator navigator, String from) : base(navigator, from)
+        public GetCommand(Context ctx, String from) : base(ctx, from)
         {
             requests.Add(base.from.root);
         }
@@ -60,7 +60,7 @@ namespace Storm.Execution
 
             sr.ReadData(dataReader, metadata);
 
-            return GetCommandHelpers.ToResults(sr, this.navigator, requests, from);
+            return GetCommandHelpers.ToResults(sr, this.ctx, requests, from);
         }
 
         public new IEnumerable<dynamic> Execute()

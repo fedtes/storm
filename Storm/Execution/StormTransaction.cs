@@ -36,7 +36,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public GetCommand Get(String EntityIdentifier)
         {
-            return new GetCommand(connection.navigator, EntityIdentifier)
+            return new GetCommand(connection.ctx, EntityIdentifier)
             {
                 connection = this.connection,
                 compiler = connection.GetCompiler(),
@@ -51,7 +51,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public SelectCommand Projection(String EntityIdentifier)
         {
-            return new SelectCommand(connection.navigator, EntityIdentifier)
+            return new SelectCommand(connection.ctx, EntityIdentifier)
             {
                 connection = this.connection,
                 compiler = connection.GetCompiler(),
@@ -66,7 +66,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public SetCommand Set(String EntityIdentifier)
         {
-            return new SetCommand(connection.navigator, EntityIdentifier)
+            return new SetCommand(connection.ctx, EntityIdentifier)
             {
                 connection = this.connection,
                 compiler = connection.GetCompiler(),
@@ -82,7 +82,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public SetCommand Set(String EntityIdentifier, object id)
         {
-            return new SetCommand(connection.navigator, EntityIdentifier, id)
+            return new SetCommand(connection.ctx, EntityIdentifier, id)
             {
                 connection = this.connection,
                 compiler = connection.GetCompiler(),
@@ -97,7 +97,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public DeleteCommand Delete(String EntityIdentifier)
         {
-            return new DeleteCommand(connection.navigator, EntityIdentifier)
+            return new DeleteCommand(connection.ctx, EntityIdentifier)
             {
                 connection = this.connection,
                 compiler = connection.GetCompiler(),
@@ -112,7 +112,7 @@ namespace Storm.Execution
             {
                 transaction.Commit();
                 isCompleted = true;
-                connection.navigator.GetLogger().Info("Transaction", $"{{\"Action\":\"Commit\"}}", this.connection.connectionId, this.transactionid);
+                connection.ctx.GetLogger().Info("Transaction", $"{{\"Action\":\"Commit\"}}", this.connection.connectionId, this.transactionid);
             }
         }
 
@@ -122,7 +122,7 @@ namespace Storm.Execution
             {
                 transaction.Rollback();
                 isCompleted = true;
-                connection.navigator.GetLogger().Info("Transaction", $"{{\"Action\":\"Rollback\"}}", this.connection.connectionId, this.transactionid);
+                connection.ctx.GetLogger().Info("Transaction", $"{{\"Action\":\"Rollback\"}}", this.connection.connectionId, this.transactionid);
             }
         }
 

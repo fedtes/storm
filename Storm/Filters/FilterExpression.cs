@@ -236,16 +236,16 @@ namespace Storm.Filters
 
     public class SubQueryContext
     {
-        private readonly Schema.SchemaNavigator navigator;
+        private readonly Context ctx;
 
-        internal SubQueryContext(Schema.SchemaNavigator navigator)
+        internal SubQueryContext(Context ctx)
         {
-            this.navigator = navigator;
+            this.ctx = ctx;
         }
 
         public NestedCommand From(String EntityIdentifier)
         {
-            return new NestedCommand(navigator, EntityIdentifier);
+            return new NestedCommand(ctx, EntityIdentifier);
         }
     }
 

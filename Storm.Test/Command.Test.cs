@@ -27,7 +27,7 @@ namespace Storm.Test
         {
             Storm s = StormDefine();
 
-            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            GetCommand cmd = new GetCommand(s.CreateContext(), "Appointment");
             cmd.With("Contact").With("AssignedUser");
 
             Assert.Equal("Appointment", cmd.from.root.Entity.ID);
@@ -41,7 +41,7 @@ namespace Storm.Test
         {
             Storm s = StormDefine();
 
-            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            GetCommand cmd = new GetCommand(s.CreateContext(), "Appointment");
             cmd.With("Contact").With("AssignedUser").With("Contact.OwnerUser");
 
             Assert.Equal("Appointment", cmd.from.root.Entity.ID);
@@ -56,7 +56,7 @@ namespace Storm.Test
         {
             Storm s = StormDefine();
 
-            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            GetCommand cmd = new GetCommand(s.CreateContext(), "Appointment");
             cmd.With("Contact").With("AssignedUser").With("Contact.OwnerUser");
             cmd.ParseSQL();
 
@@ -72,7 +72,7 @@ namespace Storm.Test
         {
             Storm s = StormDefine();
 
-            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            GetCommand cmd = new GetCommand(s.CreateContext(), "Appointment");
             cmd.With("Contact")
                 .With("AssignedUser")
                 .Where(f => f["Contact.LastName"].EqualTo.Val("foo") * f["Contact.FirstName"].EqualTo.Val("boo"));
@@ -95,7 +95,7 @@ namespace Storm.Test
         {
             Storm s = StormDefine();
 
-            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            GetCommand cmd = new GetCommand(s.CreateContext(), "Appointment");
             cmd.With("Contact")
                 .With("AssignedUser")
                 .Where(f => f["Contact.LastName"].EqualTo.Val("foo") * f["Contact.FirstName"].EqualTo.Val("boo"));
@@ -118,7 +118,7 @@ namespace Storm.Test
         {
             Storm s = StormDefine();
 
-            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            GetCommand cmd = new GetCommand(s.CreateContext(), "Appointment");
             cmd.With("Contact")
                 .Where(f => f["Contact.LastName"].EqualTo.Ref("AssignedUser.LastName"));
 
@@ -138,7 +138,7 @@ namespace Storm.Test
         {
             Storm s = StormDefine();
 
-            GetCommand cmd = new GetCommand(s.schema.GetNavigator(), "Appointment");
+            GetCommand cmd = new GetCommand(s.CreateContext(), "Appointment");
             cmd.Where(f => {
                     return f["Appointment.ID"].GreaterTo.Val(10) * (( f["Contact.LastName"].EqualTo.Ref("AssignedUser.LastName") * f["Contact.LastName"].IsNotNull ) + f["Contact.LastName"].IsNull);
                 });
@@ -160,7 +160,7 @@ namespace Storm.Test
         {
             Storm s = StormDefine();
 
-            SelectCommand cmd = new SelectCommand(s.schema.GetNavigator(), "Appointment");
+            SelectCommand cmd = new SelectCommand(s.CreateContext(), "Appointment");
             cmd.Select("Appointment.{ID, Summary}")
                 .Select("Contact.*")
                 .Select("AssignedUser.ID");
