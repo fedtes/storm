@@ -829,7 +829,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Set(Model_0)
+            var cmd1 = con.Insert(Model_0)
                 .Value(new Dictionary<string, object>() {
                     {"ID","asd"}, //<= this shold not take in consideration because it's primary key of the entity
                     {"Model1ID","1" },
@@ -857,7 +857,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Set(Model_0)
+            var cmd1 = con.Insert(Model_0)
                 .Value(new Model_0() {
                     ID= 12, //<= this shold not take in consideration because it's primary key of the entity
                     Model1ID =1,
@@ -886,7 +886,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Set(Model_0, 12)
+            var cmd1 = con.Update(Model_0, 12)
                 .Value(new Dictionary<string, object>() {
                     {"ID","asd"}, //<= this shold not take in consideration because it's primary key of the entity
                     {"Model1ID","1" },
@@ -914,7 +914,7 @@ namespace Storm.Test.TestUnits
             var compiler = new SqlServerCompiler();
             var con = storm.OpenConnection(new EmptyConnection());
 
-            var cmd1 = con.Set(Model_0, 12)
+            var cmd1 = con.Update(Model_0, 12)
                 .Value(new Model_0()
                 {
                     ID = 12, //<= this shold not take in consideration because it's primary key of the entity

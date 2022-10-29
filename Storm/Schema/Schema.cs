@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using System.Data;
 using Storm.Filters;
 using System.Linq;
@@ -13,15 +14,11 @@ namespace Storm.Schema
         internal Object monitor = new object();
         internal Dictionary<long, SchemaInstance> _schemas;
         internal long _current = 0;
-#pragma warning disable IDE0052 // Remove unread private members
-        private readonly System.Threading.Timer timer;
-#pragma warning restore IDE0052 // Remove unread private members
 
         public Schema()
         {
             _schemas = new Dictionary<long, SchemaInstance>();
             _schemas.Add(_current, new SchemaInstance());
-            timer = new System.Threading.Timer(Clear, this, 0, 1800 * 1000);
         }
 
         public SchemaNavigator GetNavigator()
@@ -39,18 +36,20 @@ namespace Storm.Schema
                 {
                     _schemas.Add(r.ticks, r.schemaInstance);
                     _current = r.ticks;
+                    Task.Delay(5 * 60 * 1000)
+                        .ContinueWith((t) => Task.Factory.StartNew(Clear));
                 }
             }
         }
 
-        private static void Clear(object state)
+        private void Clear()
         {
-            lock (((Schema)state).monitor)
+            lock (monitor)
             {
-                ((Schema)state)._schemas.Keys
-                    .Where(k => k != ((Schema)state)._current)
+                _schemas.Keys
+                    .Where(k => k != _current)
                     .ToList()
-                    .ForEach(k => ((Schema)state)._schemas.Remove(k));
+                    .ForEach(k => _schemas.Remove(k));
             }
          }
 

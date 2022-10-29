@@ -169,7 +169,7 @@ namespace Storm.Test.PublicAPI
         {
             using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                var r = con.Set("Task")
+                var r = con.Insert("Task")
                     .Value(new Task()
                     {
                         Completed = false,
@@ -209,7 +209,7 @@ namespace Storm.Test.PublicAPI
 
                 var task = con.Get("Task").Where(f => f["ID"].EqualTo.Val(1)).Execute().First();
 
-                var r = con.Set("Task", task.ID)
+                var r = con.Update("Task", task.ID)
                     .Value(new Task()
                     {
                         Completed = task.Completed,
@@ -246,7 +246,7 @@ namespace Storm.Test.PublicAPI
             using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
             {
 
-                var r = con.Set("Task", 99999) // id not exists!!
+                var r = con.Update("Task", 99999) // id not exists!!
                     .Value(new Task()
                     {
                         Completed = false,

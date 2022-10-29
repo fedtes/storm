@@ -64,7 +64,7 @@ namespace Storm.Execution
         /// </summary>
         /// <param name="EntityIdentifier"></param>
         /// <returns></returns>
-        public SetCommand Set(String EntityIdentifier)
+        public SetCommand Insert(String EntityIdentifier)
         {
             return new SetCommand(connection.ctx, EntityIdentifier)
             {
@@ -80,7 +80,7 @@ namespace Storm.Execution
         /// <param name="EntityIdentifier"></param>
         /// <param name="id"></param>
         /// <returns></returns>
-        public SetCommand Set(String EntityIdentifier, object id)
+        public SetCommand Update(String EntityIdentifier, object id)
         {
             return new SetCommand(connection.ctx, EntityIdentifier, id)
             {
