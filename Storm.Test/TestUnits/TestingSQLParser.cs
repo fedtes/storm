@@ -6,6 +6,7 @@ using SqlKata.Compilers;
 using Storm.Schema;
 using Storm.Test.MockAndModels;
 using Xunit;
+using Xunit.Sdk;
 
 namespace Storm.Test.TestUnits
 {
@@ -817,6 +818,30 @@ namespace Storm.Test.TestUnits
 
             // Previusly Calculated check sum integrity
             Assert.Equal("C5E2C68D6792A7C0CD4C3CDC768A1825", Helpers.Checksum(sql1));
+
+        }
+
+        [Fact]
+        public void Parse_GetProjection_Using_Pagination()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+
+            var cmd1 = con.Projection(Model_1)
+                .Select("ID")
+                .Select("Child_2.{data, ParentID}")
+                .ForPage(2, 500);
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            var fake_cmd = new System.Data.SqlClient.SqlCommand();
+            cmd1.PopulateCommandText(fake_cmd, result1);
+            string sql1 = fake_cmd.CommandText;
+            // Previusly Calculated check sum integrity
+            Assert.Equal("C44EC84B6E5D1A6E8592D4FD5F7A8BC1", Helpers.Checksum(sql1));
 
         }
 

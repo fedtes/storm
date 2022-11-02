@@ -4,9 +4,11 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using SqlKata;
 using Storm.Execution;
 using Storm.Helpers;
 using Storm.Schema;
+using Storm.SQLParser;
 
 namespace Storm.Execution
 {
@@ -14,6 +16,7 @@ namespace Storm.Execution
     {
         const String valudationPath = @"^([^ .{},[\]*]\.?)*([^*.[\]]+|\*)$";
         protected List<SelectNode> selectFields = new List<SelectNode>();
+        internal Query coreQuery = null;
 
         public SelectCommand(Context ctx, string from) : base(ctx, from) { }
 
@@ -60,12 +63,43 @@ namespace Storm.Execution
 
         internal override void ParseSQL()
         {
-            base.ParseSQL();
+            SQLWhereParser whereParser = new SQLWhereParser(from, where, ctx, query);
+            query = whereParser.Parse();
+
+            SQLFromParser fromParser = new SQLFromParser(from, ctx, query);
+            query = fromParser.Parse();
 
             foreach (var field in selectFields)
             {
                 base.query.Select($"{field.Alias}.{field.DBName} AS {field.Alias}${field.CodeName}");
             }
+
+            if (paging != (-1,-1))
+            {
+                coreQuery = query.Clone();
+                SQLPagingParser pagingParser = new SQLPagingParser(paging, ctx, query);
+                query = pagingParser.Parse();
+            }
+
+            if (orderBy != null && orderBy.Any())
+            {
+                SQLOrderByParser orderByParser = new SQLOrderByParser(orderBy, ctx, query);
+                query = orderByParser.Parse();
+            } 
+            else if (paging != (-1, -1))
+            {
+                var pk = new SelectNode()
+                {
+                    EntityField = this.from.root.Entity.PrimaryKey,
+                    FullPath = new FieldPath(this.rootEntity, String.Empty, this.from.root.Entity.PrimaryKey.CodeName),
+                    FromNode = this.from.root
+                };
+                SQLOrderByParser orderByParser = 
+                    new SQLOrderByParser(new List<(SelectNode, bool)>() { { (pk, true) } }, ctx, query);
+                query = orderByParser.Parse();
+            }
+
+            
         }
 
         internal override object Read(IDataReader dataReader)
@@ -78,6 +112,48 @@ namespace Storm.Execution
         public new StormDataSet Execute()
         {
             return (StormDataSet)base.Execute();
+        }
+
+
+        internal override void PopulateCommandText(IDbCommand cmd, SqlResult result)
+        {
+            if (this.paging != (-1, -1))
+            {
+                SqlResult coreQueryResult = compiler.Compile(coreQuery);
+                string coreSql = coreQueryResult.Sql;
+                string fullSql = @"SELECT COUNT(*) " + Environment.NewLine
+                    + "(" + Environment.NewLine
+                    + coreSql
+                    + ") A;";
+                cmd.CommandText = result.Sql + ";" + Environment.NewLine + fullSql;
+            }
+            else
+            {
+                base.PopulateCommandText(cmd, result);
+            }
+        }
+
+        protected override object ExecuteQuery(IDbCommand cmd)
+        {
+            if (this.paging != (-1, -1))
+            {
+                using (var reader = cmd.ExecuteReader())
+                {
+                    this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Executed\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
+                    StormDataSet r = (StormDataSet)Read(reader);
+
+                    if (reader.NextResult() && reader.Read())
+                    {
+                        r.rowCount = reader.GetInt32(0);
+                    }
+                    return r;
+                }
+
+            }
+            else
+            {
+                return base.ExecuteQuery(cmd);
+            }
         }
     }
 }

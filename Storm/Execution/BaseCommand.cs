@@ -44,25 +44,10 @@ namespace Storm.Execution
 
             try
             {
-                compiler = compiler == null ? new SqlServerCompiler() : compiler;
-                this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Selected Compiler\", \"Time\":\"{sw.ElapsedMilliseconds}\", \"Compiler\":\"{compiler.GetType().Name}\" }}");
-
-                this.ParseSQL();
-                this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Parsed SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
-
-                SqlResult result = compiler.Compile(query);
-
                 cmd = connection.connection.CreateCommand();
-                cmd.CommandText = result.Sql;
-                
-
-                foreach (var binding in result.NamedBindings)
-                {
-                    var p = cmd.CreateParameter();
-                    p.ParameterName = binding.Key;
-                    p.Value = binding.Value;
-                    cmd.Parameters.Add(p);
-                }
+                SqlResult result = Compile();
+                PopulateCommandText(cmd, result);
+                BindParameters(cmd, result);
 
                 this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Compiled SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
                 this.CommandLog(LogLevel.Debug, "Command", $"{{\"SQL\":\"{result.Sql}\", \"Params\":\"{result.NamedBindings.Select(nb => nb.Key + "=" + nb.Value)}\" }}");
@@ -79,11 +64,7 @@ namespace Storm.Execution
             {
                 this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Execute\", \"Transaction\":\"{(isLocalTransaction ? "Local" : "External")}\"}}");
                 cmd.Transaction = transaction.transaction;
-                using (var reader = cmd.ExecuteReader())
-                {
-                    this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Executed\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
-                    return Read(reader);
-                }
+                return ExecuteQuery(cmd);
             }
             catch (Exception ex)
             {
@@ -100,6 +81,42 @@ namespace Storm.Execution
             
         }
 
+        protected virtual object ExecuteQuery(IDbCommand cmd)
+        {
+            using (var reader = cmd.ExecuteReader())
+            {
+                this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Executed\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
+                return Read(reader);
+            }
+        }
+
+        protected virtual void BindParameters(IDbCommand cmd, SqlResult result)
+        {
+            foreach (var binding in result.NamedBindings)
+            {
+                var p = cmd.CreateParameter();
+                p.ParameterName = binding.Key;
+                p.Value = binding.Value;
+                cmd.Parameters.Add(p);
+            }
+        }
+
+        internal virtual void PopulateCommandText(IDbCommand cmd, SqlResult result)
+        {
+            cmd.CommandText = result.Sql;
+        }
+
+        protected virtual SqlResult Compile()
+        {
+            compiler = compiler == null ? new SqlServerCompiler() : compiler;
+            this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Selected Compiler\", \"Time\":\"{sw.ElapsedMilliseconds}\", \"Compiler\":\"{compiler.GetType().Name}\" }}");
+
+            this.ParseSQL();
+            this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Parsed SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
+
+            SqlResult result = compiler.Compile(query);
+            return result;
+        }
     }
 
 }

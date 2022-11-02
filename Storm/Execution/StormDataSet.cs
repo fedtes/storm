@@ -27,6 +27,8 @@ namespace Storm.Execution
 
         internal IList<Object[]> data;
 
+        internal int? rowCount;
+
         public StormDataSet(String Root)
         {
             this.root = Root;
@@ -82,6 +84,15 @@ namespace Storm.Execution
         IEnumerator IEnumerable.GetEnumerator()
         {
             return (IEnumerator)this.GetEnumerator();
+        }
+
+        /// <summary>
+        /// Return the row count of the query result. If a pagination is used this number return the total rows as if pagination is not used.
+        /// </summary>
+        /// <returns></returns>
+        public int RowCount()
+        {
+            return rowCount == null ? data.Count : rowCount.Value; 
         }
 
         private (string, string) splitColumnName(string name)
