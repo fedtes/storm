@@ -50,7 +50,7 @@ namespace Storm.Execution
                 BindParameters(cmd, result);
 
                 this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Compiled SQL\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
-                this.CommandLog(LogLevel.Debug, "Command", $"{{\"SQL\":\"{result.Sql}\", \"Params\":\"{result.NamedBindings.Select(nb => nb.Key + "=" + nb.Value)}\" }}");
+                this.CommandLog(LogLevel.Debug, "Command", $"{{\"SQL\":\"{Util.JSONClean(cmd.CommandText)}\", \"Params\":\"{Util.JSONClean(String.Join("|",result.NamedBindings.Select(nb => nb.Key + "=" + nb.Value)))}\" }}");
             }
             catch (Exception ex)
             {

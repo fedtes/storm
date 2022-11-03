@@ -822,7 +822,30 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_Using_Pagination()
+        public void Parse_GetProjection_Using_Pagination1()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+
+            var cmd1 = con.Projection(Model_1)
+                .Select("ID")
+                .Select("Child_2.{data, ParentID}")
+                .ForPage(1, 500);
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            var fake_cmd = new System.Data.SqlClient.SqlCommand();
+            cmd1.PopulateCommandText(fake_cmd, result1);
+            string sql1 = fake_cmd.CommandText;
+            // Previusly Calculated check sum integrity
+            Assert.Equal("A44F4C1925EB57D7A5568B1B7491CDDD", Helpers.Checksum(sql1));
+        }
+
+        [Fact]
+        public void Parse_GetProjection_Using_Pagination2()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
@@ -841,10 +864,32 @@ namespace Storm.Test.TestUnits
             cmd1.PopulateCommandText(fake_cmd, result1);
             string sql1 = fake_cmd.CommandText;
             // Previusly Calculated check sum integrity
-            Assert.Equal("C44EC84B6E5D1A6E8592D4FD5F7A8BC1", Helpers.Checksum(sql1));
-
+            Assert.Equal("F4E725C4C7225A7115FB9272A4727F29", Helpers.Checksum(sql1));
         }
 
+        [Fact]
+        public void Parse_GetProjection_Using_Pagination3()
+        {
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            var compiler = new SqlServerCompiler();
+            var con = storm.OpenConnection(new EmptyConnection());
+
+
+            var cmd1 = con.Projection(Model_1)
+                .Select("ID")
+                .Select("Child_2.{data, ParentID}")
+                .OrderBy("Child_2.ID")
+                .ForPage(2, 500);
+
+            cmd1.ParseSQL();
+            SqlResult result1 = compiler.Compile(cmd1.query);
+            var fake_cmd = new System.Data.SqlClient.SqlCommand();
+            cmd1.PopulateCommandText(fake_cmd, result1);
+            string sql1 = fake_cmd.CommandText;
+            // Previusly Calculated check sum integrity
+            Assert.Equal("23662B1C3314AA9ED4805B976CDE1E45", Helpers.Checksum(sql1));
+        }
 
         [Fact]
         public void Parse_SetCommand_Insert()

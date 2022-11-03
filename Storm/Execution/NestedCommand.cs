@@ -13,7 +13,7 @@ namespace Storm.Execution
 
         internal SelectNode outputField = null;
 
-        public NestedCommand(Context ctx, string from) : base(ctx, from) { }
+        internal NestedCommand(Context ctx, string from) : base(ctx, from) { }
 
         internal override void ParseSQL()
         {

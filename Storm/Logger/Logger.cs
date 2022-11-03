@@ -15,10 +15,24 @@ namespace Storm
 
     public class LogEvent
     {
+        /// <summary>
+        /// Identifier composed of {ConnectionID}.{TransactionID}.{CommandID}. "0000000" means that connection or transaction is null for that log event.
+        /// </summary>
         public string EventID { get; internal set; }
+
+        /// <summary>
+        /// DateTime when the event is traced. Use this in case of deferred log writing.
+        /// </summary>
         public DateTime EventTime { get; internal set; }
         public LogLevel Level { get; internal set; }
+        /// <summary>
+        /// Class that invoke the log event
+        /// </summary>
         public String Source { get; internal set; }
+
+        /// <summary>
+        /// json string containing log information
+        /// </summary>
         public String Payload { get; internal set; }
     }
 

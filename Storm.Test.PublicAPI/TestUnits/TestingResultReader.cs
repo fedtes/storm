@@ -39,6 +39,56 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
+        public void Should_Read_Paginated_Projection_Result()
+        {
+            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            {
+                StormDataSet r = con.Projection("User")
+                    .Select("{FirstName, LastName}")
+                    .ForPage(1,5)
+                    .Execute();
+
+                Assert.Equal(5, r.Count());
+                Assert.Equal("Kaila", r.Last()["FirstName"]);
+
+            }
+        }
+
+        [Fact]
+        public void Should_Read_Paginated_Projection_Result_2()
+        {
+            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            {
+                StormDataSet r = con.Projection("User")
+                    .Select("{FirstName, LastName}")
+                    .ForPage(2, 5)
+                    .Execute();
+
+                Assert.Equal(5, r.Count());
+                Assert.Equal("Katerine", r.Last()["FirstName"]);
+
+            }
+        }
+
+        [Fact]
+        public void Should_Read_Paginated_Projection_Result_3()
+        {
+            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            {
+                StormDataSet r = con.Projection("User")
+                    .Select("{FirstName, LastName}")
+                    .ForPage(2, 5)
+                    .OrderBy("ID",false)
+                    .Where(x => x["ID"].LessOrEqualTo.Val(10))
+                    .Execute();
+
+                Assert.Equal(5, r.Count());
+                Assert.Equal("Goldarina", r.Last()["FirstName"]);
+
+            }
+        }
+
+        [Fact]
         public void Should_Read_Get_Result_OneModel_Single()
         {
             using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))

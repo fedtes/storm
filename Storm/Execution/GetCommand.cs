@@ -16,7 +16,7 @@ namespace Storm.Execution
     {
         internal List<Origin> requests = new List<Origin>();
 
-        public GetCommand(Context ctx, String from) : base(ctx, from)
+        internal GetCommand(Context ctx, String from) : base(ctx, from)
         {
             requests.Add(base.from.root);
         }

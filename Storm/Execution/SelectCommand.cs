@@ -14,12 +14,20 @@ namespace Storm.Execution
 {
     public class SelectCommand : Command<SelectCommand>
     {
-        const String valudationPath = @"^([^ .{},[\]*]\.?)*([^*.[\]]+|\*)$";
         protected List<SelectNode> selectFields = new List<SelectNode>();
-        internal Query coreQuery = null;
+        internal Query CoreQuery = null;
 
-        public SelectCommand(Context ctx, string from) : base(ctx, from) { }
+        internal SelectCommand(Context ctx, string from) : base(ctx, from) { }
 
+        /// <summary>
+        /// Define the output column of the command by declaring the path of the field to get such my.path.to.field. 
+        /// To request multiple columns invoke this method that many times.
+        /// </summary>
+        /// <remarks>
+        /// Allow also the following syntax my.path.to.{field1, field2} to extract more field at once and my.path.to.* to get all
+        /// </remarks>
+        /// <param name="requestPath"></param>
+        /// <returns></returns>
         public SelectCommand Select(string requestPath)
         {
             var _requestPath = new EntityPath(from.root.Entity.ID, requestPath).Path;
@@ -57,7 +65,7 @@ namespace Storm.Execution
                 selectFields.AddRange(fields);
             }
 
-            ((BaseCommand)this).CommandLog(LogLevel.Info, "SelectCommand", $"{{\"Action\":\"Select\", \"Path\":\"{requestPath}\"}}");
+            ((BaseCommand)this).CommandLog(LogLevel.Info, "SelectCommand", $"{{\"Action\":\"Select\", \"Path\":\"{Util.JSONClean(requestPath)}\"}}");
             return this;
         }
 
@@ -76,7 +84,7 @@ namespace Storm.Execution
 
             if (paging != (-1,-1))
             {
-                coreQuery = query.Clone();
+                CoreQuery = query.Clone();
                 SQLPagingParser pagingParser = new SQLPagingParser(paging, ctx, query);
                 query = pagingParser.Parse();
             }
@@ -119,10 +127,10 @@ namespace Storm.Execution
         {
             if (this.paging != (-1, -1))
             {
-                SqlResult coreQueryResult = compiler.Compile(coreQuery);
+                SqlResult coreQueryResult = compiler.Compile(CoreQuery);
                 string coreSql = coreQueryResult.Sql;
                 string fullSql = @"SELECT COUNT(*) " + Environment.NewLine
-                    + "(" + Environment.NewLine
+                    + "FROM (" + Environment.NewLine
                     + coreSql
                     + ") A;";
                 cmd.CommandText = result.Sql + ";" + Environment.NewLine + fullSql;

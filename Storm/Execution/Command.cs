@@ -56,6 +56,14 @@ namespace Storm.Execution
 
         }
 
+        /// <summary>
+        /// Include additional entities in the command. If a Get command is used, each entity is extracted.
+        /// </summary>
+        /// <remarks>
+        /// There must be a valid connection between the Root entity and the one requested in the schema.
+        /// </remarks>
+        /// <param name="requestPath"></param>
+        /// <returns></returns>
         public virtual C With(String requestPath)
         {
             from.Resolve(requestPath);
@@ -63,6 +71,18 @@ namespace Storm.Execution
             return (C)(BaseCommand)this;
         }
 
+        /// <summary>
+        /// Define a filter that will be applied to the command. Calling this method more times put the various filters in And relationship.
+        /// </summary>
+        /// <remarks>
+        /// Filter is described by a lambda such as 
+        /// <code>x => x["my.path.to.field"].EqualTo.Val("abc")</code>
+        /// <para>
+        /// Use '*' ("And"), '+' ("Or"), () ("Brackets") operator to describe boolean expressions.
+        /// </para>
+        /// </remarks>
+        /// <param name="where"></param>
+        /// <returns></returns>
         public virtual C Where(Func<FilterContext, Filter> where)
         {
             if (this.where == null)
@@ -73,6 +93,13 @@ namespace Storm.Execution
             return (C)(BaseCommand)this;
         }
 
+        /// <summary>
+        /// Add an order to your command. You can order by multiple field by calling this method many times.
+        /// </summary>
+        /// <param name="requestPath"></param>
+        /// <param name="asc"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public virtual C OrderBy(String requestPath, bool asc = true)
         {
             var _requestPath = new EntityPath(from.root.Entity.ID, requestPath).Path;
@@ -81,7 +108,7 @@ namespace Storm.Execution
             (string[], string) item;
 
             if (p.Count() > 1)
-                throw new ArgumentException("Only one field should be used in OrderBy. If you need more field in you're OrderBy call this method multiple times.");
+                throw new ArgumentException("Only one field should be used in OrderBy. If you need more field in your OrderBy then call this method multiple times.");
             else if (p.Count() == 0)
                 throw new ArgumentException("At least one field should be used in OrderBy");
             else
@@ -102,6 +129,16 @@ namespace Storm.Execution
             return (C)(BaseCommand)this;
         }
 
+        /// <summary>
+        /// Slice the result in page. <paramref name="page"/> is a 1 index base page number where each page size is basede on <paramref name="pageSize"/>. 
+        /// </summary>
+        /// <remarks>
+        /// If no OrderBy is specified for the command a default order is icluded as root Entity primary key order by asc
+        /// </remarks>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public virtual C ForPage(int page, int pageSize)
         {
             if (page < 1)

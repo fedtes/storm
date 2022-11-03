@@ -5,7 +5,7 @@ using System.Text;
 namespace Storm.Plugin
 {
     /// <summary>
-    /// Implement this to regiter a logging service to storm
+    /// Implement this to register a logging service to storm
     /// </summary>
     public interface ILogService
     {
