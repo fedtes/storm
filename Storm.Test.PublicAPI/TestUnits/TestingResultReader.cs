@@ -319,5 +319,36 @@ namespace Storm.Test.PublicAPI
         }
 
 
+        /* ----  Testing Nullable values ---- */
+
+        public class NullableTask
+        {
+            [Schema.StormPrimaryKey]
+            public int ID;
+            public int? UserID;
+            public string TaskType;
+            public bool? Completed;
+            [Schema.StormColumnName("ShortDesc")]
+            public string Subject;
+            public DateTime? DateStart;
+            public DateTime? DateEnd;
+        }
+
+        [Fact]
+        public void It_ShouldReadNullable_Types()
+        {
+            var s = new Storm(SQLEngine.SQLite);
+            s.EditSchema(e => e.Add<NullableTask>("Task", "Tasks"));
+            using (var con = s.OpenConnection(PrepMethods.PrepareDB()))
+            {
+                NullableTask nt =  con.Get("Task").ForPage(1, 1).Execute().First().GetModel<NullableTask>();
+                Assert.NotNull(nt.UserID);
+                Assert.NotNull(nt.Completed);
+                Assert.NotNull(nt.DateStart);
+                Assert.NotNull(nt.DateEnd);
+            }
+        }
+
+
     }
 }

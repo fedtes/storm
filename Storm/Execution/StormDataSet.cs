@@ -136,7 +136,8 @@ namespace Storm.Execution
                         {
                             try
                             {
-                                var x = Convert.ChangeType(dataReader.GetValue(i), selectNode.EntityField.CodeType);
+                                var t = Nullable.GetUnderlyingType(selectNode.EntityField.CodeType) ?? selectNode.EntityField.CodeType;
+                                var x = Convert.ChangeType(dataReader.GetValue(i), t);
                                 dataRow[i] = x;
                             }
                             catch (InvalidCastException)
