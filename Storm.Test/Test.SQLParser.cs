@@ -4,7 +4,6 @@ using System.Text;
 using SqlKata;
 using SqlKata.Compilers;
 using Storm.Schema;
-using Storm.Test.MockAndModels;
 using Xunit;
 using Xunit.Sdk;
 
@@ -12,7 +11,6 @@ namespace Storm.Test.TestUnits
 {
     public class TestingSQLParser
     {
-
         /*
          * Sample testing schema
          *  Model_1

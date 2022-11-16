@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Storm;
 using Storm.Schema;
 
-namespace Storm.Test.MockAndModels
+namespace Storm.Test
 {
     public class TestModel
     {
@@ -22,7 +21,7 @@ namespace Storm.Test.MockAndModels
         [StormDefaultIfNull("Some Default Value")]
         public string DefaultedField;
 
-        [StormColumnType(System.Data.DbType.String,50)]
+        [StormColumnType(System.Data.DbType.String, 50)]
         public string SpecifiedType;
 
         [StormColumnAccess(ColumnAccess.ReadOnly)]

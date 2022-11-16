@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 
-namespace Storm.Test.MockAndModels
+namespace Storm.Test
 {
     public class EmptyConnection : IDbConnection
     {
         private string _x;
-        public string ConnectionString { get => "MOCK CONNECTION STRING" ; set => _x = value ; }
+        public string ConnectionString { get => "MOCK CONNECTION STRING"; set => _x = value; }
 
         public int ConnectionTimeout => 0;
 
@@ -47,28 +47,6 @@ namespace Storm.Test.MockAndModels
         }
 
         public void Open()
-        {
-            //throw new NotImplementedException();
-        }
-    }
-
-    public class EmptyTransaction : IDbTransaction
-    {
-        public IDbConnection Connection => new EmptyConnection();
-
-        public IsolationLevel IsolationLevel => IsolationLevel.Chaos;
-
-        public void Commit()
-        {
-            //throw new NotImplementedException();
-        }
-
-        public void Dispose()
-        {
-            //throw new NotImplementedException();
-        }
-
-        public void Rollback()
         {
             //throw new NotImplementedException();
         }

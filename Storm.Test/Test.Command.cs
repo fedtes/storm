@@ -186,7 +186,7 @@ namespace Storm.Test
                     .Add<User>("User", "Users")
                     .Add<Organization>("Organization", "Organizations")
                     .Add<Language>("Language", "Languages")
-                    .Add("AppointmentCf", "AppointmentCustomFields", SchemaTest.AppointmentCustomFields)
+                    .Add("AppointmentCf", "AppointmentCustomFields", TestingSchema.AppointmentCustomFields)
                     .Connect("Contact", "Appointment", "Contact", "ContactID", "ID")
                     .Connect("OwnerUser","Contact", "User", "OwnerUserID", "ID")
                     .Connect("AssignedUser", "Appointment", "User", "AssignedUserID", "ID")

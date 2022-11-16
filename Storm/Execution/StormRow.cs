@@ -10,9 +10,9 @@ namespace Storm.Execution
     public class StormRow : IEnumerable<KeyValuePair<string, object>>
     {
         internal readonly StormDataSet parent;
-        private readonly int index;
-        private readonly int min = 0;
-        private readonly int max;
+        internal readonly int index;
+        internal readonly int min = 0;
+        internal readonly int max;
 
         internal StormRow(StormDataSet parent, int index)
         {

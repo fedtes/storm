@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Storm;
 using Storm.Schema;
 
-namespace Storm.Test.MockAndModels
+namespace Storm.Test
 {
     public class Model_0
     {
