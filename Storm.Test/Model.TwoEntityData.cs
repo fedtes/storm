@@ -1,9 +1,86 @@
-﻿using System;
+﻿using Storm.Execution;
+using Storm.Origins;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using Storm.Schema;
 
 namespace Storm.Test
 {
-    public class TwoEntityMockDataSources
+    public class MockResult_TwoEntity_1To1
     {
+        public static void DefineSchema(out Storm s, out Context ctx, out StormDataSet data, out List<SelectNode> nodes)
+        {
+            s = MonoEntityMockDataSources.StormDefine();
+            ctx = s.CreateContext();
+            var entity = ctx.Navigator.GetEntity("Test");
+            var entity2 = ctx.Navigator.GetEntity("Test2");
+            Origin fromNode1 = new Origin()
+            {
+                Alias = "A1",
+                children = new List<Origin>(),
+                Entity = entity,
+                Edge = null,
+                FullPath = new Schema.EntityPath("Test", "")
+            };
+
+            Origin fromNode2 = new Origin()
+            {
+                Alias = "A2",
+                children = new List<Origin>(),
+                Entity = entity2,
+                Edge = null,
+                FullPath = new Schema.EntityPath("Test", "ExtraInfos")
+            };
+
+
+            var _idField = entity.entityFields.First(x => x.CodeName == "ID");
+            var _FirstName = entity.entityFields.First(x => x.CodeName == "FirstName");
+            var _LastName = entity.entityFields.First(x => x.CodeName == "LastName");
+            var _Email = entity.entityFields.First(x => x.CodeName == "Email");
+            var _Mobile = entity.entityFields.First(x => x.CodeName == "Mobile");
+            var _Phone = entity.entityFields.First(x => x.CodeName == "Phone");
+            var _Addre = entity.entityFields.First(x => x.CodeName == "Address");
+
+
+            var _ID2 = entity2.entityFields.First(x => x.CodeName == "ID");
+            var _ParentID = entity2.entityFields.First(x => x.CodeName == "ParentID");
+            var _Info1 = entity2.entityFields.First(x => x.CodeName == "Info1");
+            var _Info2 = entity2.entityFields.First(x => x.CodeName == "Info2");
+            var _Info3 = entity2.entityFields.First(x => x.CodeName == "Info3");
+
+            data = new StormDataSet("Test");
+            nodes = new List<SelectNode>()
+            {
+                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","ID"), EntityField = _idField},
+                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","FirstName"), EntityField = _FirstName},
+                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","LastName"), EntityField = _LastName},
+                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","Email"), EntityField = _Email},
+                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","Mobile"), EntityField = _Mobile},
+                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","Phone"), EntityField = _Phone},
+                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","Address"), EntityField = _Addre},
+
+                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","ID"), EntityField = _ID2},
+                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","ParentID"), EntityField = _ParentID},
+                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","Info1"), EntityField = _Info1},
+                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","Info2"), EntityField = _Info2},
+                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","Info3"), EntityField = _Info3}
+            };
+        }
+
+        public static (Storm, Context, StormDataSet) PrepareDataSet()
+        {
+            Storm s;
+            Context ctx;
+            StormDataSet data;
+            List<SelectNode> nodes;
+            DefineSchema(out s, out ctx, out data, out nodes);
+
+            data.ReadData(new MockResult_TwoEntity_1To1().GetReader(), nodes);
+            return (s, ctx, data);
+        }
+
+
         public MockReader GetReader() => new MockReader(source, names);
 
         public String[] names = new string[]
@@ -49,8 +126,22 @@ namespace Storm.Test
 
     }
 
-    public class TwoEntityMockDataSources2
+    public class MockResult_2Entities_1ToManyRelation
     {
+
+        public static (Storm, Context, StormDataSet) PrepareDataSet()
+        {
+            Storm s;
+            Context ctx;
+            StormDataSet data;
+            List<SelectNode> nodes;
+            MockResult_TwoEntity_1To1.DefineSchema(out s, out ctx, out data, out nodes);
+
+            data.ReadData(new MockResult_2Entities_1ToManyRelation().GetReader(), nodes);
+            return (s, ctx, data);
+        }
+
+
         public MockReader GetReader() => new MockReader(source, names);
 
         public String[] names = new string[]
@@ -80,4 +171,138 @@ namespace Storm.Test
         };
 
     }
+
+    public class MockResult_3Entities_1ToManyRelation
+    {
+        public static (Storm, Context, StormDataSet) PrepareDataSet()
+        {
+            var s = new Storm(SQLEngine.SQLite);
+            s.EditSchema(x =>
+            {
+                return x.Add("E1", "E1", y => y.AddPrimary("ID", typeof(int)).Add("FirstName", typeof(string)))
+                .Add("E2", "E2", y => y.AddPrimary("InfoID", typeof(int)).Add("ParentID", typeof(int)))
+                .Add("E3", "E3", y => y.AddPrimary("InfoID", typeof(int)).Add("ParentID", typeof(int)))
+                .Add("E4", "E4", y => y.AddPrimary("ExtraID", typeof(int)).Add("ParentID", typeof(int)))
+                .Connect("Info1", "E1", "E2", "ID", "ParentID")
+                .Connect("Info2", "E1", "E3", "ID", "ParentID")
+                .Connect("Extra", "E2", "E4", "InfoID", "ParentID");
+            });
+            var data = new StormDataSet("E1");
+            var ctx = s.CreateContext();
+            Origin n1 = new Origin()
+            {
+                Alias = "A1",
+                children = new List<Origin>(),
+                Entity = ctx.Navigator.GetEntity("E1"),
+                Edge = null,
+                FullPath = new Schema.EntityPath("E1", "")
+            };
+
+            Origin n2 = new Origin()
+            {
+                Alias = "A2",
+                children = new List<Origin>(),
+                Entity = ctx.Navigator.GetEntity("E2"),
+                Edge = null,
+                FullPath = new Schema.EntityPath("E1", "Info1")
+            };
+
+            Origin n3 = new Origin()
+            {
+                Alias = "A3",
+                children = new List<Origin>(),
+                Entity = ctx.Navigator.GetEntity("E3"),
+                Edge = null,
+                FullPath = new Schema.EntityPath("E1", "Info2")
+            };
+
+            Origin n4 = new Origin()
+            {
+                Alias = "A4",
+                children = new List<Origin>(),
+                Entity = ctx.Navigator.GetEntity("E4"),
+                Edge = null,
+                FullPath = new Schema.EntityPath("E1", "Info1.Extra")
+            };
+
+            var nodes = new List<SelectNode>()
+            {
+                new SelectNode()
+                {
+                    FromNode = n1,
+                    FullPath = new FieldPath("E1","","ID"),
+                    EntityField = n1.Entity.entityFields.First(x => x.CodeName == "ID")
+                },
+                new SelectNode()
+                {
+                    FromNode = n1,
+                    FullPath = new FieldPath("E1","","FirstName"),
+                    EntityField = n1.Entity.entityFields.First(x => x.CodeName == "FirstName")
+                },
+                new SelectNode()
+                {
+                    FromNode = n2,
+                    FullPath = new FieldPath("E1","Info1","InfoID"),
+                    EntityField = n2.Entity.entityFields.First(x => x.CodeName == "InfoID")
+                },
+                new SelectNode()
+                {
+                    FromNode = n2,
+                    FullPath = new FieldPath("E1","Info1","ParentID"),
+                    EntityField = n2.Entity.entityFields.First(x => x.CodeName == "ParentID")
+                },
+                new SelectNode()
+                {
+                    FromNode = n3,
+                    FullPath = new FieldPath("E1","Info2","InfoID"),
+                    EntityField = n3.Entity.entityFields.First(x => x.CodeName == "InfoID")
+                },
+                new SelectNode()
+                {
+                    FromNode = n3,
+                    FullPath = new FieldPath("E1","Info2","ParentID"),
+                    EntityField = n3.Entity.entityFields.First(x => x.CodeName == "ParentID")
+                },
+                new SelectNode()
+                {
+                    FromNode = n4,
+                    FullPath = new FieldPath("E1","Info1.Extra","ExtraID"),
+                    EntityField = n4.Entity.entityFields.First(x => x.CodeName == "ExtraID")
+                },
+                new SelectNode()
+                {
+                    FromNode = n4,
+                    FullPath = new FieldPath("E1","Info1.Extra","ParentID"),
+                    EntityField = n4.Entity.entityFields.First(x => x.CodeName == "ParentID")
+                },
+            };
+
+            data.ReadData(new MockResult_3Entities_1ToManyRelation().GetReader(), nodes);
+            return (s, ctx, data);
+        }
+
+        public MockReader GetReader() => new MockReader(source, names);
+
+        public string[] names = new string[]
+        {
+            "A1$ID",
+            "A1$FirstName",
+            "A2$InfoID",
+            "A2$ParentID",
+            "A3$InfoID",
+            "A3$ParentID",
+            "A4$ExtraID",
+            "A4$ParentID"
+        };
+
+        public object[][] source = new object[][] 
+        {                                 // 1, 2, 1, 2, 1, 2
+            new object[] {1,"Mario", 1, 1, null, null, 1, 1},
+            new object[] {1,"Mario", 1, 1, null, null, 2, 1},
+            new object[] {1,"Mario", 2, 1, 2, 1, 3, 2},
+            new object[] {1,"Mario", 3, 1, 2, 1, null, null }
+        }; 
+    }
+
+
 }

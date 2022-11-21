@@ -66,7 +66,7 @@ namespace Storm.Test
 
         public object GetValue(int i) => source[row][i];
 
-        public bool IsDBNull(int i) => false;
+        public bool IsDBNull(int i) => source[row][i] == null;
 
         public bool Read()
         {

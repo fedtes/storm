@@ -16,7 +16,7 @@ namespace Storm.Test
         [Fact]
         public void SelectResult_DataSetRead()
         {
-            (Storm s, Context nav, StormDataSet data) = PrepareDataSet();
+            (Storm s, Context nav, StormDataSet data) = MonoEntityMockDataSources.PrepareDataSet();
 
             Assert.Equal(18, data.Count());
             Assert.Equal(1, data.First()["ID"]);
@@ -29,7 +29,7 @@ namespace Storm.Test
         [Fact]
         public void GetResult_DataSetRead()
         {
-            (Storm s, Context ctx, StormDataSet data) = PrepareDataSet();
+            (Storm s, Context ctx, StormDataSet data) = MonoEntityMockDataSources.PrepareDataSet();
             GetCommand cmd = new GetCommand(ctx, "Test");
 
             var res = GetCommandHelpers.ToResults(data, ctx, cmd.requests, cmd.from).Cast<dynamic>();
@@ -45,7 +45,7 @@ namespace Storm.Test
         [Fact]
         void GetResult_DataSetRead_2Entities()
         {
-            (Storm s, Context ctx, StormDataSet data) = PrepareDataSet2();
+            (Storm s, Context ctx, StormDataSet data) = MockResult_TwoEntity_1To1.PrepareDataSet();
             GetCommand cmd = new GetCommand(ctx, "Test");
             cmd.With("ExtraInfos");
 
@@ -71,7 +71,7 @@ namespace Storm.Test
         [Fact]
         void GetResult_DataSetRead_2Entities_MultiRelation()
         {
-            (Storm s, Context ctx, StormDataSet data) = PrepareDataSet3();
+            (Storm s, Context ctx, StormDataSet data) = MockResult_2Entities_1ToManyRelation.PrepareDataSet();
             GetCommand cmd = new GetCommand(ctx, "Test");
             cmd.With("ExtraInfos");
 
@@ -83,163 +83,30 @@ namespace Storm.Test
             
         }
 
-
-
-
-        private static (Storm,Context,StormDataSet) PrepareDataSet()
+        [Fact]
+        void GetResult_DataSetRead_3Entities_MultiRelation()
         {
-            Storm s = StormDefine();
-            var ctx = s.CreateContext();
-            var entity = ctx.Navigator.GetEntity("Test");
-            Origin fromNode = new Origin()
-            {
-                Alias = "A1",
-                children = new List<Origin>(),
-                Entity = entity,
-                Edge = null,
-                FullPath = new Schema.EntityPath("Test", "")
-            };
-            var _idField = entity.entityFields.First(x => x.CodeName == "ID");
-            var _FirstName = entity.entityFields.First(x => x.CodeName == "FirstName");
-            var _LastName = entity.entityFields.First(x => x.CodeName == "LastName");
-            var _Email = entity.entityFields.First(x => x.CodeName == "Email");
-            var _Mobile = entity.entityFields.First(x => x.CodeName == "Mobile");
-            var _Phone = entity.entityFields.First(x => x.CodeName == "Phone");
-            var _Addre = entity.entityFields.First(x => x.CodeName == "Address");
+            (Storm s, Context ctx, StormDataSet data) = MockResult_3Entities_1ToManyRelation.PrepareDataSet();
+            GetCommand cmd = new GetCommand(ctx, "E1");
+            cmd.With("Info1");
+            cmd.With("Info2");
+            cmd.With("Info1.Extra");
 
-            StormDataSet data = new StormDataSet("Test");
-            List<SelectNode> nodes = new List<SelectNode>()
-            {
-                new SelectNode() {FromNode = fromNode, FullPath = new Schema.FieldPath("Test","","ID"), EntityField = _idField},
-                new SelectNode() {FromNode = fromNode, FullPath = new Schema.FieldPath("Test","","FirstName"), EntityField = _FirstName},
-                new SelectNode() {FromNode = fromNode, FullPath = new Schema.FieldPath("Test","","LastName"), EntityField = _LastName},
-                new SelectNode() {FromNode = fromNode, FullPath = new Schema.FieldPath("Test","","Email"), EntityField = _Email},
-                new SelectNode() {FromNode = fromNode, FullPath = new Schema.FieldPath("Test","","Mobile"), EntityField = _Mobile},
-                new SelectNode() {FromNode = fromNode, FullPath = new Schema.FieldPath("Test","","Phone"), EntityField = _Phone},
-                new SelectNode() {FromNode = fromNode, FullPath = new Schema.FieldPath("Test","","Address"), EntityField = _Addre}
-            };
-
-
-            data.ReadData(new MonoEntityMockDataSources().GetReader(), nodes);
-            return (s,ctx,data);
+            var res = GetCommandHelpers.ToResults(data, ctx, cmd.requests, cmd.from).Cast<dynamic>();
+            Assert.Equal("Mario", res.First().FirstName);
+            Assert.Equal(1, res.First().Info1[0].InfoID);
+            Assert.Equal(2, res.First().Info1[1].InfoID);
+            Assert.Equal(3, res.First().Info1[2].InfoID);
+            Assert.Equal(2, res.First().Info2[0].InfoID);
+            Assert.Equal(1, res.First().Info1[0].Extra[0].ExtraID);
+            Assert.Equal(2, res.First().Info1[0].Extra[1].ExtraID);
         }
 
-        private static (Storm, Context, StormDataSet) PrepareDataSet2()
-        {
-            Storm s;
-            Context ctx;
-            StormDataSet data;
-            List<SelectNode> nodes;
-            DefineSchema(out s, out ctx, out data, out nodes);
-
-            data.ReadData(new TwoEntityMockDataSources().GetReader(), nodes);
-            return (s, ctx, data);
-        }
-
-        private static (Storm, Context, StormDataSet) PrepareDataSet3()
-        {
-            Storm s;
-            Context ctx;
-            StormDataSet data;
-            List<SelectNode> nodes;
-            DefineSchema(out s, out ctx, out data, out nodes);
-
-            data.ReadData(new TwoEntityMockDataSources2().GetReader(), nodes);
-            return (s, ctx, data);
-        }
-
-        private static void DefineSchema(out Storm s, out Context ctx, out StormDataSet data, out List<SelectNode> nodes)
-        {
-            s = StormDefine();
-            ctx = s.CreateContext();
-            var entity = ctx.Navigator.GetEntity("Test");
-            var entity2 = ctx.Navigator.GetEntity("Test2");
-            Origin fromNode1 = new Origin()
-            {
-                Alias = "A1",
-                children = new List<Origin>(),
-                Entity = entity,
-                Edge = null,
-                FullPath = new Schema.EntityPath("Test", "")
-            };
-
-            Origin fromNode2 = new Origin()
-            {
-                Alias = "A2",
-                children = new List<Origin>(),
-                Entity = entity2,
-                Edge = null,
-                FullPath = new Schema.EntityPath("Test", "ExtraInfos")
-            };
 
 
-            var _idField = entity.entityFields.First(x => x.CodeName == "ID");
-            var _FirstName = entity.entityFields.First(x => x.CodeName == "FirstName");
-            var _LastName = entity.entityFields.First(x => x.CodeName == "LastName");
-            var _Email = entity.entityFields.First(x => x.CodeName == "Email");
-            var _Mobile = entity.entityFields.First(x => x.CodeName == "Mobile");
-            var _Phone = entity.entityFields.First(x => x.CodeName == "Phone");
-            var _Addre = entity.entityFields.First(x => x.CodeName == "Address");
 
 
-            var _ID2 = entity2.entityFields.First(x => x.CodeName == "ID");
-            var _ParentID = entity2.entityFields.First(x => x.CodeName == "ParentID");
-            var _Info1 = entity2.entityFields.First(x => x.CodeName == "Info1");
-            var _Info2 = entity2.entityFields.First(x => x.CodeName == "Info2");
-            var _Info3 = entity2.entityFields.First(x => x.CodeName == "Info3");
 
-            data = new StormDataSet("Test");
-            nodes = new List<SelectNode>()
-            {
-                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","ID"), EntityField = _idField},
-                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","FirstName"), EntityField = _FirstName},
-                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","LastName"), EntityField = _LastName},
-                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","Email"), EntityField = _Email},
-                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","Mobile"), EntityField = _Mobile},
-                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","Phone"), EntityField = _Phone},
-                new SelectNode() {FromNode = fromNode1, FullPath = new Schema.FieldPath("Test","","Address"), EntityField = _Addre},
-
-                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","ID"), EntityField = _ID2},
-                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","ParentID"), EntityField = _ParentID},
-                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","Info1"), EntityField = _Info1},
-                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","Info2"), EntityField = _Info2},
-                new SelectNode() {FromNode = fromNode2, FullPath = new Schema.FieldPath("Test","ExtraInfos","Info3"), EntityField = _Info3}
-            };
-        }
-
-        private static Storm StormDefine()
-        {
-            var s = new Storm();
-            s.EditSchema(x =>
-            {
-                x.Add("Test", "TABTest", y =>
-                {
-                    y.Add(new Schema.FieldConfig() { CodeName = "ID", DBName = "ID", CodeType = typeof(Int32), DBType = DbType.Int32, IsPrimary = true });
-                    y.Add(new Schema.FieldConfig() { CodeName = "FirstName", DBName = "FirstName", CodeType = typeof(String), DBType = DbType.String });
-                    y.Add(new Schema.FieldConfig() { CodeName = "LastName", DBName = "LastName", CodeType = typeof(String), DBType = DbType.String });
-                    y.Add(new Schema.FieldConfig() { CodeName = "Email", DBName = "Email", CodeType = typeof(String), DBType = DbType.String });
-                    y.Add(new Schema.FieldConfig() { CodeName = "Mobile", DBName = "Mobile", CodeType = typeof(String), DBType = DbType.String });
-                    y.Add(new Schema.FieldConfig() { CodeName = "Phone", DBName = "Phone", CodeType = typeof(String), DBType = DbType.String });
-                    y.Add(new Schema.FieldConfig() { CodeName = "Address", DBName = "Address", CodeType = typeof(String), DBType = DbType.String});
-                    return y;
-                });
-
-                x.Add("Test2", "TABTest2", y =>
-                {
-                    y.Add(new Schema.FieldConfig() { CodeName = "ID", DBName = "ID", CodeType = typeof(Int32), DBType = DbType.Int32, IsPrimary = true });
-                    y.Add(new Schema.FieldConfig() { CodeName = "ParentID", DBName = "ParentID", CodeType = typeof(Int32), DBType = DbType.Int32 });
-                    y.Add(new Schema.FieldConfig() { CodeName = "Info1", DBName = "Info1", CodeType = typeof(String), DBType = DbType.String });
-                    y.Add(new Schema.FieldConfig() { CodeName = "Info2", DBName = "Info2", CodeType = typeof(String), DBType = DbType.String });
-                    y.Add(new Schema.FieldConfig() { CodeName = "Info3", DBName = "Info3", CodeType = typeof(String), DBType = DbType.String });
-                    return y;
-                });
-
-                x.Connect("ExtraInfos", "Test", "Test2", "ID", "ParentID");
-
-                return x;
-            });
-            return s;
-        }
 
     }
 }

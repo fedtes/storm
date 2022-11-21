@@ -106,12 +106,13 @@ namespace Storm.Execution
             int iteration = 0;
             var readerIdx_selectNode = new Dictionary<int, SelectNode>();
             this.data = new List<object[]>();
+            var identies = new List<int>();
             while (dataReader.Read())
             {
                 // Calculate columns
                 if (0 == iteration)
                 {
-                    ComputeColumnMetadata(dataReader, selectNodes, readerIdx_selectNode);
+                    ComputeColumnMetadata(dataReader, selectNodes, readerIdx_selectNode, identies);
                 }
 
                 // Calculate data
@@ -123,7 +124,10 @@ namespace Storm.Execution
 
                     if (dataReader.IsDBNull(i))
                     {
-                        dataRow[i] = selectNode.FieldDefault;
+                        if (!identies.Contains(i))
+                            dataRow[i] = selectNode.FieldDefault;
+                        else
+                            dataRow[i] = null;
                     }
                     else
                     {
@@ -153,7 +157,11 @@ namespace Storm.Execution
             }
         }
 
-        private void ComputeColumnMetadata(IDataReader dataReader, IEnumerable<SelectNode> selectNodes, Dictionary<int, SelectNode> tempMap)
+        private void ComputeColumnMetadata(
+            IDataReader dataReader,
+            IEnumerable<SelectNode> selectNodes,
+            Dictionary<int, SelectNode> tempMap,
+            List<int> identies)
         {
             SchemaNode currentEntity = null;
             for (int i = 0; i < dataReader.FieldCount; i++)
@@ -176,7 +184,10 @@ namespace Storm.Execution
                 }
 
                 if (m.EntityField.IsPrimary)
+                {
                     this.IdentityIndexes.Add(m.FullPath.OwnerEntityPath, m.FullPath);
+                    identies.Add(i);
+                }
 
                 ColumnMap.Add(m.FullPath, i);
                 tempMap.Add(i, m);

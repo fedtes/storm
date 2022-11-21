@@ -11,6 +11,7 @@ namespace Storm.Schema
 
         public virtual String Path => String.Join(".", tokens);
         public String Root => tokens[0];
+        public String Last => tokens.Last();
 
         public EntityPath(string root, string path)
         {

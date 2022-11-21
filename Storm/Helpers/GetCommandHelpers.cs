@@ -23,15 +23,15 @@ namespace Storm.Helpers
             var identityFieldPath = data.IdentityIndexes[thisReq.FullPath];
             var range = data.ObjectRanges[thisReq.Entity];
             
-            foreach(var g in subset.GroupBy(x => x[identityFieldPath]))
+            foreach(var g in subset.Where(x => x[identityFieldPath] != null).GroupBy(x => x[identityFieldPath]))
             {
                 var b = g.First();
                 var sr = new StormResult(new StormRow(data, b.index, range.Start, range.End), thisReq.Entity);
-                var childRequest = requests.Where(x => x.FullPath.Count() == length + 1 && x.FullPath.Path.StartsWith(thisReq.FullPath.Path));
-                foreach (var r in childRequest)
+                var childRequest = requests.Where(x => x.FullPath.Count() >= length + 1 && x.FullPath.Path.StartsWith(thisReq.FullPath.Path));
+                foreach (var r in childRequest.Where(x => x.FullPath.Count() == length + 1))
                 {
                     var cr = childRequest.Where(x => x.FullPath.Path.StartsWith(r.FullPath.Path)).ToList();
-                    sr.Relations.Add(r.FullPath.Path, RecursiveGroupResults(data, g, cr, length + 1));
+                    sr.Relations.Add(r.FullPath.Last, RecursiveGroupResults(data, g, cr, length + 1));
 
                 }
                 result.Add(sr);
