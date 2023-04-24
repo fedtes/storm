@@ -1,14 +1,11 @@
-﻿using SqlKata;
-using Storm.Execution;
-using Storm.Filters;
-using Storm.Helpers;
+﻿using Storm.Helpers;
 using Storm.Schema;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using Storm.Origins;
+using System.Threading.Tasks;
 
 namespace Storm.Execution
 {
@@ -63,9 +60,9 @@ namespace Storm.Execution
             return GetCommandHelpers.ToResults(sr, this.ctx, requests, from);
         }
 
-        public new IEnumerable<dynamic> Execute()
+        public async Task<IEnumerable<dynamic>> Execute()
         {
-            return (IEnumerable<dynamic>)base.Execute();
+            return (IEnumerable<dynamic>)(await base.InternalExecute<IEnumerable<dynamic>>());
         }
     }
 }

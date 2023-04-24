@@ -1,27 +1,26 @@
 ﻿using System;
 using System.Data;
-using System.Collections.Generic;
-using System.Text;
-using Storm.Schema;
 using SqlKata.Compilers;
 using Storm.Helpers;
+using System.Data.Common;
+using System.Threading.Tasks;
 
 namespace Storm.Execution
 {
     /// <summary>
     /// Wraps the logics of interaction with the database. Use the methods Get, Set, Delete, Projection here or begin a new transaction if you want to operate on transactional scope.
     /// </summary>
-    public class StormConnection : IDisposable
+    public class StormConnection : IAsyncDisposable
     {
 
         protected bool isOpen;
-        internal IDbConnection connection;
+        internal DbConnection connection;
         protected StormTransaction currentTransaction;
         internal readonly SQLEngine engine;
         internal readonly Context ctx;
         internal readonly String connectionId;
 
-        internal StormConnection(Context ctx, IDbConnection connection, SQLEngine engine)
+        internal StormConnection(Context ctx, DbConnection connection, SQLEngine engine)
         {
             isOpen = false;
             this.ctx = ctx;
@@ -120,13 +119,13 @@ namespace Storm.Execution
             };
         }
 
-        internal void Open()
+        internal async Task OpenAsync()
         {
             ctx.GetLogger().Info("Connection", $"{{\"Action\":\"Open\"}}", this.connectionId);
             if (!isOpen)
             {
                 if (connection.State != ConnectionState.Open)
-                    connection.Open();
+                    await connection.OpenAsync();
                 isOpen = true;
             }
         }
@@ -157,44 +156,16 @@ namespace Storm.Execution
             }
         }
 
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
-
-        protected virtual void Dispose(bool disposing)
+#region IDisposable Support
+        public async ValueTask DisposeAsync()
         {
-            if (!disposedValue)
-            {
-                if (disposing)
+            if (isOpen)
                 {
-                    // TODO: dispose managed state (managed objects).
-                    if (isOpen)
-                    {
-                        ctx.GetLogger().Info("Connection", $"{{\"Action\":\"Close\"}}", this.connectionId);
-                        connection.Close();
-                    }
+                    ctx.GetLogger().Info("Connection", $"{{\"Action\":\"Close\"}}", this.connectionId);
+                    await connection.CloseAsync();
                 }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
-            }
         }
-
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~StormConnection() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
-        }
+        
 #endregion
     }
 }

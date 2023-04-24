@@ -1,54 +1,49 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
+using System.Data.Common;
 
 namespace Storm.Test
 {
-    public class EmptyConnection : IDbConnection
+    public class EmptyConnection : DbConnection
     {
         private string _x;
-        public string ConnectionString { get => "MOCK CONNECTION STRING"; set => _x = value; }
+        public override string ConnectionString { get => "MOCK CONNECTION STRING"; set => _x = value; }
 
-        public int ConnectionTimeout => 0;
+        public override int ConnectionTimeout => 0;
 
-        public string Database => "MOCKDB";
+        public override string Database => "MOCKDB";
 
-        public ConnectionState State => ConnectionState.Open;
+        public override ConnectionState State => ConnectionState.Open;
 
-        public IDbTransaction BeginTransaction()
+        public override string DataSource => throw new NotImplementedException();
+
+        public override string ServerVersion => throw new NotImplementedException();
+
+
+        public override void ChangeDatabase(string databaseName)
+        {
+            //throw new NotImplementedException();
+        }
+
+        public override void Close()
+        {
+            //throw new NotImplementedException();
+        }
+
+
+        public override void Open()
+        {
+            //throw new NotImplementedException();
+        }
+
+        protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
             throw new NotImplementedException();
         }
 
-        public IDbTransaction BeginTransaction(IsolationLevel il)
+        protected override DbCommand CreateDbCommand()
         {
             throw new NotImplementedException();
-        }
-
-        public void ChangeDatabase(string databaseName)
-        {
-            //throw new NotImplementedException();
-        }
-
-        public void Close()
-        {
-            //throw new NotImplementedException();
-        }
-
-        public IDbCommand CreateCommand()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Dispose()
-        {
-            //throw new NotImplementedException();
-        }
-
-        public void Open()
-        {
-            //throw new NotImplementedException();
         }
     }
 }

@@ -19,11 +19,11 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
-        public void Should_Read_Projection_Result()
+        public async void Should_Read_Projection_Result()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                StormDataSet r = con.Projection("Task")
+                StormDataSet r = await con.Projection("Task")
                     .Select("User.{FirstName, LastName}")
                     .Select("TaskType")
                     .Select("Completed")
@@ -39,11 +39,11 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
-        public void Should_Read_Paginated_Projection_Result()
+        public async void Should_Read_Paginated_Projection_Result()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                StormDataSet r = con.Projection("User")
+                StormDataSet r = await con.Projection("User")
                     .Select("{FirstName, LastName}")
                     .ForPage(1,5)
                     .Execute();
@@ -55,11 +55,11 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
-        public void Should_Read_Paginated_Projection_Result_2()
+        public async void Should_Read_Paginated_Projection_Result_2()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                StormDataSet r = con.Projection("User")
+                StormDataSet r = await con.Projection("User")
                     .Select("{FirstName, LastName}")
                     .ForPage(2, 5)
                     .Execute();
@@ -71,11 +71,11 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
-        public void Should_Read_Paginated_Projection_Result_3()
+        public async void Should_Read_Paginated_Projection_Result_3()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                StormDataSet r = con.Projection("User")
+                StormDataSet r = await con.Projection("User")
                     .Select("{FirstName, LastName}")
                     .ForPage(2, 5)
                     .OrderBy("ID",false)
@@ -89,11 +89,11 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
-        public void Should_Read_Get_Result_OneModel_Single()
+        public async void Should_Read_Get_Result_OneModel_Single()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                var r = con.Get("Task")
+                var r = await con.Get("Task")
                     .Where(x => x["ID"].EqualTo.Val("10"))
                     .Execute();
 
@@ -111,11 +111,11 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
-        public void Should_Read_Get_Result_OneModel_Single_TypedModel()
+        public async void Should_Read_Get_Result_OneModel_Single_TypedModel()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                var r = con.Get("Task")
+                var r = await con.Get("Task")
                     .Where(x => x["ID"].EqualTo.Val("10"))
                     .Execute();
 
@@ -132,11 +132,11 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
-        public void Should_Read_Get_Result_2Model_Single()
+        public async void Should_Read_Get_Result_2Model_Single()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                var r = con.Get("Task")
+                var r = await con.Get("Task")
                     .With("User")
                     .Where(x => x["ID"].EqualTo.Val("10"))
                     .Execute();
@@ -152,11 +152,11 @@ namespace Storm.Test.PublicAPI
 
 
         [Fact]
-        public void Should_Read_Get_Result_3Model_Single()
+        public async void Should_Read_Get_Result_3Model_Single()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                var r = con.Get("Task")
+                var r = await con.Get("Task")
                     .With("User")
                     .With("Info")
                     .Where(x => x["Info.ID"].EqualTo.Val("10"))
@@ -179,11 +179,11 @@ namespace Storm.Test.PublicAPI
 
 
         [Fact]
-        public void Should_Read_Get_Result_3Model_Multiple()
+        public async void Should_Read_Get_Result_3Model_Multiple()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                var r = con.Get("Task")
+                var r = await con.Get("Task")
                     .With("User")
                     .With("Info")
                     .Where(x => x["Info.ID"].EqualTo.Val("10") + x["ID"].EqualTo.Val("11"))
@@ -215,11 +215,11 @@ namespace Storm.Test.PublicAPI
 
 
         [Fact]
-        public void Should_Add_NewElement()
+        public async void Should_Add_NewElement()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
-                var r = con.Insert("Task")
+                var r = await con.Insert("Task")
                     .Value(new Task()
                     {
                         Completed = false,
@@ -238,7 +238,7 @@ namespace Storm.Test.PublicAPI
                 Assert.Equal(1, rows);
 
 
-                var task = con.Get("Task").Where(f => f["ID"].EqualTo.Val(id)).Execute().First();
+                var task = (await con.Get("Task").Where(f => f["ID"].EqualTo.Val(id)).Execute()).First();
 
                 Assert.False(task.Completed);
                 Assert.Equal("New Task element", task.Subject);
@@ -252,14 +252,14 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
-        public void Should_Update_Element()
+        public async void Should_Update_Element()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
 
-                var task = con.Get("Task").Where(f => f["ID"].EqualTo.Val(1)).Execute().First();
+                var task = (await con.Get("Task").Where(f => f["ID"].EqualTo.Val(1)).Execute()).First();
 
-                var r = con.Update("Task", task.ID)
+                var r = await con.Update("Task", task.ID)
                     .Value(new Task()
                     {
                         Completed = task.Completed,
@@ -277,7 +277,7 @@ namespace Storm.Test.PublicAPI
                 Assert.Equal(1, rows);
 
 
-                var task2 = con.Get("Task").Where(f => f["ID"].EqualTo.Val(id)).Execute().First();
+                var task2 = (await con.Get("Task").Where(f => f["ID"].EqualTo.Val(id)).Execute()).First();
 
                 Assert.Equal(task.Completed, task2.Completed);
                 Assert.Equal(task.Subject, task2.Subject);
@@ -291,12 +291,12 @@ namespace Storm.Test.PublicAPI
 
 
         [Fact]
-        public void Should_NotUpdate_Element()
+        public async void Should_NotUpdate_Element()
         {
-            using (var con = storm.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await storm.OpenConnection(PrepMethods.PrepareDB()))
             {
 
-                var r = con.Update("Task", 99999) // id not exists!!
+                var r = await con.Update("Task", 99999) // id not exists!!
                     .Value(new Task()
                     {
                         Completed = false,
@@ -312,7 +312,7 @@ namespace Storm.Test.PublicAPI
 
                 Assert.Equal(0, rows);
 
-                var elements = con.Get("Task").Where(f => f["ID"].EqualTo.Val(99999)).Execute();
+                var elements = await con.Get("Task").Where(f => f["ID"].EqualTo.Val(99999)).Execute();
                 Assert.Empty(elements);
 
             }
@@ -335,13 +335,13 @@ namespace Storm.Test.PublicAPI
         }
 
         [Fact]
-        public void It_ShouldReadNullable_Types()
+        public async void It_ShouldReadNullable_Types()
         {
             var s = new Storm(SQLEngine.SQLite);
             s.EditSchema(e => e.Add<NullableTask>("Task", "Tasks"));
-            using (var con = s.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var con = await s.OpenConnection(PrepMethods.PrepareDB()))
             {
-                NullableTask nt =  con.Get("Task").ForPage(1, 1).Execute().First().GetModel<NullableTask>();
+                NullableTask nt =  (await con.Get("Task").ForPage(1, 1).Execute()).First().GetModel<NullableTask>();
                 Assert.NotNull(nt.UserID);
                 Assert.NotNull(nt.Completed);
                 Assert.NotNull(nt.DateStart);

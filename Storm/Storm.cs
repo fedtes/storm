@@ -3,9 +3,10 @@ using Storm.Plugin;
 using Storm.Schema;
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Data.Common;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 
 [assembly: InternalsVisibleTo("Storm.Test")]
 
@@ -43,10 +44,10 @@ namespace Storm
         /// </summary>
         /// <param name="sqlConnection"></param>
         /// <returns></returns>
-        public StormConnection OpenConnection(IDbConnection sqlConnection)
+        public async Task<StormConnection> OpenConnection(DbConnection sqlConnection)
         {
             var c = new StormConnection(this.CreateContext(), sqlConnection, engine);
-            c.Open();
+            await c.OpenAsync();
             return c;
         }
 

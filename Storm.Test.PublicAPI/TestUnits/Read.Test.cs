@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Xunit;
-using Microsoft.Data.Sqlite;
-using System.IO;
-using System.Data;
-using Storm;
+﻿using Xunit;
 using Storm.Execution;
 using System.Linq;
 using Storm.Test.PublicAPI.Helpers;
@@ -65,15 +58,15 @@ namespace Storm.Test.PublicAPI
 
 
         [Fact]
-        public void It_should_get_users()
+        public async void It_should_get_users()
         {
             var s = PrepMethods.PrepareStorm();
             StormDataSet result;
-            using (var stormConnection = s.OpenConnection(PrepMethods.PrepareDB()))
+            await using (var stormConnection = await s.OpenConnection(PrepMethods.PrepareDB()))
             {
-                using (var tran = stormConnection.BeginTransaction())
+                await using (var tran = stormConnection.BeginTransaction())
                 {
-                    result = tran.Projection("User")
+                    result =await tran.Projection("User")
                         .Select("ID")
                         .Select("FirstName")
                         .Select("LastName")

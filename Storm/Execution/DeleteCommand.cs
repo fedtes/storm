@@ -7,7 +7,7 @@ using Storm.SQLParser;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Text;
+using System.Threading.Tasks;
 
 namespace Storm.Execution
 {
@@ -64,9 +64,9 @@ namespace Storm.Execution
             return new StormDeleteResult(dataReader.RecordsAffected);
         }
 
-        public new StormDeleteResult Execute()
+        public async Task<StormDeleteResult> Execute()
         {
-            return (StormDeleteResult)base.Execute();
+            return (StormDeleteResult)(await base.InternalExecute<StormDeleteResult>());
         }
     }
 }

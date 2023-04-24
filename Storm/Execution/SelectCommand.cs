@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using SqlKata;
-using Storm.Execution;
 using Storm.Helpers;
 using Storm.Schema;
 using Storm.SQLParser;
@@ -117,9 +116,9 @@ namespace Storm.Execution
             return sr;
         }
 
-        public new StormDataSet Execute()
+        public async Task<StormDataSet> Execute()
         {
-            return (StormDataSet)base.Execute();
+            return await base.InternalExecute<StormDataSet>();
         }
 
 
@@ -141,11 +140,11 @@ namespace Storm.Execution
             }
         }
 
-        protected override object ExecuteQuery(IDbCommand cmd)
+        protected override async Task<T> ExecuteQuery<T>(DbCommand cmd)
         {
             if (this.paging != (-1, -1))
             {
-                using (var reader = cmd.ExecuteReader())
+                using (var reader = await cmd.ExecuteReaderAsync())
                 {
                     this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Executed\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
                     StormDataSet r = (StormDataSet)Read(reader);
@@ -154,13 +153,13 @@ namespace Storm.Execution
                     {
                         r.rowCount = reader.GetInt32(0);
                     }
-                    return r;
+                    return (T)(object)r;
                 }
 
             }
             else
             {
-                return base.ExecuteQuery(cmd);
+                return await base.ExecuteQuery<T>(cmd);
             }
         }
     }

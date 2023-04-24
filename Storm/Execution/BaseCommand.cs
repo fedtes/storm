@@ -1,13 +1,12 @@
 ﻿using SqlKata;
-using Storm.Schema;
 using System;
 using System.Data;
-using System.Collections.Generic;
-using System.Text;
 using SqlKata.Compilers;
 using System.Diagnostics;
 using System.Linq;
 using Storm.Helpers;
+using System.Threading.Tasks;
+using System.Data.Common;
 
 namespace Storm.Execution
 {
@@ -35,11 +34,11 @@ namespace Storm.Execution
 
         internal abstract Object Read(IDataReader dataReader);
 
-        public Object Execute()
+        protected async Task<T> InternalExecute<T>()
         {
 
             this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Begin\"}}");
-            IDbCommand cmd;
+            DbCommand cmd;
             sw.Start();
 
             try
@@ -64,29 +63,29 @@ namespace Storm.Execution
             {
                 this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Execute\", \"Transaction\":\"{(isLocalTransaction ? "Local" : "External")}\"}}");
                 cmd.Transaction = transaction.transaction;
-                return ExecuteQuery(cmd);
+                return await ExecuteQuery<T>(cmd);
             }
             catch (Exception ex)
             {
-                transaction.Rollback();
+                await transaction.Rollback();
                 throw new ApplicationException("Error executing query", ex);
             }
             finally
             {
                 if (isLocalTransaction)
                 {
-                    transaction.Dispose();
+                    await transaction.DisposeAsync();
                 }
             }
             
         }
 
-        protected virtual object ExecuteQuery(IDbCommand cmd)
+        protected virtual async Task<T> ExecuteQuery<T>(DbCommand cmd)
         {
-            using (var reader = cmd.ExecuteReader())
+            using (var reader = await cmd.ExecuteReaderAsync())
             {
                 this.CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"Executed\", \"Time\":\"{sw.ElapsedMilliseconds}\" }}");
-                return Read(reader);
+                return (T)Read(reader);
             }
         }
 

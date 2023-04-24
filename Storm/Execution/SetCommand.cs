@@ -1,12 +1,11 @@
-﻿using Storm.Origins;
-using Storm.Schema;
+﻿using Storm.Schema;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Data;
 using System.Reflection;
-using System.Text;
 using Storm.Helpers;
+using System.Threading.Tasks;
 
 namespace Storm.Execution
 {
@@ -96,9 +95,9 @@ namespace Storm.Execution
             return new StormSetResult(output_id ?? this.id, dataReader.RecordsAffected);
         }
 
-        public new StormSetResult Execute()
+        public async Task<StormSetResult> Execute()
         {
-            return (StormSetResult)base.Execute();
+            return (StormSetResult)(await base.InternalExecute<StormSetResult>());
         }
     }
 }

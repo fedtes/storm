@@ -1,16 +1,15 @@
 ﻿using Microsoft.Data.Sqlite;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
-using System.Text;
 using Storm.Test.PublicAPI.MockAndModels;
+using System.Data.Common;
 
 namespace Storm.Test.PublicAPI.Helpers
 {
     static class PrepMethods
     {
-        static public IDbConnection PrepareDB()
+        static public DbConnection PrepareDB()
         {
             var db = new SqliteConnection("Data Source=TestDB;Mode=Memory;");
             db.Open();

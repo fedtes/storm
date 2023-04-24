@@ -1,27 +1,26 @@
 ﻿using System;
-using System.Data;
-using System.Collections.Generic;
-using System.Text;
 using Storm.Helpers;
+using System.Data.Common;
+using System.Threading.Tasks;
 
 namespace Storm.Execution
 {
-    public class StormTransaction : IDisposable
+    public class StormTransaction : IAsyncDisposable
     {
         protected bool autoCommit = false;
-        internal IDbTransaction transaction;
+        internal DbTransaction transaction;
         protected StormConnection connection;
         internal bool isCompleted = false;
         internal readonly String transactionid;
 
-        internal StormTransaction(StormConnection connection, IDbTransaction transaction)
+        internal StormTransaction(StormConnection connection, DbTransaction transaction)
         {
             this.transaction = transaction;
             this.connection = connection;
             this.transactionid = Util.UCode();
         }
 
-        internal StormTransaction(StormConnection connection, IDbTransaction transaction, bool AutoCommit)
+        internal StormTransaction(StormConnection connection, DbTransaction transaction, bool AutoCommit)
         {
             this.autoCommit = AutoCommit;
             this.transaction = transaction;
@@ -106,68 +105,41 @@ namespace Storm.Execution
         }
 
 
-        public void Commit()
+        public async Task Commit()
         {
             if (!isCompleted)
             {
-                transaction.Commit();
+                await transaction.CommitAsync();
                 isCompleted = true;
                 connection.ctx.GetLogger().Info("Transaction", $"{{\"Action\":\"Commit\"}}", this.connection.connectionId, this.transactionid);
             }
         }
 
-        public void Rollback()
+        public async Task Rollback()
         {
             if (!isCompleted)
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 isCompleted = true;
                 connection.ctx.GetLogger().Info("Transaction", $"{{\"Action\":\"Rollback\"}}", this.connection.connectionId, this.transactionid);
             }
         }
 
-        #region IDisposable Support
-        private bool disposedValue = false; // To detect redundant calls
+#region IDisposable Support
+       
 
-        protected virtual void Dispose(bool disposing)
+        public async ValueTask DisposeAsync()
         {
-            if (!disposedValue)
+            if (autoCommit && !isCompleted)
             {
-                if (disposing)
-                {
-                    // TODO: dispose managed state (managed objects).
-                    if (autoCommit && !isCompleted)
-                    {
-                        this.Commit();
-                    }
-                    else if (!autoCommit && !isCompleted)
-                    {
-                        this.Rollback();
-                    }
-                }
-
-                // TODO: free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // TODO: set large fields to null.
-
-                disposedValue = true;
+                await this.Commit();
+            }
+            else if (!autoCommit && !isCompleted)
+            {
+                await this.Rollback();
             }
         }
 
-        // TODO: override a finalizer only if Dispose(bool disposing) above has code to free unmanaged resources.
-        // ~StormTransaction() {
-        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-        //   Dispose(false);
-        // }
-
-        // This code added to correctly implement the disposable pattern.
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            // TODO: uncomment the following line if the finalizer is overridden above.
-            // GC.SuppressFinalize(this);
-        }
-        #endregion
-
+#endregion
     }
 }

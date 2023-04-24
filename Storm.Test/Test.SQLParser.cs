@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using SqlKata;
 using SqlKata.Compilers;
 using Storm.Schema;
 using Xunit;
-using Xunit.Sdk;
 
 namespace Storm.Test.TestUnits
 {
@@ -51,11 +49,11 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetObject_OnlyRoot()
+        public async void Parse_GetObject_OnlyRoot()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd = con.Get(Model_1);
 
@@ -69,11 +67,11 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetObject_With_Relation_FullPathed()
+        public async void Parse_GetObject_With_Relation_FullPathed()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd = con.Get(Model_1).With("Model_1.Child_2");
 
@@ -87,11 +85,11 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetObject_With_Relation_ShortPathed()
+        public async void Parse_GetObject_With_Relation_ShortPathed()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd = con.Get(Model_1).With("Child_2");
 
@@ -105,11 +103,11 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetObject_With_Second_Lev_Relation_FullPathed()
+        public async void Parse_GetObject_With_Second_Lev_Relation_FullPathed()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd = con.Get(Model_1).With("Model_1.Child_3").With("Model_1.Child_3.Child_2");
 
@@ -123,11 +121,11 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetObject_With_Second_Lev_Relation_ShortPathed()
+        public async void Parse_GetObject_With_Second_Lev_Relation_ShortPathed()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd = con.Get(Model_1).With("Child_3").With("Child_3.Child_2");
 
@@ -141,11 +139,11 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetObject_With_Many_Relations()
+        public async void Parse_GetObject_With_Many_Relations()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd = con.Get(Model_1)
                 .With("Child_2")
@@ -164,11 +162,11 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetObject_With_Where()
+        public async void Parse_GetObject_With_Where()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd = con.Get(Model_1).Where(e => e["data"].EqualTo.Val("some string data"));
                 
@@ -183,11 +181,11 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetObject_With_Where_And_Relation()
+        public async void Parse_GetObject_With_Where_And_Relation()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd = con.Get(Model_1)
                 .With("Child_2")
@@ -204,11 +202,11 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Should_AutoAdd_Relation_For_Where_Condition()
+        public async void Should_AutoAdd_Relation_For_Where_Condition()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd = con.Get(Model_1)
                 .Where(e => e["Child_2.data"].EqualTo.Val("some string data"));
@@ -225,12 +223,12 @@ namespace Storm.Test.TestUnits
 
 
         [Fact]
-        public void Parse_Filter_EqualTo()
+        public async void Parse_Filter_EqualTo()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].EqualTo.Val("data1"));
@@ -254,12 +252,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_NotEqualTo()
+        public async void Parse_Filter_NotEqualTo()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].NotEqualTo.Val("data1"));
@@ -283,12 +281,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_GreaterTo()
+        public async void Parse_Filter_GreaterTo()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].GreaterTo.Val("data1"));
@@ -312,12 +310,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_GreaterOrEqualTo()
+        public async void Parse_Filter_GreaterOrEqualTo()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].GreaterOrEqualTo.Val("data1"));
@@ -341,12 +339,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_LessTo()
+        public async void Parse_Filter_LessTo()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].LessTo.Val("data1"));
@@ -370,12 +368,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_LessOrEqualTo()
+        public async void Parse_Filter_LessOrEqualTo()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].LessOrEqualTo.Val("data1"));
@@ -399,12 +397,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_Like()
+        public async void Parse_Filter_Like()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].Like.Val("data1"));
@@ -428,12 +426,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_NotLike()
+        public async void Parse_Filter_NotLike()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].NotLike.Val("data1"));
@@ -457,12 +455,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_In_List()
+        public async void Parse_Filter_In_List()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].In.Val(new[] {1,2,3,4,5}));
@@ -476,12 +474,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_In_SubQuery()
+        public async void Parse_Filter_In_SubQuery()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => 
@@ -499,12 +497,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_NotIn_List()
+        public async void Parse_Filter_NotIn_List()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].NotIn.Val(new[] { 1, 2, 3, 4, 5 }));
@@ -518,12 +516,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_NotIn_SubQuery()
+        public async void Parse_Filter_NotIn_SubQuery()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e =>
@@ -541,12 +539,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_IsNull()
+        public async void Parse_Filter_IsNull()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].IsNull);
@@ -560,12 +558,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_IsNotNull()
+        public async void Parse_Filter_IsNotNull()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].IsNotNull);
@@ -579,12 +577,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_And()
+        public async void Parse_Filter_And()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].NotEqualTo.Val("data1") * e["data"].NotEqualTo.Val("data2"));
@@ -599,12 +597,12 @@ namespace Storm.Test.TestUnits
 
 
         [Fact]
-        public void Parse_Filter_Or()
+        public async void Parse_Filter_Or()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => e["data"].EqualTo.Val("data1") + e["data"].EqualTo.Val("data2"));
@@ -618,12 +616,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_Filter_And_Or_Mixed()
+        public async void Parse_Filter_And_Or_Mixed()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Get(Model_1)
                 .Where(e => (e["Child_2.data"].EqualTo.Val("some data") * e["data"].EqualTo.Val("data1")) + e["data"].EqualTo.Val("data2") * e["Child_3.Child_2.data"].EqualTo.Val("some data"));
@@ -637,12 +635,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection()
+        public async void Parse_GetProjection()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Projection(Model_0).Select("Model_0.Field1").Select("Model_0.Child.data");
 
@@ -655,12 +653,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_ShortPathed()
+        public async void Parse_GetProjection_ShortPathed()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Projection(Model_0).Select("Field1").Select("Child.data");
 
@@ -673,12 +671,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_Use_WildCard()
+        public async void Parse_GetProjection_Use_WildCard()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Projection(Model_0).Select("Model_0.*");
 
@@ -691,12 +689,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_Use_WildCard_ShortPathed()
+        public async void Parse_GetProjection_Use_WildCard_ShortPathed()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Projection(Model_0).Select("*");
 
@@ -709,12 +707,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_Use_Bracket_List()
+        public async void Parse_GetProjection_Use_Bracket_List()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Projection(Model_0).Select("Model_0.{Field1, Field4,Field3}");
 
@@ -727,12 +725,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_Use_Bracket_List_ShortPathed()
+        public async void Parse_GetProjection_Use_Bracket_List_ShortPathed()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Projection(Model_0).Select("{Field1, Field4,Field3}");
 
@@ -745,12 +743,12 @@ namespace Storm.Test.TestUnits
         } 
 
         [Fact]
-        public void Parse_GetProjection_With_Relation_Use_WildCard()
+        public async void Parse_GetProjection_With_Relation_Use_WildCard()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Projection(Model_0).Select("Child.*");
 
@@ -763,12 +761,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_With_Relation_Use_Bracket_List()
+        public async void Parse_GetProjection_With_Relation_Use_Bracket_List()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Projection(Model_0).Select("Child.{ data }");
 
@@ -781,12 +779,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_With_Where_And_Relation()
+        public async void Parse_GetProjection_With_Where_And_Relation()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Projection(Model_0).Select("Child.Child_2.data");
 
@@ -800,12 +798,12 @@ namespace Storm.Test.TestUnits
 
 
         [Fact]
-        public void Parse_GetProjection_Using_JoinExpressions()
+        public async void Parse_GetProjection_Using_JoinExpressions()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
 
             var cmd1 = con.Projection(Model_5).Select("Child_5.data");
@@ -820,12 +818,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_Using_Pagination1()
+        public async void Parse_GetProjection_Using_Pagination1()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
 
             var cmd1 = con.Projection(Model_1)
@@ -843,12 +841,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_Using_Pagination2()
+        public async void Parse_GetProjection_Using_Pagination2()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
 
             var cmd1 = con.Projection(Model_1)
@@ -866,12 +864,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_GetProjection_Using_Pagination3()
+        public async void Parse_GetProjection_Using_Pagination3()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
 
             var cmd1 = con.Projection(Model_1)
@@ -890,12 +888,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_SetCommand_Insert()
+        public async void Parse_SetCommand_Insert()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Insert(Model_0)
                 .Value(new Dictionary<string, object>() {
@@ -918,12 +916,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_SetCommand_Insert_UsingModel()
+        public async void Parse_SetCommand_Insert_UsingModel()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Insert(Model_0)
                 .Value(new Model_0() {
@@ -947,12 +945,12 @@ namespace Storm.Test.TestUnits
 
 
         [Fact]
-        public void Parse_SetCommand_Update()
+        public async void Parse_SetCommand_Update()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Update(Model_0, 12)
                 .Value(new Dictionary<string, object>() {
@@ -975,12 +973,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_SetCommand_Update_UsingModel()
+        public async void Parse_SetCommand_Update_UsingModel()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Update(Model_0, 12)
                 .Value(new Model_0()
@@ -1005,12 +1003,12 @@ namespace Storm.Test.TestUnits
 
 
         [Fact]
-        public void Parse_DeleteCommand_NoFilter()
+        public async void Parse_DeleteCommand_NoFilter()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Delete(Model_0);
 
@@ -1024,12 +1022,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_DeleteCommand_SimpleFilter()
+        public async void Parse_DeleteCommand_SimpleFilter()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Delete(Model_0).Where(x => x["Field1"].IsNotNull * x["Field2"].GreaterTo.Val(100));
 
@@ -1042,12 +1040,12 @@ namespace Storm.Test.TestUnits
         }
 
         [Fact]
-        public void Parse_DeleteCommand_FilterInSecondaryEntity()
+        public async void Parse_DeleteCommand_FilterInSecondaryEntity()
         {
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var compiler = new SqlServerCompiler();
-            var con = storm.OpenConnection(new EmptyConnection());
+            var con = await storm.OpenConnection(new EmptyConnection());
 
             var cmd1 = con.Delete(Model_0).Where(x => x["Child.Child_2.data"].IsNotNull * x["Field2"].GreaterTo.Val(100));
 
