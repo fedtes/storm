@@ -4,6 +4,10 @@ using SqlKata.Compilers;
 using Storm.Helpers;
 using System.Data.Common;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Linq;
+using Storm.Linq;
+using Remotion.Linq.Parsing.Structure;
 
 namespace Storm.Execution
 {
@@ -155,6 +159,16 @@ namespace Storm.Execution
                     return new SqlServerCompiler();
             }
         }
+
+#region "LINQ"
+
+        public IQueryable<StormQueryContext> From(String EntityIdentifier)
+        {
+            return new StormQuerable<StormQueryContext>(QueryParser.CreateDefault(), new StormQueryExecutor(this, EntityIdentifier));
+        }
+
+#endregion
+
 
 #region IDisposable Support
         public async ValueTask DisposeAsync()
