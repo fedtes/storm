@@ -1,13 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
-using SqlKata;
-using SqlKata.Compilers;
 using Storm.Schema;
 using Xunit;
 
-namespace Storm.Test.TestUnits 
+namespace Storm.Test.TestUnits
 {
     public class TestLinq 
     {
@@ -18,9 +13,8 @@ namespace Storm.Test.TestUnits
             Storm storm = new Storm();
             storm.EditSchema(SampleSchema);
             var con = await storm.OpenConnection(new EmptyConnection());
-
-            var cmd = con.From("Customer").Where(x => x["Address.City"] == "TEST" ).ToArray();
-            var cmd2 = con.From("Customer").Where(x => x["Address.City"] == x["RagSoc"] ).ToArray();
+    
+            var cmd = con.From("Customer").Where(x => x["RagSoc"].Like("something") || (x["Address.City"] == "TEST" && x["AddressID"].IsNotNull())).ToArray();
         }
 
 

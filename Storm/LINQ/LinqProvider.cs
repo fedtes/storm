@@ -1,18 +1,16 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Linq.Expressions;
 using Remotion.Linq;
 using Remotion.Linq.Clauses;
-using Remotion.Linq.Clauses.Expressions;
 using Remotion.Linq.Parsing.Structure;
 using SqlKata;
 using SqlKata.Compilers;
 using Storm.Execution;
 
-namespace Storm.Linq 
+namespace Storm.Linq
 {
     public class StormQuerable<T> : QueryableBase<T>
     {
@@ -49,7 +47,7 @@ namespace Storm.Linq
             var compiler = new SqlServerCompiler();
             SqlResult result = compiler.Compile(command.query);
             
-            return (IEnumerable<T>)new List<StormQueryContext>() {new StormQueryContext() {Result= result.Sql}};
+            return (IEnumerable<T>)new List<Entity>() {new Entity() {Result= result.Sql}};
         }
 
         public T ExecuteScalar<T>(QueryModel queryModel)
@@ -64,73 +62,9 @@ namespace Storm.Linq
 
         public override void VisitWhereClause(WhereClause whereClause, QueryModel queryModel, int index)
         {
-            switch (whereClause.Predicate.NodeType)
-            {
-                case ExpressionType.Equal:
-                    var e = (BinaryExpression)whereClause.Predicate;
-
-                    string _leftPath = null;
-                    object _leftValue = null;
-
-                    // look 4 left
-                    switch (e.Left.NodeType)
-                    {
-                        case ExpressionType.Call:
-                            var _call = (MethodCallExpression)e.Left;
-                            if (_call.Object.GetType() == typeof(QuerySourceReferenceExpression)) {
-                                _leftPath = ((ConstantExpression)_call.Arguments[0]).Value.ToString();
-                            }
-                        break;
-                        case ExpressionType.Constant:
-                            _leftValue = ((ConstantExpression)e.Left).Value;
-                        break;
-                        default:
-                            throw new ApplicationException();
-                    }
-                    // look 4 right
-
-                    string _righPath=null;
-                    object _rightValue = null;
-
-                    switch (e.Right.NodeType)
-                    {
-                        case ExpressionType.Call:
-                            var _call = (MethodCallExpression)e.Right;
-                            if (_call.Object.GetType() == typeof(QuerySourceReferenceExpression)) {
-                                _righPath = ((ConstantExpression)_call.Arguments[0]).Value.ToString();
-                            }
-                        break;
-                        case ExpressionType.Constant:
-                            _rightValue = ((ConstantExpression)e.Right).Value;
-                        break;
-                        default:
-                            throw new ApplicationException();
-                    }
-
-                    if (_leftPath != null && _righPath != null) 
-                    {
-                        command.Where(f => f[_leftPath].EqualTo.Ref(_righPath) );
-                    } 
-                    else if (_leftPath != null && _righPath == null) 
-                    {
-                        command.Where(f => f[_leftPath].EqualTo.Val(_rightValue) );
-                    } 
-                    else if (_leftPath == null && _righPath != null) 
-                    {
-                        command.Where(f => f[_righPath].EqualTo.Val(_leftValue) );
-                    } 
-                    else 
-                    {
-                        throw new ApplicationException();
-                    }
-
-
-                    base.VisitWhereClause(whereClause, queryModel, index);
-                    break;
-                default:
-                    base.VisitWhereClause(whereClause, queryModel, index);
-                    break;
-            }
+            WhereClauseVisitor _wVisitor = new WhereClauseVisitor();
+            var f = _wVisitor.Parse(whereClause, whereClause.Predicate, queryModel, index);
+            command.Where((_) => f);
         }
 
         public override void VisitAdditionalFromClause(AdditionalFromClause fromClause, QueryModel queryModel, int index)
@@ -194,14 +128,26 @@ namespace Storm.Linq
     }
 
 
-    public class StormQueryContext
+    public class Entity
     {
-        public StormQueryToken this[string path] => new StormQueryToken();
+        public EntityProperty this[string path] => new EntityProperty();
 
-        public class StormQueryToken
+        public class EntityProperty
         {
-            public static bool operator ==(StormQueryToken left, object right) => true;
-            public static bool operator !=(StormQueryToken left, object right) => true;
+
+            public static bool operator > (EntityProperty left, object right) => true;
+            public static bool operator < (EntityProperty left, object right) => true;
+            public static bool operator >= (EntityProperty left, object right) => true;
+            public static bool operator <= (EntityProperty left, object right) => true;
+            public static bool operator ==(EntityProperty left, object right) => true;
+            public static bool operator !=(EntityProperty left, object right) => true;
+            public bool Like(string s) => true;
+            public bool NotLike(string s) => true;
+            public bool IsNull() => true;
+            public bool IsNotNull() => true;
+
+            public override bool Equals(object obj) => base.Equals(obj);
+            public override int GetHashCode() => base.GetHashCode();
         }
 
         public string Result {get; internal set;}

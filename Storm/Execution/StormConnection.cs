@@ -162,9 +162,9 @@ namespace Storm.Execution
 
 #region "LINQ"
 
-        public IQueryable<StormQueryContext> From(String EntityIdentifier)
+        public IQueryable<Entity> From(String EntityIdentifier)
         {
-            return new StormQuerable<StormQueryContext>(QueryParser.CreateDefault(), new StormQueryExecutor(this, EntityIdentifier));
+            return new StormQuerable<Entity>(QueryParser.CreateDefault(), new StormQueryExecutor(this, EntityIdentifier));
         }
 
 #endregion
