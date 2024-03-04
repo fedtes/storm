@@ -32,7 +32,7 @@ namespace Storm.Linq
         private readonly StormConnection connection;
         private readonly string entityIdentifier;
 
-        private GetCommand command;
+        internal GetCommand command;
 
         public StormQueryExecutor(StormConnection connection, string EntityIdentifier){
             this.connection = connection;
@@ -41,13 +41,10 @@ namespace Storm.Linq
 
         public IEnumerable<T> ExecuteCollection<T>(QueryModel queryModel)
         {
-            command = new GetCommand(connection.ctx, entityIdentifier);
+            command = this.connection.Get(this.entityIdentifier);
             this.VisitQueryModel(queryModel);
-            command.ParseSQL();
-            var compiler = new SqlServerCompiler();
-            SqlResult result = compiler.Compile(command.query);
-            
-            return (IEnumerable<T>)new List<Entity>() {new Entity() {Result= result.Sql}};
+
+            return (IEnumerable<T>)new List<Entity>();
         }
 
         public T ExecuteScalar<T>(QueryModel queryModel)
