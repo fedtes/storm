@@ -30,10 +30,10 @@ namespace Storm.Test
             GetCommand cmd = new GetCommand(s.CreateContext(), "Appointment");
             cmd.With("Contact").With("AssignedUser");
 
-            Assert.Equal("Appointment", cmd.from.root.Entity.ID);
+            Assert.Equal("Appointment", cmd.from.root.Entity.Id);
             Assert.Equal(2, cmd.from.root.children.Count);
-            Assert.Equal("Contact", cmd.from.root.children[0].Entity.ID);
-            Assert.Equal("User", cmd.from.root.children[1].Entity.ID);
+            Assert.Equal("Contact", cmd.from.root.children[0].Entity.Id);
+            Assert.Equal("User", cmd.from.root.children[1].Entity.Id);
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace Storm.Test
             GetCommand cmd = new GetCommand(s.CreateContext(), "Appointment");
             cmd.With("Contact").With("AssignedUser").With("Contact.OwnerUser");
 
-            Assert.Equal("Appointment", cmd.from.root.Entity.ID);
+            Assert.Equal("Appointment", cmd.from.root.Entity.Id);
             Assert.Equal(2, cmd.from.root.children.Count);
             Assert.Single(cmd.from.root.children.First().children);
             Assert.Equal("Appointment.Contact.OwnerUser", cmd.from.root.children.First().children.First().FullPath.Path);
@@ -77,7 +77,7 @@ namespace Storm.Test
                 .With("AssignedUser")
                 .Where(f => f["Contact.LastName"].EqualTo.Val("foo") * f["Contact.FirstName"].EqualTo.Val("boo"));
 
-            Assert.Equal("Appointment", cmd.from.root.Entity.ID);
+            Assert.Equal("Appointment", cmd.from.root.Entity.Id);
             var _and =  Assert.IsType<AndFilter>(cmd.where);
             Assert.Equal(2, _and.filters.Count());
 

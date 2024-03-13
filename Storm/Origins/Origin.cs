@@ -16,11 +16,11 @@ namespace Storm.Origins
         /// <summary>
         /// The current entity which supply the table/view information
         /// </summary>
-        public SchemaNode Entity;
+        public Entity Entity;
         /// <summary>
         /// The link between this entity and the one in the parent origin. Has the information to generate the join condition. Can be null in case of root origin.
         /// </summary>
-        public SchemaEdge Edge;
+        public NavigationProperty Edge;
         /// <summary>
         /// Alias used in the query to refer to this table/view
         /// </summary>

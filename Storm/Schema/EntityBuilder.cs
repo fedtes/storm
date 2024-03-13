@@ -11,7 +11,7 @@ namespace Storm.Schema
     /// </summary>
     public class EntityBuilder
     {
-        private List<EntityField> efs = new List<EntityField>();
+        private List<BaseProperty> efs = new List<BaseProperty>();
         
         /// <summary>
         /// Add a field to the Entity. Only one field should be mark as primary and an Entity must has a primary field declared
@@ -20,7 +20,7 @@ namespace Storm.Schema
         /// <returns></returns>
         public EntityBuilder Add(FieldConfig field)
         {
-            var f = new EntityField
+            var f = new SimpleProperty
             {
                 CodeName = field.CodeName,
                 DBName = String.IsNullOrEmpty(field.DBName)? field.CodeName : field.DBName,
@@ -29,7 +29,9 @@ namespace Storm.Schema
                 Size = field.Size,
                 ColumnAccess = field.ColumnAccess,
                 DefaultIfNull = field.DefaultIfNull,
-                IsPrimary = field.IsPrimary
+                IsPrimary = field.IsPrimary,
+                Id= field.CodeName,
+                PropertyName = field.CodeName
             };
 
             efs.Add(f);
@@ -38,14 +40,14 @@ namespace Storm.Schema
 
         internal bool HasPrimaryKey()
         {
-            return efs.Any(x => x.IsPrimary);
+            return efs.Any(x => (x as SimpleProperty).IsPrimary);
         }
 
-        internal SchemaItem GetEntity()
+        internal AbstractSchemaItem GetEntity()
         {
-            return new SchemaNode
+            return new Entity
             {
-                entityFields = efs
+                Properties = efs
             };
         }
     }

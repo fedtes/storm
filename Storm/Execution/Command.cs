@@ -102,7 +102,7 @@ namespace Storm.Execution
         /// <exception cref="ArgumentException"></exception>
         public virtual C OrderBy(String requestPath, bool asc = true)
         {
-            var _requestPath = new EntityPath(from.root.Entity.ID, requestPath).Path;
+            var _requestPath = new EntityPath(from.root.Entity.Id, requestPath).Path;
             var p = SelectCommandHelper.ValidatePath(_requestPath);
 
             (string[], string) item;

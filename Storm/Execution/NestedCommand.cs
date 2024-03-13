@@ -24,7 +24,7 @@ namespace Storm.Execution
             {
                 outputField = new SelectNode()
                 {
-                    FullPath = new FieldPath(from.root.Entity.ID, from.root.Entity.ID, from.root.Entity.PrimaryKey.CodeName),
+                    FullPath = new FieldPath(from.root.Entity.Id, from.root.Entity.Id, from.root.Entity.PrimaryKey.CodeName),
                     EntityField = from.root.Entity.PrimaryKey,
                     FromNode = from.root
                 };
@@ -35,7 +35,7 @@ namespace Storm.Execution
 
         public NestedCommand Select(string requestPath)
         {
-            var _requestPath = new EntityPath(from.root.Entity.ID, requestPath).Path;
+            var _requestPath = new EntityPath(from.root.Entity.Id, requestPath).Path;
             var p = SelectCommandHelper.ValidatePath(_requestPath);
 
             (string[], string) item;

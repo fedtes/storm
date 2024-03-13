@@ -34,7 +34,7 @@ namespace Storm
         /// Edit the schema of Storm. Schema contains all the metadata needed to generate and execute queries. The first time you call this method the schema is empty, you can call it multiple times to add more metadata step by step.
         /// </summary>
         /// <param name="editor"></param>
-        public void EditSchema(Func<SchemaEditor, SchemaEditor> editor)
+        public void EditSchema(Func<SchemaModelBuilder, SchemaModelBuilder> editor)
         {
             schema.EditSchema(editor);
         }

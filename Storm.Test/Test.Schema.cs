@@ -33,7 +33,7 @@ namespace Storm.Test
             var nav = storm.schema.GetNavigator();
             var x = nav.GetEntity("TestModel");
             Assert.Equal("TABTest", x.DBName);
-            Assert.Equal("TestModel", x.ID);
+            Assert.Equal("TestModel", x.Id);
             Assert.Equal("ID", x.PrimaryKey.CodeName);
             Assert.Equal(typeof(TestModel), x.TModel);
         }
@@ -45,7 +45,7 @@ namespace Storm.Test
             storm.EditSchema(e => e.Add<TestModel>("TestModel", "TABTest"));
             var nav = storm.schema.GetNavigator();
             var x = nav.GetEntity("TestModel");
-            Assert.Contains(x.entityFields, y => y.CodeName == "SomeProperty");
+            Assert.Contains(x.SimpleProperties, y => y.CodeName == "SomeProperty");
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace Storm.Test
             storm.EditSchema(e => e.Add<TestModel>("TestModel", "TABTest"));
             var nav = storm.schema.GetNavigator();
             var x = nav.GetEntity("TestModel");
-            Assert.DoesNotContain(x.entityFields, y => y.CodeName == "IgnorableField");
+            Assert.DoesNotContain(x.SimpleProperties, y => y.CodeName == "IgnorableField");
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace Storm.Test
             storm.EditSchema(e => e.Add<TestModel>("TestModel", "TABTest"));
             var nav = storm.schema.GetNavigator();
             var x = nav.GetEntity("TestModel");
-            Assert.Equal("DifferentName", x.entityFields.First(y => y.CodeName == "SomeName").DBName);
+            Assert.Equal("DifferentName", x.SimpleProperties.First(y => y.CodeName == "SomeName").DBName);
         }
 
         [Fact]
@@ -75,7 +75,7 @@ namespace Storm.Test
             storm.EditSchema(e => e.Add<TestModel>("TestModel", "TABTest"));
             var nav = storm.schema.GetNavigator();
             var x = nav.GetEntity("TestModel");
-            Assert.Equal("Some Default Value", x.entityFields.First(y => y.CodeName == "DefaultedField").DefaultIfNull);
+            Assert.Equal("Some Default Value", x.SimpleProperties.First(y => y.CodeName == "DefaultedField").DefaultIfNull);
         }
 
         [Fact]
@@ -85,8 +85,8 @@ namespace Storm.Test
             storm.EditSchema(e => e.Add<TestModel>("TestModel", "TABTest"));
             var nav = storm.schema.GetNavigator();
             var x = nav.GetEntity("TestModel");
-            Assert.Equal(System.Data.DbType.String, x.entityFields.First(y => y.CodeName == "SpecifiedType").DBType);
-            Assert.Equal(50, x.entityFields.First(y => y.CodeName == "SpecifiedType").Size);
+            Assert.Equal(System.Data.DbType.String, x.SimpleProperties.First(y => y.CodeName == "SpecifiedType").DBType);
+            Assert.Equal(50, x.SimpleProperties.First(y => y.CodeName == "SpecifiedType").Size);
         }
 
         [Fact]
@@ -96,9 +96,9 @@ namespace Storm.Test
             storm.EditSchema(e => e.Add<TestModel>("TestModel", "TABTest"));
             var nav = storm.schema.GetNavigator();
             var x = nav.GetEntity("TestModel");
-            Assert.Equal(ColumnAccess.ReadOnly, x.entityFields.First(y => y.CodeName == "ReadOnlyField").ColumnAccess);
-            Assert.Equal(ColumnAccess.CanInsert, x.entityFields.First(y => y.CodeName == "InsertOnly").ColumnAccess);
-            Assert.Equal(ColumnAccess.Full, x.entityFields.First(y => y.CodeName == "FullControl").ColumnAccess);
+            Assert.Equal(ColumnAccess.ReadOnly, x.SimpleProperties.First(y => y.CodeName == "ReadOnlyField").ColumnAccess);
+            Assert.Equal(ColumnAccess.CanInsert, x.SimpleProperties.First(y => y.CodeName == "InsertOnly").ColumnAccess);
+            Assert.Equal(ColumnAccess.Full, x.SimpleProperties.First(y => y.CodeName == "FullControl").ColumnAccess);
         }
 
         [Fact]
@@ -113,7 +113,7 @@ namespace Storm.Test
             var nav = storm.schema.GetNavigator();
             var x = nav.GetEntity("SomeDynModel");
             Assert.Equal("Table", x.DBName);
-            Assert.Equal("SomeDynModel", x.ID);
+            Assert.Equal("SomeDynModel", x.Id);
             Assert.Equal("ID", x.PrimaryKey.CodeName);
         }
 
@@ -236,9 +236,9 @@ namespace Storm.Test
             var nav = storm.schema.GetNavigator();
             var s = nav.GetEntity("SomeDynModel");
             var t = nav.GetEntity("TestModel");
-            var x = nav.GetEdge("SomeDynModel.TestModel");
-            Assert.Equal(s.ID, x.SourceID);
-            Assert.Equal(t.ID, x.TargetID);
+            var x = nav.GetNavigationProperty("SomeDynModel.TestModel");
+            Assert.Equal(s.Id, x.OwnerEntityId);
+            Assert.Equal(t.Id, x.TargetEntity);
             Assert.Equal("TestModelID", x.On.Item1);
             Assert.Equal("ID", x.On.Item2);
         }
@@ -264,9 +264,9 @@ namespace Storm.Test
             var nav = storm.schema.GetNavigator();
             var s = nav.GetEntity("SomeDynModel");
             var t = nav.GetEntity("TestModel");
-            var x = nav.GetEdge("SomeDynModel.TestModel");
-            Assert.Equal(s.ID, x.SourceID);
-            Assert.Equal(t.ID, x.TargetID);
+            var x = nav.GetNavigationProperty("SomeDynModel.TestModel");
+            Assert.Equal(s.Id, x.OwnerEntityId);
+            Assert.Equal(t.Id, x.TargetEntity);
             Assert.NotNull(x.OnExpression);
             var f = Assert.IsType<Filters.EqualToFilter>(x.OnExpression);
             Assert.Equal("source.TestModelID", f.Left.Path);
@@ -356,16 +356,16 @@ namespace Storm.Test
             var appointment = n.GetEntity("Appointment");
             Assert.Equal("Appointments", appointment.DBName);
             Assert.Equal(typeof(Appointment), appointment.TModel);
-            Assert.Equal("Appointment", appointment.ID);
-            Assert.Equal(9, appointment.entityFields.Count());
+            Assert.Equal("Appointment", appointment.Id);
+            Assert.Equal(9, appointment.SimpleProperties.Count());
 
 
             //------------------- APPOINTMENT CF -------------------
             var appointmentCf = n.GetEntity("AppointmentCf");
             Assert.Equal("AppointmentCustomFields", appointmentCf.DBName);
             Assert.Null(appointmentCf.TModel);
-            Assert.Equal("AppointmentCf", appointmentCf.ID);
-            Assert.Equal(5, appointmentCf.entityFields.Count());
+            Assert.Equal("AppointmentCf", appointmentCf.Id);
+            Assert.Equal(5, appointmentCf.SimpleProperties.Count());
 
         }
 

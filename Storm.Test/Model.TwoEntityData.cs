@@ -34,20 +34,20 @@ namespace Storm.Test
             };
 
 
-            var _idField = entity.entityFields.First(x => x.CodeName == "ID");
-            var _FirstName = entity.entityFields.First(x => x.CodeName == "FirstName");
-            var _LastName = entity.entityFields.First(x => x.CodeName == "LastName");
-            var _Email = entity.entityFields.First(x => x.CodeName == "Email");
-            var _Mobile = entity.entityFields.First(x => x.CodeName == "Mobile");
-            var _Phone = entity.entityFields.First(x => x.CodeName == "Phone");
-            var _Addre = entity.entityFields.First(x => x.CodeName == "Address");
+            var _idField = entity.SimpleProperties.First(x => x.CodeName == "ID");
+            var _FirstName = entity.SimpleProperties.First(x => x.CodeName == "FirstName");
+            var _LastName = entity.SimpleProperties.First(x => x.CodeName == "LastName");
+            var _Email = entity.SimpleProperties.First(x => x.CodeName == "Email");
+            var _Mobile = entity.SimpleProperties.First(x => x.CodeName == "Mobile");
+            var _Phone = entity.SimpleProperties.First(x => x.CodeName == "Phone");
+            var _Addre = entity.SimpleProperties.First(x => x.CodeName == "Address");
 
 
-            var _ID2 = entity2.entityFields.First(x => x.CodeName == "ID");
-            var _ParentID = entity2.entityFields.First(x => x.CodeName == "ParentID");
-            var _Info1 = entity2.entityFields.First(x => x.CodeName == "Info1");
-            var _Info2 = entity2.entityFields.First(x => x.CodeName == "Info2");
-            var _Info3 = entity2.entityFields.First(x => x.CodeName == "Info3");
+            var _ID2 = entity2.SimpleProperties.First(x => x.CodeName == "ID");
+            var _ParentID = entity2.SimpleProperties.First(x => x.CodeName == "ParentID");
+            var _Info1 = entity2.SimpleProperties.First(x => x.CodeName == "Info1");
+            var _Info2 = entity2.SimpleProperties.First(x => x.CodeName == "Info2");
+            var _Info3 = entity2.SimpleProperties.First(x => x.CodeName == "Info3");
 
             data = new StormDataSet("Test");
             nodes = new List<SelectNode>()
@@ -231,49 +231,49 @@ namespace Storm.Test
                 {
                     FromNode = n1,
                     FullPath = new FieldPath("E1","","ID"),
-                    EntityField = n1.Entity.entityFields.First(x => x.CodeName == "ID")
+                    EntityField = n1.Entity.SimpleProperties.First(x => x.CodeName == "ID")
                 },
                 new SelectNode()
                 {
                     FromNode = n1,
                     FullPath = new FieldPath("E1","","FirstName"),
-                    EntityField = n1.Entity.entityFields.First(x => x.CodeName == "FirstName")
+                    EntityField = n1.Entity.SimpleProperties.First(x => x.CodeName == "FirstName")
                 },
                 new SelectNode()
                 {
                     FromNode = n2,
                     FullPath = new FieldPath("E1","Info1","InfoID"),
-                    EntityField = n2.Entity.entityFields.First(x => x.CodeName == "InfoID")
+                    EntityField = n2.Entity.SimpleProperties.First(x => x.CodeName == "InfoID")
                 },
                 new SelectNode()
                 {
                     FromNode = n2,
                     FullPath = new FieldPath("E1","Info1","ParentID"),
-                    EntityField = n2.Entity.entityFields.First(x => x.CodeName == "ParentID")
+                    EntityField = n2.Entity.SimpleProperties.First(x => x.CodeName == "ParentID")
                 },
                 new SelectNode()
                 {
                     FromNode = n3,
                     FullPath = new FieldPath("E1","Info2","InfoID"),
-                    EntityField = n3.Entity.entityFields.First(x => x.CodeName == "InfoID")
+                    EntityField = n3.Entity.SimpleProperties.First(x => x.CodeName == "InfoID")
                 },
                 new SelectNode()
                 {
                     FromNode = n3,
                     FullPath = new FieldPath("E1","Info2","ParentID"),
-                    EntityField = n3.Entity.entityFields.First(x => x.CodeName == "ParentID")
+                    EntityField = n3.Entity.SimpleProperties.First(x => x.CodeName == "ParentID")
                 },
                 new SelectNode()
                 {
                     FromNode = n4,
                     FullPath = new FieldPath("E1","Info1.Extra","ExtraID"),
-                    EntityField = n4.Entity.entityFields.First(x => x.CodeName == "ExtraID")
+                    EntityField = n4.Entity.SimpleProperties.First(x => x.CodeName == "ExtraID")
                 },
                 new SelectNode()
                 {
                     FromNode = n4,
                     FullPath = new FieldPath("E1","Info1.Extra","ParentID"),
-                    EntityField = n4.Entity.entityFields.First(x => x.CodeName == "ParentID")
+                    EntityField = n4.Entity.SimpleProperties.First(x => x.CodeName == "ParentID")
                 },
             };
 

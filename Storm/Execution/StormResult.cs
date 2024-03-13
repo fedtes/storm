@@ -8,17 +8,19 @@ using System.Text;
 
 namespace Storm.Execution
 {
-
-    public class StormResult : DynamicObject
+    /// <summary>
+    /// Define a dynamic object that act as a proxy to access an Entity and its properties or to a subset of properties an entity in case of Select clause (projection)
+    /// </summary>
+    public class DynamicResult : DynamicObject
     {
         private StormRow datarow;
-        private SchemaNode _node;
+        private Entity _node;
         private Dictionary<string, string>  _propertyMap = new Dictionary<string, string>();
 
-        internal Dictionary<string, IEnumerable<StormResult>> Relations = new Dictionary<string, IEnumerable<StormResult>>();
+        internal Dictionary<string, IEnumerable<DynamicResult>> Relations = new Dictionary<string, IEnumerable<DynamicResult>>();
 
 
-        internal StormResult(StormRow datarow, SchemaNode node)
+        internal DynamicResult(StormRow datarow, Entity node)
         {
             this.datarow = datarow;
             _node = node;
@@ -31,7 +33,7 @@ namespace Storm.Execution
             foreach (var item in this.datarow.Keys)
             {
                 var _fieldName = getField(item);
-                if (_node.entityFields.Any(x => x.CodeName.ToLowerInvariant() == _fieldName.ToLowerInvariant()))
+                if (_node.SimpleProperties.Any(x => x.CodeName.ToLowerInvariant() == _fieldName.ToLowerInvariant()))
                 {
                     _propertyMap.Add(_fieldName, item);
                 }
@@ -87,7 +89,7 @@ namespace Storm.Execution
             }
             else
             {
-                throw new ArgumentException($"Model not specified for Entity {_node.ID}.");
+                throw new ArgumentException($"Model not specified for Entity {_node.Id}.");
             }
         }
 
@@ -97,14 +99,14 @@ namespace Storm.Execution
             if (datarow == null) return result;
 
             var _val = datarow;
-            foreach (var item in _node.entityFields)
+            foreach (var item in _node.SimpleProperties)
             {
                 result.Add(item.CodeName, _val[_propertyMap[item.CodeName]]);
             }
             return result;
         }
 
-        public IEnumerable<StormResult> GetRelation(String Path)
+        public IEnumerable<DynamicResult> GetRelation(String Path)
         {
             if (Relations.ContainsKey(Path))
                 return Relations[Path];

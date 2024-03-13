@@ -33,7 +33,7 @@ namespace Storm.Test.PublicAPI.Helpers
         {
             var s = new Storm(SQLEngine.SQLite);
 
-            Schema.SchemaEditor editor(Schema.SchemaEditor e)
+            Schema.SchemaModelBuilder editor(Schema.SchemaModelBuilder e)
             {
                 return e.Add<User>("User", "Users")
                     .Add<Task>("Task", "Tasks")

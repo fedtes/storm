@@ -10,8 +10,8 @@ namespace Storm.Execution
     public class SelectNode
     {
         public Origin FromNode;
-        public SchemaNode OwnerEntity => FromNode.Entity;
-        public EntityField EntityField;
+        public Entity OwnerEntity => FromNode.Entity;
+        public SimpleProperty EntityField;
         public FieldPath FullPath;
         public String Alias => FromNode.Alias;
         public String CodeName { get => EntityField.CodeName; }

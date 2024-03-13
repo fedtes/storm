@@ -29,7 +29,7 @@ namespace Storm.Execution
         /// <returns></returns>
         public SelectCommand Select(string requestPath)
         {
-            var _requestPath = new EntityPath(from.root.Entity.ID, requestPath).Path;
+            var _requestPath = new EntityPath(from.root.Entity.Id, requestPath).Path;
             var p = SelectCommandHelper.ValidatePath(_requestPath);
 
             foreach (var item in p)
@@ -38,7 +38,7 @@ namespace Storm.Execution
                 IEnumerable<SelectNode> fields;
                 if (item.Item2 != "*") 
                 {
-                    fields = x.Entity.entityFields
+                    fields = x.Entity.SimpleProperties
                         .Where(ef => ef.CodeName == item.Item2)
                         .Select(ef => {
                             return new SelectNode()
@@ -51,7 +51,7 @@ namespace Storm.Execution
                 }
                 else //wildcard = select all
                 {
-                    fields = x.Entity.entityFields
+                    fields = x.Entity.SimpleProperties
                         .Select(ef => {
                             return new SelectNode()
                             {

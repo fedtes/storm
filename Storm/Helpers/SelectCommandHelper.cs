@@ -48,7 +48,7 @@ namespace Storm.Helpers
         public static SelectNode GenerateSingleSelectNode((String[], string) validatedPath, OriginTree fromTree)
         {
             var x = fromTree.Resolve(validatedPath.Item1);
-            return x.Entity.entityFields
+            return x.Entity.SimpleProperties
                 .Where(ef => ef.CodeName == validatedPath.Item2)
                 .Select(ef => {
                     return new SelectNode()

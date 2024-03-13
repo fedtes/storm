@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Storm.Schema
@@ -10,7 +11,7 @@ namespace Storm.Schema
 
         internal SchemaNavigator(SchemaInstance p) => this.p = p;
 
-        public SchemaItem Get(String identifier)
+        public AbstractSchemaItem Get(String identifier)
         {
             if (p.ContainsKey(identifier))
                 return p[identifier];
@@ -18,14 +19,14 @@ namespace Storm.Schema
                 return null;
         }
 
-        public SchemaNode GetEntity(String identifier)
+        public Entity GetEntity(String identifier)
         {
             if (p.ContainsKey(identifier))
             {
                 var x = p[identifier];
-                if (x.GetType() == typeof(SchemaNode))
+                if (x.GetType() == typeof(Entity))
                 {
-                    return (SchemaNode)x;
+                    return (Entity)x;
                 }
                 else
                 {
@@ -38,14 +39,23 @@ namespace Storm.Schema
             }
         }
 
-        public SchemaEdge GetEdge(String identifier)
+        public NavigationProperty GetNavigationProperty(String EntityDotProperty)
         {
-            if (p.ContainsKey(identifier))
+            if (EntityDotProperty.IndexOf(".") == -1) {
+                throw new ArgumentException("Expected string like EnitityName.PropertyName");
+            }
+
+            var _splitted = EntityDotProperty.Split(".");
+            var _entityId = _splitted[0];
+            var _propertyName = _splitted[1];
+
+            if (p.ContainsKey(_entityId))
             {
-                var x = p[identifier];
-                if (x.GetType() == typeof(SchemaEdge))
-                {
-                    return (SchemaEdge)x;
+                var ownerEntity = p[_entityId];
+                if (ownerEntity.GetType() == typeof(Entity))
+                {   
+                    var prop = (ownerEntity as Entity).Properties.FirstOrDefault(x => typeof(NavigationProperty)==x.GetType() && (x as NavigationProperty).PropertyName == _propertyName);
+                    return (NavigationProperty)prop;
                 }
                 else
                 {

@@ -58,16 +58,16 @@ namespace Storm.SQLParser
         private string resolveTargetColumnName(Origin subTree)
         {
             string targetCol = string.Empty;
-            var target = ctx.Navigator.GetEntity(subTree.Edge.TargetID);
-            if (target.entityFields != null && target.entityFields.Any())
+            var target = ctx.Navigator.GetEntity(subTree.Edge.TargetEntity);
+            if (target.SimpleProperties != null && target.SimpleProperties.Any())
             {
                 var field = target
-                    .entityFields
+                    .SimpleProperties
                     .FirstOrDefault(ef => ef.CodeName == subTree.Edge.On.Item2);
                 if (field != null)
                     targetCol = field.DBName;
                 else
-                    throw new ArgumentException($"Error on parsing join condition for table {subTree.Entity.DBName}: no field found on entity {subTree.Edge.TargetID} with name {subTree.Edge.On.Item2}.");
+                    throw new ArgumentException($"Error on parsing join condition for table {subTree.Entity.DBName}: no field found on entity {subTree.Edge.TargetEntity} with name {subTree.Edge.On.Item2}.");
             }
             else
             {
@@ -80,16 +80,16 @@ namespace Storm.SQLParser
         private string resolveSourceColumnName(Origin subTree)
         {
             string sourceCol = string.Empty;
-            var source = ctx.Navigator.GetEntity(subTree.Edge.SourceID);
-            if (source.entityFields != null && source.entityFields.Any())
+            var source = ctx.Navigator.GetEntity(subTree.Edge.OwnerEntityId);
+            if (source.SimpleProperties != null && source.SimpleProperties.Any())
             {
                 var field = source
-                    .entityFields
+                    .SimpleProperties
                     .FirstOrDefault(ef => ef.CodeName == subTree.Edge.On.Item1);
                 if (field != null)
                     sourceCol = field.DBName;
                 else
-                    throw new ArgumentException($"Error on parsing join condition for table {subTree.Entity.DBName}: no field found on entity {subTree.Edge.SourceID} with name {subTree.Edge.On.Item1}.");
+                    throw new ArgumentException($"Error on parsing join condition for table {subTree.Entity.DBName}: no field found on entity {subTree.Edge.OwnerEntityId} with name {subTree.Edge.On.Item1}.");
             }
             else
             {

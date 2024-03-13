@@ -62,13 +62,13 @@ namespace Storm.Origins
 
             if (!nodes.ContainsKey(partialPath))
             {
-                var _edge = ctx.Navigator.GetEdge($"{subTree.Entity.ID}.{current}");
+                var _edge = ctx.Navigator.GetNavigationProperty($"{subTree.Entity.Id}.{current}");
                 var node = new Origin()
                 {
                     Alias = $"A{nodes.Count}",
                     children = new List<Origin>(),
                     Edge = _edge,
-                    Entity = ctx.Navigator.GetEntity(_edge.TargetID),
+                    Entity = ctx.Navigator.GetEntity(_edge.TargetEntity),
                     FullPath = partialPath
                 };
                 nodes.Add(partialPath, node);

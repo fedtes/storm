@@ -24,7 +24,7 @@ namespace Storm.Execution
         internal BaseCommand(Context ctx, String from)
         {
             this.ctx = ctx;
-            this.rootEntity = ctx.Navigator.GetEntity(from).ID;
+            this.rootEntity = ctx.Navigator.GetEntity(from).Id;
             this.query = new Query($"{ctx.Navigator.GetEntity(from).DBName} as A0");
             commandId = Helpers.Util.UCode();
             sw = new Stopwatch();

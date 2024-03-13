@@ -11,12 +11,12 @@ namespace Storm.Schema
     /// <summary>
     /// Allow to manipulate the schema that storm uses for generating queries
     /// </summary>
-    public class SchemaEditor
+    public class SchemaModelBuilder
     {
         internal SchemaInstance schemaInstance;
         internal long ticks;
 
-        public SchemaEditor(SchemaInstance schemaInstance, long ticks)
+        public SchemaModelBuilder(SchemaInstance schemaInstance, long ticks)
         {
             this.schemaInstance = schemaInstance;
             this.ticks = ticks;
@@ -44,11 +44,11 @@ namespace Storm.Schema
         /// <param name="identifier"></param>
         /// <param name="sourceTable"></param>
         /// <returns></returns>
-        public SchemaEditor Add<TModel>(String identifier, String sourceTable)
+        public SchemaModelBuilder Add<TModel>(String identifier, String sourceTable)
         {
             if (!schemaInstance.ContainsKey(identifier))
             {
-                schemaInstance.Add(identifier, parseModel(this, identifier, sourceTable, typeof(TModel)));
+                schemaInstance.Add(identifier, ParseModel(this, identifier, sourceTable, typeof(TModel)));
             }
             else
             {
@@ -64,7 +64,7 @@ namespace Storm.Schema
         /// <param name="sourceTable"></param>
         /// <param name="builder"></param>
         /// <returns></returns>
-        public SchemaEditor Add(String identifier, String sourceTable, Func<EntityBuilder, EntityBuilder> builder)
+        public SchemaModelBuilder Add(String identifier, String sourceTable, Func<EntityBuilder, EntityBuilder> builder)
         {
             if (!schemaInstance.ContainsKey(identifier))
             {
@@ -74,8 +74,8 @@ namespace Storm.Schema
                     throw new NoPrimaryKeySpecifiedException("No primary key specified for " + identifier);
                 }
                 var e = b.GetEntity();
-                ((SchemaNode)e).DBName = sourceTable;
-                e.ID = identifier;
+                ((Entity)e).DBName = sourceTable;
+                e.Id = identifier;
                 schemaInstance.Add(identifier, e);
             }
             else
@@ -86,11 +86,11 @@ namespace Storm.Schema
         }
 
         /// <summary>
-        /// Remove an object from the schema, can be either an Entity or an Edge. For edges use SourceEntityIdentifier.Identifier as argument of this method. You should be sure that removing an items all other elements already registered are consistent.
+        /// Remove an object from the schema, can be either an Entity You should be sure that removing an items all other elements already registered are consistent.
         /// </summary>
         /// <param name="identifier"></param>
         /// <returns></returns>
-        public SchemaEditor Remove(String identifier)
+        public SchemaModelBuilder Remove(String identifier)
         {
             if (schemaInstance.ContainsKey(identifier))
             {
@@ -104,14 +104,14 @@ namespace Storm.Schema
         }
 
         /// <summary>
-        /// Connect 2 Entities give a specific identifier.
+        /// Connect 2 Entities with the specified navigation property.
         /// </summary>
-        /// <param name="identifier">Identifier of the relation</param>
+        /// <param name="navigationPropertyName">Identifier of the relation</param>
         /// <param name="sourceIdentifier">Source (or left) entity identifier</param>
         /// <param name="targetIdentifier">Target (or right) entity identifier</param>
         /// <param name="joinExpression">Expression that describe how to join. In the sintax refer as 'source' for the source object and 'target' for the target</param>
         /// <returns></returns>
-        public SchemaEditor Connect(String identifier, String sourceIdentifier, String targetIdentifier, String sourceField, String targetField)
+        public SchemaModelBuilder Connect(String navigationPropertyName, String sourceIdentifier, String targetIdentifier, String sourceField, String targetField)
         {
             
             if (!schemaInstance.ContainsKey(sourceIdentifier))
@@ -124,14 +124,21 @@ namespace Storm.Schema
             }
             else
             {
-                var x = new SchemaEdge
+                var navProperty = new NavigationProperty
                 {
-                    ID = $"{sourceIdentifier}.{identifier}",
+                    Id = $"{sourceIdentifier}.{navigationPropertyName}",
                     On = (sourceField, targetField).ToTuple(),
-                    SourceID = sourceIdentifier,
-                    TargetID = targetIdentifier
+                    OwnerEntityId = sourceIdentifier,
+                    TargetEntity = targetIdentifier,
+                    PropertyName = navigationPropertyName
                 };
-                schemaInstance.Add(x.ID, x);
+
+                var _properties = (schemaInstance[sourceIdentifier] as Entity).Properties as List<BaseProperty>;
+                if (!_properties.Any(x=> x.Id == navProperty.Id)) {
+                    _properties.Add(navProperty);
+                } else {
+                    throw new ArgumentException($"Navigation property {navigationPropertyName} for entity {sourceIdentifier} already defined");
+                }
             }
 
             return this;
@@ -145,7 +152,7 @@ namespace Storm.Schema
         /// <param name="targetIdentifier">Target (or right) entity identifier</param>
         /// <param name="joinExpression">Expression that describe how to join. In the sintax refer as 'source' for the source object and 'target' for the target</param>
         /// <returns></returns>
-        public SchemaEditor Connect(String identifier, String sourceIdentifier, String targetIdentifier, Func<JoinContext, Filter> joinExpression)
+        public SchemaModelBuilder Connect(String identifier, String sourceIdentifier, String targetIdentifier, Func<JoinContext, Filter> joinExpression)
         {
 
             if (!schemaInstance.ContainsKey(sourceIdentifier))
@@ -158,26 +165,33 @@ namespace Storm.Schema
             }
             else
             {
-                var x = new SchemaEdge
+                var navProperty = new NavigationProperty
                 {
-                    ID = $"{sourceIdentifier}.{identifier}",
+                    Id = $"{sourceIdentifier}.{identifier}",
                     OnExpression = joinExpression(new JoinContext()),
-                    SourceID = sourceIdentifier,
-                    TargetID = targetIdentifier
+                    OwnerEntityId = sourceIdentifier,
+                    TargetEntity = targetIdentifier,
+                    PropertyName= identifier
                 };
-                schemaInstance.Add(x.ID, x);
+
+                var _properties = (schemaInstance[sourceIdentifier] as Entity).Properties as List<BaseProperty>;
+                if (!_properties.Any(x=> x.Id == navProperty.Id)) {
+                    _properties.Add(navProperty);
+                } else {
+                    throw new ArgumentException($"Navigation property {identifier} for entity {sourceIdentifier} already defined");
+                }
             }
 
             return this;
         }
 
-        private SchemaItem parseModel(SchemaEditor schemaEditor, string identifier, string sourceTable, Type type)
+        private AbstractSchemaItem ParseModel(SchemaModelBuilder schemaEditor, string identifier, string sourceTable, Type type)
         {
-            SchemaNode schemaNode = new SchemaNode
+            Entity schemaNode = new Entity
             {
                 TModel = type,
                 DBName = sourceTable,
-                ID = identifier
+                Id = identifier
             };
 
             object[] getAttributes(MemberInfo mi) {
@@ -198,7 +212,7 @@ namespace Storm.Schema
             {
                 if (!hasAttribute<StormIgnore>(x.attr))
                 {
-                    var f = new EntityField();
+                    var f = new SimpleProperty();
                     f.CodeName = x.Name;
                     f.CodeType = x.PropertyType;
                     f.DBName = hasAttribute<StormColumnName>(x.attr) ? getAttribute<StormColumnName>(x.attr).name : x.Name;
@@ -208,12 +222,12 @@ namespace Storm.Schema
                     f.DefaultIfNull = hasAttribute<StormDefaultIfNull>(x.attr) ? getAttribute<StormDefaultIfNull>(x.attr).value : null;
                     f.IsPrimary = hasAttribute<StormPrimaryKey>(x.attr);
 
-                    if (schemaNode.entityFields == null)
+                    if (schemaNode.Properties == null)
                     {
-                        schemaNode.entityFields = new List<EntityField>();
+                        schemaNode.Properties = new List<BaseProperty>();
                     }
 
-                    ((List<EntityField>)schemaNode.entityFields).Add(f);
+                    ((List<BaseProperty>)schemaNode.Properties).Add(f);
                 }
             }
 
@@ -231,7 +245,7 @@ namespace Storm.Schema
                 .ToList()
                 .ForEach(mapToField);
 
-            if (!schemaNode.entityFields.Any(x => x.IsPrimary))
+            if (!schemaNode.SimpleProperties.Any(x => x.IsPrimary))
             {
                 throw new NoPrimaryKeySpecifiedException("No primary key specified for " + identifier);
             }

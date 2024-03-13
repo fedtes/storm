@@ -11,13 +11,13 @@ namespace Storm.Helpers
     static class GetCommandHelpers
     {
 
-        private static IEnumerable<StormResult> RecursiveGroupResults(
+        private static IEnumerable<DynamicResult> RecursiveGroupResults(
             StormDataSet data,
             IEnumerable<StormRow> subset,
             List<Origin> requests,
             int length)
         {
-            var result = new List<StormResult>();
+            var result = new List<DynamicResult>();
             if (subset.Count() == 0) return result; 
             var thisReq = requests.First();
             var identityFieldPath = data.IdentityIndexes[thisReq.FullPath];
@@ -26,7 +26,7 @@ namespace Storm.Helpers
             foreach(var g in subset.Where(x => x[identityFieldPath] != null).GroupBy(x => x[identityFieldPath]))
             {
                 var b = g.First();
-                var sr = new StormResult(new StormRow(data, b.index, range.Start, range.End), thisReq.Entity);
+                var sr = new DynamicResult(new StormRow(data, b.index, range.Start, range.End), thisReq.Entity);
                 var childRequest = requests.Where(x => x.FullPath.Count() >= length + 1 && x.FullPath.Path.StartsWith(thisReq.FullPath.Path));
                 foreach (var r in childRequest.Where(x => x.FullPath.Count() == length + 1))
                 {
@@ -42,7 +42,7 @@ namespace Storm.Helpers
         }
 
 
-        public static IList<StormResult> ToResults(StormDataSet data, 
+        public static IList<DynamicResult> ToResults(StormDataSet data, 
                                             Context ctx, 
                                             List<Origin> requests,
                                             OriginTree fromTree)

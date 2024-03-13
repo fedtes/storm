@@ -10,7 +10,7 @@ namespace Storm.Test.TestUnits
     public class TestLinq 
     {
 
-         [Fact]
+        [Fact]
         public async void Parse_GetObject_OnlyRoot()
         {
             var db = new SqliteConnection("Data Source=TestDB;Mode=Memory;");
@@ -57,10 +57,31 @@ namespace Storm.Test.TestUnits
             }
         }
 
+        [Fact]
+        public async void Parse_GetObject_OnlyRoot2()
+        {
+
+            Storm storm = new Storm();
+            storm.EditSchema(SampleSchema);
+            await using (var con = await storm.OpenConnection(new EmptyConnection()))
+            {
+                 var result = (await con.From("Customer")
+                    .Where(x => x["RagSoc"].Like("ACME") || (x["Address.City"] == "New York" && x["AddressID"].IsNotNull()))
+                    // .OrderBy(x => x["RagSoc"])
+                    // .Take(10)
+                    .Select("RagSoc")
+                    .ToListAsync())
+                    .Select(x => new { b=x.RagSoc});
+                
+                Assert.Equal("ACME SRL", result.First().b.ToString());
+
+            }
+        }
 
 
 
-        public SchemaEditor SampleSchema(SchemaEditor e)
+
+        public SchemaModelBuilder SampleSchema(SchemaModelBuilder e)
         {
             return e.Add("Customer", "TABCustomer", eb => {
                 return eb.AddPrimary("CustomerID", typeof(int))

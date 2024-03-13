@@ -42,12 +42,12 @@ namespace Storm.SQLParser
 
             if ("source"== path.First().ToLowerInvariant())
             {
-                var field = sourceNode.Entity.entityFields.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
+                var field = sourceNode.Entity.SimpleProperties.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
                 return $"{sourceNode.Alias}.{field.DBName}";
 
             } else if ("target" == path.First().ToLowerInvariant())
             {
-                var field = targetNode.Entity.entityFields.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
+                var field = targetNode.Entity.SimpleProperties.FirstOrDefault(ef => ef.CodeName.ToLowerInvariant() == name.ToLowerInvariant());
                 return $"{targetNode.Alias}.{field.DBName}";
             }
             else

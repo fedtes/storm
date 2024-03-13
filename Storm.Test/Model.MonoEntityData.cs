@@ -56,13 +56,13 @@ namespace Storm.Test
                 Edge = null,
                 FullPath = new Schema.EntityPath("Test", "")
             };
-            var _idField = entity.entityFields.First(x => x.CodeName == "ID");
-            var _FirstName = entity.entityFields.First(x => x.CodeName == "FirstName");
-            var _LastName = entity.entityFields.First(x => x.CodeName == "LastName");
-            var _Email = entity.entityFields.First(x => x.CodeName == "Email");
-            var _Mobile = entity.entityFields.First(x => x.CodeName == "Mobile");
-            var _Phone = entity.entityFields.First(x => x.CodeName == "Phone");
-            var _Addre = entity.entityFields.First(x => x.CodeName == "Address");
+            var _idField = entity.SimpleProperties.First(x => x.CodeName == "ID");
+            var _FirstName = entity.SimpleProperties.First(x => x.CodeName == "FirstName");
+            var _LastName = entity.SimpleProperties.First(x => x.CodeName == "LastName");
+            var _Email = entity.SimpleProperties.First(x => x.CodeName == "Email");
+            var _Mobile = entity.SimpleProperties.First(x => x.CodeName == "Mobile");
+            var _Phone = entity.SimpleProperties.First(x => x.CodeName == "Phone");
+            var _Addre = entity.SimpleProperties.First(x => x.CodeName == "Address");
 
             StormDataSet data = new StormDataSet("Test");
             List<SelectNode> nodes = new List<SelectNode>()

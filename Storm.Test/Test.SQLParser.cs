@@ -31,7 +31,7 @@ namespace Storm.Test.TestUnits
         public const String Model_4 = "Model_4";
         public const String Model_5 = "Model_5";
 
-        public SchemaEditor SampleSchema(SchemaEditor e)
+        public SchemaModelBuilder SampleSchema(SchemaModelBuilder e)
         {
             return e.Add<Model_1>("Model_1", "Table_1")
                 .Add<Model_2>("Model_2", "Table_2")

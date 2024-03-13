@@ -49,7 +49,7 @@ namespace Storm.Execution
             if (whereLambda != null)
             {
                 Filter _whereDelete(FilterContext ctx) => ctx[this.from.root.Entity.PrimaryKey.CodeName].In
-                    .SubQuery(s => s.From(this.from.root.Entity.ID).Where(whereLambda));
+                    .SubQuery(s => s.From(this.from.root.Entity.Id).Where(whereLambda));
 
                 SQLWhereParser whereParser = 
                     new SQLWhereParser(from, _whereDelete(new FilterContext()), ctx, query);

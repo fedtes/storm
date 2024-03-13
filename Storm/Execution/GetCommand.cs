@@ -30,7 +30,7 @@ namespace Storm.Execution
         {
             base.ParseSQL();
             var selectStatement = requests
-                .SelectMany(r => r.Entity.entityFields.Select(ef => (r.Alias, ef)))
+                .SelectMany(r => r.Entity.SimpleProperties.Select(ef => (r.Alias, ef)))
                 .Select(x => $"{x.Alias}.{x.ef.DBName} AS {x.Alias}${x.ef.CodeName}")
                 .ToArray();
 
@@ -44,7 +44,7 @@ namespace Storm.Execution
 
             var metadata = this.requests
                 .SelectMany(r => {
-                    return r.Entity.entityFields
+                    return r.Entity.SimpleProperties
                         .Select(f => {
                             return new SelectNode()
                             {

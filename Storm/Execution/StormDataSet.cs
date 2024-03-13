@@ -19,7 +19,7 @@ namespace Storm.Execution
     {
         internal Dictionary<FieldPath, int> ColumnMap = new Dictionary<FieldPath, int>();
 
-        internal Dictionary<SchemaNode, IndexRange> ObjectRanges = new Dictionary<SchemaNode, IndexRange>();
+        internal Dictionary<Entity, IndexRange> ObjectRanges = new Dictionary<Entity, IndexRange>();
 
         internal Dictionary<EntityPath, FieldPath> IdentityIndexes = new Dictionary<EntityPath, FieldPath>();
 
@@ -163,7 +163,7 @@ namespace Storm.Execution
             Dictionary<int, SelectNode> tempMap,
             List<int> identies)
         {
-            SchemaNode currentEntity = null;
+            Entity currentEntity = null;
             for (int i = 0; i < dataReader.FieldCount; i++)
             {
                 var (_alias, _name) = splitColumnName(dataReader.GetName(i));

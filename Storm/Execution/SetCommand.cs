@@ -15,7 +15,7 @@ namespace Storm.Execution
         protected IList<object> values = new List<object>();
         protected Dictionary<string, object> data = new Dictionary<string, object>();
         protected object id = null;
-        protected SchemaNode entity;
+        protected Entity entity;
 
         internal SetCommand(Context ctx, String from):base(ctx, from)
         {
@@ -46,7 +46,7 @@ namespace Storm.Execution
                 dmodel.Add(prop.Name, prop.GetValue(model));
             }
 
-            foreach (var item in entity.entityFields.Where(ef => !ef.IsPrimary && ef.ColumnAccess != ColumnAccess.ReadOnly))
+            foreach (var item in entity.SimpleProperties.Where(ef => !ef.IsPrimary && ef.ColumnAccess != ColumnAccess.ReadOnly))
             {
                 if (dmodel.ContainsKey(item.CodeName))
                 {
@@ -59,7 +59,7 @@ namespace Storm.Execution
 
         public SetCommand Value(IDictionary<String,Object> model)
         {
-            foreach (var item in entity.entityFields.Where(ef => !ef.IsPrimary && ef.ColumnAccess != ColumnAccess.ReadOnly))
+            foreach (var item in entity.SimpleProperties.Where(ef => !ef.IsPrimary && ef.ColumnAccess != ColumnAccess.ReadOnly))
             {
                 if (model.ContainsKey(item.CodeName))
                 {

@@ -26,9 +26,9 @@ namespace Storm.Schema
             return new SchemaNavigator(this._schemas[_current]);
         }
 
-        public void EditSchema(Func<SchemaEditor, SchemaEditor> editor)
+        public void EditSchema(Func<SchemaModelBuilder, SchemaModelBuilder> editor)
         {
-            SchemaEditor schemaEditor = new SchemaEditor(this._schemas[_current].Clone(), DateTime.Now.Ticks);
+            SchemaModelBuilder schemaEditor = new SchemaModelBuilder(this._schemas[_current].Clone(), DateTime.Now.Ticks);
             var r = editor(schemaEditor);
             if (r.ticks > _current)
             {
@@ -53,6 +53,21 @@ namespace Storm.Schema
             }
          }
 
+    }
+
+
+    public class SchemaInstance : Dictionary<string, AbstractSchemaItem>
+    {
+        public SchemaInstance Clone()
+        {
+            var i = new SchemaInstance();
+
+            foreach (var si in this)
+            {
+                i.Add(si.Key, si.Value.Clone());
+            }
+            return i;
+        }
     }
 
 }
