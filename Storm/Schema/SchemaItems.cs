@@ -34,7 +34,7 @@ namespace Storm.Schema
         /// </summary>
         public string DBName { get; internal set; }
         public SimpleProperty PrimaryKey => SimpleProperties.First(x => x.IsPrimary);
-        public IEnumerable<AbstractSchemaItem> Properties { get; internal set; }
+        public IEnumerable<BaseProperty> Properties { get; internal set; }
 
         public IEnumerable<SimpleProperty> SimpleProperties => Properties.Where(x=> typeof(SimpleProperty)==x.GetType()).Cast<SimpleProperty>();
 
@@ -45,7 +45,7 @@ namespace Storm.Schema
                 Id = Id,
                 DBName = DBName,
                 TModel = TModel,
-                Properties = Properties.Select(x => x.Clone()).Cast<AbstractSchemaItem>().ToList()
+                Properties = Properties.Select(x => x.Clone()).Cast<BaseProperty>().ToList()
             };
         }
 

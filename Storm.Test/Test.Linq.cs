@@ -42,7 +42,7 @@ namespace Storm.Test.TestUnits
             cmd.ExecuteNonQuery();
 
             Storm storm = new Storm();
-            storm.EditSchema(SampleSchema);
+            storm.EditSchema(DynamicModelRealistic.SampleSchema);
             await using (var con = await storm.OpenConnection(db))
             {
                  var result = await con.From("Customer")
@@ -62,7 +62,7 @@ namespace Storm.Test.TestUnits
         {
 
             Storm storm = new Storm();
-            storm.EditSchema(SampleSchema);
+            storm.EditSchema(DynamicModelRealistic.SampleSchema);
             await using (var con = await storm.OpenConnection(new EmptyConnection()))
             {
                  var result = (await con.From("Customer")
@@ -78,31 +78,5 @@ namespace Storm.Test.TestUnits
             }
         }
 
-
-
-
-        public SchemaModelBuilder SampleSchema(SchemaModelBuilder e)
-        {
-            return e.Add("Customer", "TABCustomer", eb => {
-                return eb.AddPrimary("CustomerID", typeof(int))
-                    .Add("AddressID", typeof(int))
-                    .Add("RagSoc", typeof(string));
-            })
-            .Add("Address", "TABAddress", eb => {
-                return eb.AddPrimary("AddressID", typeof(int))
-                    .Add("City", typeof(string))
-                    .Add("Street", typeof(string))
-                    .Add("Number", typeof(int));
-            })
-            .Add("Location", "TABLocation", eb => {
-                return eb.AddPrimary("LocationID", typeof(int))
-                    .Add("CustomerID", typeof(int))
-                    .Add("AddressID", typeof(int))
-                    .Add("Name", typeof(string));
-            })
-            .Connect("Address", "Customer", "Address", "AddressID", "AddressID")
-            .Connect("Locations", "Customer", "Location", "CustomerID", "CustomerID")
-            .Connect("Address", "Location", "Address", "AddressID", "AddressID");
-        }
     }
 }

@@ -1,10 +1,87 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace Storm.Schema
 {
+
+    public class Path : IEnumerable<String>
+    {
+        protected String[] tokens = new string[] { };
+        public virtual String Stringify() => String.Join(".", tokens);
+
+        public string this[int index]  => tokens[index];
+
+        public Path(string pathWithRoot)
+        {
+            if (String.IsNullOrEmpty(pathWithRoot))
+                throw new ArgumentNullException("pathWithRoot");
+            tokens = pathWithRoot.Split(".");
+        }
+
+        public Path(string root, string path)
+        {
+            if (String.IsNullOrEmpty(root))
+                throw new ArgumentNullException("root");
+            if (String.IsNullOrEmpty(path))
+                throw new ArgumentNullException("path");
+
+            tokens = (new string[] {root}).Concat(path.Split(".")).ToArray();
+        }
+
+        public Path(IEnumerable<string> pathWithRoot)
+        {
+            if (pathWithRoot == null)
+                throw new ArgumentNullException("pathWithRoot");
+            if (pathWithRoot.Any(x => string.IsNullOrEmpty(x)))
+                throw new ArgumentNullException("pathWithRoot", "At least one element is null or empty.");
+            tokens = pathWithRoot.ToArray();
+        }
+
+        public Path(string root, IEnumerable<string> path)
+        {
+            if (String.IsNullOrEmpty(root))
+                throw new ArgumentNullException("root");
+            if (path == null)
+                throw new ArgumentNullException("path");
+            if (path.Any(x => string.IsNullOrEmpty(x)))
+                throw new ArgumentNullException("path", "At least one element is null or empty.");
+            tokens =  (new string[] {root}).Concat(path).ToArray();
+        }
+
+        public static bool operator ==(Path x, Path y)
+        {
+            return x.tokens.Length == x.tokens.Length && x.Stringify() == y.Stringify();
+        }
+
+        public static bool operator !=(Path x, Path y)
+        {
+            return !(x == y);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return this == (Path)obj;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Stringify().GetHashCode();
+        }
+
+        public IEnumerator<string> GetEnumerator()
+        {
+            return tokens.ToList().GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return tokens.GetEnumerator();
+        }
+    }
+
+
     public class EntityPath
     {
         protected String[] tokens = new string[] { };
