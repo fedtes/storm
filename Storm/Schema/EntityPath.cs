@@ -79,6 +79,9 @@ namespace Storm.Schema
         {
             return tokens.GetEnumerator();
         }
+    
+        public static Path operator + (Path p1, Path p2) => new Path(p1.tokens.Concat(p2.tokens).ToArray());
+    
     }
 
 

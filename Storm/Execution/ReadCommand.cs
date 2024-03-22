@@ -23,11 +23,11 @@ namespace Storm.Execution
         internal TableTree from;
         internal Filter where;
         internal List<(SelectNode, bool)> orderBy = null;
-        internal (int,int) paging = (-1, -1);
+        internal (int, int) paging = (-1, -1);
 
         public ReadCommand(Context ctx, string from) : base(ctx, from)
         {
-            this.from = new TableTree(from);
+            this.from = new TableTree(ctx, from);
         }
 
         internal override void ParseSQL()
@@ -39,116 +39,6 @@ namespace Storm.Execution
         {
             throw new System.NotImplementedException();
         }
-
-        internal class TableTree
-        {
-            private readonly Context ctx;
-            private string from;
-            private Table root;
-            private int aliasIndex=0;
-
-            public TableTree(Context ctx, string from)
-            {
-                this.ctx = ctx;
-                this.from = from;
-                this.root = CreateTable(ctx.Navigator.GetEntity(from), null);
-            }
-
-            internal void Resolve(string path)
-            {
-                var p = new Path(path);
-                p = EnsurePath(p);
-                var fullExpandedPath = ctx.Navigator.GetFullPath(p);
-                Resolve(root, fullExpandedPath);
-            }
-
-            internal void Resolve(Table table, IEnumerable<AbstractSchemaItem> path)
-            {
-               if (!path.Any()) return;
-
-               switch (path.First())
-               {
-                case Schema.Entity e:
-                    if (table.Entity == e) {
-                        Resolve(table, path.Skip(1));
-                    } 
-                    else 
-                    {
-                        throw new ApplicationException("Should not pass here!!");
-                    }
-                    break;
-                case NavigationProperty np:
-                    
-                    if (table.Entity == ctx.Navigator.GetEntity(np.OwnerEntityId)) {
-
-                        if (table.Joins.Any(x=> x.LookupProperty == np) )
-                        {
-                            Resolve(table.Joins.First(x => x.LookupProperty == np), path.Skip(1));
-                        }
-                        else 
-                        {
-                            Table t = CreateTable(ctx.Navigator.GetEntity(np.TargetEntity), np);
-                            table.Joins.Add(t);
-                            Resolve(t, path.Skip(1));
-                        }
-                    }
-
-                    break;
-                case SimpleProperty sp:
-                    return;
-                default:
-                    throw new ApplicationException("Should not pass here!!");
-               }
-               
-            }
-
-            private Table CreateTable(Schema.Entity entity, NavigationProperty navigationProperty)
-            {
-                var t =  new Table() 
-                {
-                    Alias=$"A{aliasIndex}",
-                    Entity= entity,
-                    LookupProperty=navigationProperty,
-                    Joins = new List<Table>()
-                };
-                aliasIndex++;
-                return t;
-            }
-
-            private Path EnsurePath(Path p)
-            {
-                throw new NotImplementedException();
-            }
-
-            internal class Table
-            {
-                /// <summary>
-                /// Alias used in the sql query
-                /// </summary>
-                public string Alias;
-                /// <summary>
-                /// Entity referenced by this table. If not root, Entity should equals to LookupProperty.TargetEntity
-                /// </summary>
-                public Schema.Entity Entity;
-                /// <summary>
-                /// Lookup property that takes to this table. Null if this table is root. 
-                /// </summary>
-                public NavigationProperty LookupProperty;
-                /// <summary>
-                /// All table in join with this throught NavigationProperties of this entity.
-                /// </summary>
-                public List<Table> Joins;
-
-                public override string ToString()
-                {
-                    var _join = LookupProperty != null ? $" on {LookupProperty.Id}" : "";
-                    return $"{Entity.Id} as {Alias}" + _join;
-                }
-
-            }
-
-        }
-
 
 
         #region "Public Methods" 
@@ -221,7 +111,7 @@ namespace Storm.Execution
         /// <exception cref="ArgumentException"></exception>
         public virtual ReadCommand OrderBy(String requestPath, bool asc = true)
         {
-            var _requestPath = new EntityPath(from.root.Entity.Id, requestPath).Path;
+            var _requestPath = new EntityPath(from.Root.Entity.Id, requestPath).Path;
             var p = SelectCommandHelper.ValidatePath(_requestPath);
 
             (string[], string) item;
@@ -236,23 +126,144 @@ namespace Storm.Execution
             if (item.Item2 == "*")
                 throw new ArgumentException("* is not allowed in OrderBy.");
 
-            var f = SelectCommandHelper.GenerateSingleSelectNode(item, from);
+            // var f = SelectCommandHelper.GenerateSingleSelectNode(item, from);
 
-            if (this.orderBy == null)
-                this.orderBy = new List<(SelectNode, bool)>();
+            // if (this.orderBy == null)
+            //     this.orderBy = new List<(SelectNode, bool)>();
 
-            this.orderBy.Add((f, asc));
+            // this.orderBy.Add((f, asc));
 
-            ((BaseCommand)this).CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"OrderBy\", \"Entity\":\"{requestPath}\", \"Direction\":\"{(asc ? "ASC" : "DESC")}\"}}");
+            // ((BaseCommand)this).CommandLog(LogLevel.Trace, "Command", $"{{\"Action\":\"OrderBy\", \"Entity\":\"{requestPath}\", \"Direction\":\"{(asc ? "ASC" : "DESC")}\"}}");
 
             return this;
         }
 
 
 
-#endregion
-    
+        #endregion
+
     }
+
+
+
+    internal class TableTree
+    {
+        private readonly Context ctx;
+        private string from;
+        private Table root;
+        private int aliasIndex = 0;
+
+        public Table Root => root;
+
+        public TableTree(Context ctx, string from)
+        {
+            this.ctx = ctx;
+            this.from = from;
+            this.root = CreateTable(ctx.Navigator.GetEntity(from), null);
+        }
+
+        internal void Resolve(string path)
+        {
+            var p = new Path(path);
+            p = EnsurePath(p);
+            var fullExpandedPath = ctx.Navigator.GetFullPath(p);
+            Resolve(root, fullExpandedPath);
+        }
+
+        internal void Resolve(Table table, IEnumerable<AbstractSchemaItem> path)
+        {
+            if (!path.Any()) return;
+
+            switch (path.First())
+            {
+                case Schema.Entity e:
+                    if (table.Entity == e)
+                    {
+                        Resolve(table, path.Skip(1));
+                    }
+                    else
+                    {
+                        throw new ApplicationException("Should not pass here!!");
+                    }
+                    break;
+                case NavigationProperty np:
+
+                    if (table.Entity == ctx.Navigator.GetEntity(np.OwnerEntityId))
+                    {
+
+                        if (table.Joins.Any(x => x.LookupProperty == np))
+                        {
+                            Resolve(table.Joins.First(x => x.LookupProperty == np), path.Skip(1));
+                        }
+                        else
+                        {
+                            Table t = CreateTable(ctx.Navigator.GetEntity(np.TargetEntity), np);
+                            table.Joins.Add(t);
+                            Resolve(t, path.Skip(1));
+                        }
+                    }
+
+                    break;
+                case SimpleProperty sp:
+                    return;
+                default:
+                    throw new ApplicationException("Should not pass here!!");
+            }
+
+        }
+
+        private Table CreateTable(Schema.Entity entity, NavigationProperty navigationProperty)
+        {
+            var t = new Table()
+            {
+                Alias = $"A{aliasIndex}",
+                Entity = entity,
+                LookupProperty = navigationProperty,
+                Joins = new List<Table>()
+            };
+            aliasIndex++;
+            return t;
+        }
+
+        private Path EnsurePath(Path p)
+        {
+            if (p.First() != this.root.Entity.Id) {
+                return new Path(this.root.Entity.Id) + p;
+            } else {
+                return p;
+            }
+        }
+
+        internal class Table
+        {
+            /// <summary>
+            /// Alias used in the sql query
+            /// </summary>
+            public string Alias;
+            /// <summary>
+            /// Entity referenced by this table. If not root, Entity should equals to LookupProperty.TargetEntity
+            /// </summary>
+            public Schema.Entity Entity;
+            /// <summary>
+            /// Lookup property that takes to this table. Null if this table is root. 
+            /// </summary>
+            public NavigationProperty LookupProperty;
+            /// <summary>
+            /// All table in join with this throught NavigationProperties of this entity.
+            /// </summary>
+            public List<Table> Joins;
+
+            public override string ToString()
+            {
+                var _join = LookupProperty != null ? $" on {LookupProperty.Id}" : "";
+                return $"{Entity.Id} as {Alias}" + _join;
+            }
+
+        }
+
+    }
+
+
 
 
 
